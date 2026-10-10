@@ -14,6 +14,7 @@
   <ItemGroup>
     <EmbeddedResource Include="Resources\data\game-data.json" LogicalName="BroLedger.Core.Resources.data.game-data.json" />
     <EmbeddedResource Include="Resources\data\game-data.schema.json" LogicalName="BroLedger.Core.Resources.data.game-data.schema.json" />
+    <EmbeddedResource Include="Resources\version.properties" LogicalName="BroLedger.Core.Resources.version.properties" />
   </ItemGroup>
 
 </Project>
