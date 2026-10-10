@@ -134,9 +134,9 @@ fingerprint = hex(hash[0..16])   // 32 个十六进制字符
 
 `starsString` 与 Java 版 `Brother` 中构造 fingerprint 输入的拼接方式完全一致（实现时以 Java 源码 `BrotherParser.computeFingerprint` + `fingerprintInput` 为准逐字符核对，含分隔符与大小写）。验收：对同一 `TestSavefile.sav`，两版产出的兄弟 fingerprint 集合完全一致。
 
-### 5.2 keeper.json
+### 5.2 keeper.json（实际文件名 `.broledger.json`）
 
-- 路径：与存档同目录，`<save名>.keeper.json`
+- 路径：与存档同目录，`<save文件名完整名>.broledger.json`（如 `save.sav.broledger.json`）——**以 Java 代码 `AnnotationService.loadFor` 为准；README 与本规格早期的 "keeper.json" 称呼是历史名**
 - Schema：与 Java 版 `AnnotationService` 序列化格式一致（`version`、`annotations` map：fingerprint → roleId / statIncreases / post11Increases / perkPlanStatus / sortIndex）
 - **fallback 路径**（存档目录不可写时）：`~/.bro-ledger/annotations-<sha256hex(存档绝对路径)>.json`，哈希输入与 Java 版一致（存档绝对路径字符串的 UTF-8）
 - 读写须兼容 Java 版已写出的文件；字段缺省、null 语义逐一对齐
