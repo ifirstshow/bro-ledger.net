@@ -87,11 +87,7 @@ public static class StatPotentialCalculator
     public static Potential Compute(Brother b, Stat stat)
     {
         var statIdx = stat.StatIndex;
-        // TODO(Task 9): replace with ExpectedStatsCalculator.RemainingLevels(b) once ported
-        // (Java ExpectedStatsCalculator.remainingLevels(levelTotal, levelPoints) — pure overload).
-        var remaining = b.LevelTotal >= 11
-            ? 0
-            : Math.Max(0, 11 - b.LevelTotal) + Math.Max(0, b.LevelPoints);
+        var remaining = ExpectedStatsCalculator.RemainingLevels(b);
         if (remaining == 0)
         {
             var bd = StatModifierService.Instance.Compute(b, stat);
