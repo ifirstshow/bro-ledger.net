@@ -1961,7 +1961,7 @@ Expected: Build succeeded，0 警告
 - [ ] **Step 2: 全量测试**
 
 Run: `dotnet test tests/BroLedger.Core.Tests`
-Expected: 全绿（HexUtils 13 + ArmorCalculator 19 + Schema 1 + Dictionary 6 + BrotherLocator 5 + Fingerprint 7 + SaveParser 8 = 59 个）
+Expected: 全绿（HexUtils 16 + ArmorCalculator 19 + Schema 1 + Dictionary 6 + BrotherLocator 5 + Fingerprint 7 + SaveParser 8 = 62 个）
 
 - [ ] **Step 3: Review Focus 手工验证**
 
