@@ -1,0 +1,127 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://niclas.se/broledger/game-data.schema.json",
+  "title": "Bro Ledger Game Data",
+  "description": "Unified data file for all game items, perks, traits and backgrounds.",
+  "type": "object",
+  "properties": {
+    "$schema": { "type": "string" },
+    "gameArtVersion": {
+      "type": "integer",
+      "description": "Monotonically increasing version; bumped whenever the asset extraction map changes. Written to game-art-version.json after extraction so the app can detect stale installs."
+    },
+    "entries": {
+      "description": "All game entities keyed by upper-cased 8-character hex ID.",
+      "type": "object",
+      "patternProperties": {
+        "^[0-9A-Za-z]{8}$": { "$ref": "#/$defs/entry" }
+      },
+      "additionalProperties": false
+    },
+    "imageSlots": {
+      "description": "All image path mappings. hexDirect maps hex IDs to archive src paths; the remaining maps cover slot-based equipment art where many items share one image.",
+      "type": "object",
+      "properties": {
+        "hexDirect":      { "type": "object", "additionalProperties": { "type": "string" } },
+        "slotIcon":       { "type": "object", "additionalProperties": { "type": "string" } },
+        "slotHexIcon":    { "type": "object", "additionalProperties": { "type": "string" } },
+        "slotHexHouse":   { "type": "object", "additionalProperties": { "type": "string" } },
+        "slotAttachment": { "type": "object", "additionalProperties": { "type": "string" } }
+      },
+      "additionalProperties": false
+    }
+  },
+  "required": ["entries"],
+  "additionalProperties": false,
+
+  "$defs": {
+    "entry": {
+      "type": "object",
+      "required": ["type"],
+      "properties": {
+        "name":    { "type": "string" },
+        "type":    {
+          "type": "string",
+          "enum": [
+            "attachment", "auxiliary", "background",
+            "genericArmor", "genericHelmet", "genericShield", "genericWeapon",
+            "gui", "injury", "internal",
+            "knowledge", "learning",
+            "namedArmor", "namedHelmet", "namedShield", "namedWeapon",
+            "perk", "permanentInjury", "potion-effect",
+            "training", "trait"
+          ]
+        },
+        "subType": { "type": "string" },
+        "slot":    { "type": "string" },
+        "icon":    { "type": "integer" },
+        "iconSet": { "type": "string" },
+        "base":    { "$ref": "#/$defs/baseStats" },
+        "weapon":  { "$ref": "#/$defs/weaponStats" },
+        "modifier":{ "$ref": "#/$defs/modifier" }
+      },
+      "additionalProperties": false
+    },
+
+    "baseStats": {
+      "description": "Inline item stats parsed from save data (DictionaryEntry).",
+      "type": "object",
+      "properties": {
+        "durability":   { "type": "integer" },
+        "fatigue":      { "type": "integer" },
+        "fatigueUse":   { "type": "integer" },
+        "damageMin":    { "type": "integer" },
+        "damageMax":    { "type": "integer" },
+        "damageArmor":  { "type": "number" },
+        "headChance":   { "type": "integer" },
+        "damageShield": { "type": "integer" },
+        "hitBonus":     { "type": "integer" },
+        "penetration":  { "type": "number" },
+        "ammoMax":      { "type": "integer" },
+        "mDef":         { "type": "integer" },
+        "rDef":         { "type": "integer" }
+      },
+      "additionalProperties": false
+    },
+
+    "weaponStats": {
+      "description": "Reference weapon stats shown in the tooltip (WeaponStats).",
+      "type": "object",
+      "properties": {
+        "weaponClass":  { "type": "string" },
+        "tier":         { "type": "integer" },
+        "worth":        { "type": "integer" },
+        "damageMin":    { "type": "integer" },
+        "damageMax":    { "type": "integer" },
+        "ignoresArmor": { "type": "integer" },
+        "vsArmor":      { "type": "integer" },
+        "durability":   { "type": "integer" },
+        "maxFatigue":   { "type": "integer" },
+        "range":        { "type": "integer", "description": "Max range for ranged weapons (tiles)" }
+      },
+      "additionalProperties": false
+    },
+
+    "modifier": {
+      "description": "Trait or perk stat modifiers (StatModifier).",
+      "type": "object",
+      "properties": {
+        "tier":        { "type": "integer", "minimum": 1, "maximum": 7 },
+        "description": { "type": "string" },
+        "effects": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "stat":       { "type": "string", "description": "Snake-case stat key (e.g. melee_skill)" },
+              "percentage": { "type": "integer" },
+              "points":     { "type": "integer" }
+            },
+            "additionalProperties": false
+          }
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

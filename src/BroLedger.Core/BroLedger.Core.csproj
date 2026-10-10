@@ -11,5 +11,9 @@
       <Version>10.0.12</Version>
     </PackageReference>
   </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\data\game-data.json" LogicalName="BroLedger.Core.Resources.data.game-data.json" />
+    <EmbeddedResource Include="Resources\data\game-data.schema.json" LogicalName="BroLedger.Core.Resources.data.game-data.schema.json" />
+  </ItemGroup>
 
 </Project>
