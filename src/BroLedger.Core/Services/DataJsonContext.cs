@@ -7,4 +7,5 @@ namespace BroLedger.Core.Services;
 [JsonSerializable(typeof(DictionaryEntry))]
 [JsonSerializable(typeof(AppConfigData))]
 [JsonSerializable(typeof(ShareRecord))]
+[JsonSerializable(typeof(AnnotationService.AnnotationsFile))]
 internal partial class DataJsonContext : JsonSerializerContext;
