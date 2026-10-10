@@ -82,7 +82,7 @@ AnnotationService, AppConfig, AssetExtractor, DictionaryService, ExpectedStatsCa
 
 - `WatchService` → `FileSystemWatcher`。**行为真源：`service/FileWatcherService.java`**——包括游戏写档期间的 Changed 事件风暴（去抖/重试策略）与 `Error` 事件（内部缓冲溢出）的处理，均以该文件为准逐一对齐
 - `java.net.http.HttpClient` → `System.Net.Http.HttpClient`
-- `ImageCache` 拆分为两半：**Core** 保留纯字节缓存逻辑（一对一迁移）；**App 层**新增基于 Avalonia `Bitmap` 的解码缓存（Core 不引用 Avalonia）
+- `ImageCache` **整体归 App 层**（计划④）：Java 实现直接缓存 `javafx.scene.image.Image`（无字节半区可迁），C# 对应为 Avalonia `Bitmap` 的 LRU 缓存（max 300 + 1×1 灰占位 PNG 字节常量照搬）——Core 不引用 Avalonia，早期「Core 字节缓存半区」表述作废
 - 桌面路径：`~/.bro-ledger/` → `Environment.GetFolderPath(UserProfile)` 拼接
 
 ### 4.4 ui/ → App/Views + App/ViewModels
@@ -109,7 +109,7 @@ JavaFX Controller 模式 → MVVM：
 |---|---|---|
 | App.java | Program.cs + App.axaml(.cs) | JavaFX Application 生命周期 → Avalonia AppBuilder 启动 |
 | Launcher.java | Program.cs | 启动入口合并 |
-| AppInfo.java | AppInfo.cs | 版本/名称常量（对齐 version.properties） |
+| AppInfo.java | **Core/AppInfo.cs**（放置调整：SaveReplayService 等 Core 服务依赖 `IsDebug()`，Core 不能反向引用 App；version.properties 随行嵌入 Core） | 版本/名称常量（对齐 version.properties） |
 
 ### 4.6 资源
 

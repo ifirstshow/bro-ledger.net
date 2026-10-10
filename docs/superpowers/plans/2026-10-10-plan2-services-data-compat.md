@@ -2,7 +2,7 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** 将 Java 版 13 个服务/模型移植为 C#（keeper/roles/config 三种 JSON 数据格式与 Java 版字节兼容），并迁移对应的 12 个测试类（约 3,400 行）。
+**Goal:** 将 Java 版 13 个服务/模型移植为 C#（keeper/roles/config 三种 JSON 数据格式与 Java 版字节兼容），并迁移对应的 13 个测试类（约 3,950 行；清单见 Task 14 收尾）。
 
 **Architecture:** 延续计划①的 `BroLedger.Core`（零 UI 依赖）。JSON 全部走 `DataJsonContext` source-gen（扩展既有 internal partial 上下文，不新建上下文类）。Java 包级私有测试缝 → C# `internal` + 既有 `InternalsVisibleTo("BroLedger.Core.Tests")`。单例 + 静态测试缝镜像 Java（`CreateForTest`/`ResetForTest`）。FileWatcher 的 FX 线程调度改为注入 `Action<Action>` 委托。
 
@@ -147,10 +147,10 @@ git add -A && git commit -m "feat(core): AppPaths + AppInfo (Core placement ruli
 - [ ] **Step 2: 运行确认编译失败**
 - [ ] **Step 3: 实现**（真源 `JAVA/service/AppConfig.java` 202 行逐方法移植）
   - SaveTo：`<file>.tmp` 写入（`WriteIndented`）→ `File.Move(tmp, file, overwrite: true)`（.NET 无 ATOMIC_MOVE 跨平台常量——File.Move 即同卷移动；Java 的 AtomicMoveNotSupportedException 回退分支消失，记录偏差）+ 失败删 tmp
-  - LoadFrom：文件不存在→默认值返回（LogTrace）；反序列化失败→`File.Move(file, file + ".bad-" + DateTimeOffset.UtcNow.ToUnixTimeMilliseconds())` + LogError/LogWarning（对齐 Java 备份语义）。DTO：私有 record `AppConfigData`（13 个可空属性，JsonPropertyName 同上）→ 读入后逐字段拷贝到单例（null 字段保留单例现值——与 Jackson readerForUpdating 一致）
+  - LoadFrom：文件不存在→默认值返回（LogTrace）；反序列化失败→`File.Move(file, file + ".bad-" + DateTimeOffset.UtcNow.ToUnixTimeMilliseconds())` + LogError/LogWarning（对齐 Java 备份语义）。DTO：**internal** record `AppConfigData`（13 个可空属性，JsonPropertyName 同上，须对 DataJsonContext 的 `[JsonSerializable]` 可见）→ 读入后逐字段拷贝到单例（null 字段保留单例现值——与 Jackson readerForUpdating 一致）
   - OrderedStats：`Stat.Values` 序遍历、`stat-` 前缀解析、未见追加——逐句对照
   - DataJsonContext 追加：`[JsonSerializable(typeof(AppConfigData))]`、`[JsonSerializable(typeof(ShareRecord))]`
-- [ ] **Step 4: 运行确认通过（62+4=66 起，以实际用例数为准）；Step 5: Commit** `feat(core): AppConfig + ShareRecord with Java-shaped config.json`
+- [ ] **Step 4: 运行确认通过（以实际用例数为准，Task 1 后基线 65）；Step 5: Commit** `feat(core): AppConfig + ShareRecord with Java-shaped config.json`
 
 ---
 
@@ -271,10 +271,61 @@ git add -A && git commit -m "feat(core): AppPaths + AppInfo (Core placement ruli
 **Interfaces:**
 - Consumes: `GameDataService`、`DataJsonContext`
 - Produces: `WeaponStats`（`WeaponClass(string?)/Tier(int?)/Worth(int?)/DamageMin(int?)/DamageMax(int?)/IgnoresArmor(int?)/VsArmor(int?)`，JsonPropertyName camelCase）；单例 `Load(Stream)`（`{hexId:{...}}` map，键大写归一）、`LoadFromEmbeddedResource()`、`internal LoadFromEntries(JsonNode?)`（带 `weapon` 子对象的项）、`Get/GetTier/GetWeaponClass/GetAll`
-- **移植缺口说明**：Java 无 WeaponStatsServiceTest——无独立测试；由 Task 9 的 greedy 链路与计划③ ReplayAnalyzer 间接覆盖；步骤 = 移植 → `dotnet build -warnaserror` 零警告 → 提交
+- **移植缺口说明**：Java 无 WeaponStatsServiceTest——补 3 个最小钉子测试（Load 大写归一、Get 缺失返回 null、GetTier/GetWeaponClass 透传），防止零测试移植。
 
-- [ ] **Step 1: 实现**（真源 `JAVA/service/WeaponStatsService.java` 87 行 + 模型；`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` 仅影响错误定位信息，C# 无对应必要——省略并记录）
-- [ ] **Step 2: 构建 + Commit** `feat(core): WeaponStatsService (weapon sub-object map)`
+**Interfaces（测试用）：**
+- Test: `tests/BroLedger.Core.Tests/Services/WeaponStatsServiceTests.cs`
+
+```csharp
+using System.Text;
+using BroLedger.Core.Services;
+using Xunit;
+
+namespace BroLedger.Core.Tests.Services;
+
+public class WeaponStatsServiceTests
+{
+    private static WeaponStatsService NewService() => WeaponStatsService.Instance.LoadForTest();
+    // 实现 internal LoadForTest(): 清空 entries 并返回单例（镜像 Java 测试缝缺失下的最小隔离）
+    // 若实现侧更倾向直接 Load 覆盖，亦可只用公开 Load(Stream)——二选一保持与 Java Load 语义一致
+
+    [Fact]
+    public void Load_NormalizesKeysToUpper()
+    {
+        var svc = WeaponStatsService.Instance;
+        svc.Load(new MemoryStream(Encoding.UTF8.GetBytes(
+            """{"ab12cd34": {"weaponClass":"1h","tier":2,"damageMin":20}}""")));
+        Assert.NotNull(svc.Get("AB12CD34"));
+        Assert.Equal("1h", svc.GetWeaponClass("AB12CD34"));
+        Assert.Equal(2, svc.GetTier("AB12CD34"));
+    }
+
+    [Fact]
+    public void Get_UnknownOrNull_ReturnsNull()
+    {
+        var svc = WeaponStatsService.Instance;
+        Assert.Null(svc.Get("FFFFFFFF"));
+        Assert.Null(svc.Get(null));
+        Assert.Null(svc.GetTier(null));
+    }
+
+    [Fact]
+    public void Load_IgnoresEntriesWithoutWeaponSubObject()
+    {
+        var svc = WeaponStatsService.Instance;
+        svc.Load(new MemoryStream(Encoding.UTF8.GetBytes(
+            """{"deadbeef": {"name":"not a weapon"}}""")));
+        Assert.Null(svc.Get("DEADBEEF"));
+    }
+}
+```
+
+> 注：测试间共享单例——三个用例须标 `[Collection("WeaponStatsService")]`（或合并为一个用例），避免 Load 相互覆盖导致 flake；实现者自行选择最小方案并保持断言语义。
+
+- [ ] **Step 1: 写失败测试**（上方代码落地）
+- [ ] **Step 2: 确认编译失败**
+- [ ] **Step 3: 实现**（真源 `JAVA/service/WeaponStatsService.java` 87 行 + 模型；`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` 仅影响错误定位信息，C# 无对应必要——省略并记录）
+- [ ] **Step 4: 确认通过；Step 5: Commit** `feat(core): WeaponStatsService (weapon sub-object map)`
 
 ---
 
@@ -349,7 +400,7 @@ git add -A && git commit -m "feat(core): AppPaths + AppInfo (Core placement ruli
 - **调度裁决**：Java `Platform.runLater(onChange)`（FX 线程）→ 注入 `marshal` 委托；App（计划④）传 `Avalonia.Threading.Dispatcher.UIThread.Invoke`，测试传直接调用 `a => a()`。**常量逐字**：`POLL_INTERVAL_MS=250`、`POLL_MAX_ATTEMPTS=6`、`DEBOUNCE_MS=2000`
 - **移植缺口说明**：Java 无专项测试（时序型）；步骤 = 移植 → 构建 → 提交；`FileSystemWatcher.Error` 事件（缓冲溢出 ≈ Java OVERFLOW）→ LogTrace + 继续观察（Java OVERFLOW 是 continue 跳过——语义：不触发 onChange，等待下一个事件）
 
-- [ ] **Step 1: 实现**（真源 124 行。结构：`watch()` 先 `Stop()`；`FileSystemWatcher{ Filter=target, NotifyFilter=LastWrite }` + 后台 `Thread`（`IsBackground=true`）跑循环；**Java WatchService.take() 阻塞语义** → C# 无内建阻塞 Take，用 `BlockingCollection<WatcherChangeTypes>` 或轮询 `WaitForChanged`——**推荐**：`FileSystemWatcher.Changed` 事件 → `BlockingCollection.Add`，后台线程 `Take()`（阻塞、`CompleteAdding` 后退出 ≈ ClosedWatchServiceException）；settle 轮询 `File.GetSize` 容忍 IOException（continue，对齐 Java size poll catch）；去抖 `lastFiredAt`（`Environment.TickCount64` 或 Stopwatch））
+- [ ] **Step 1: 实现**（真源 124 行。结构：`watch()` 先 `Stop()`；`FileSystemWatcher{ Filter=target, NotifyFilter=LastWrite }` + 后台 `Thread`（`IsBackground=true`）跑循环；**Java WatchService.take() 阻塞语义** → C# 无内建阻塞 Take，用 `BlockingCollection<WatcherChangeTypes>` 或轮询 `WaitForChanged`——**推荐**：`FileSystemWatcher.Changed` 事件 → `BlockingCollection.Add`，后台线程 `Take()`（阻塞、`CompleteAdding` 后退出 ≈ ClosedWatchServiceException）；settle 判据逐字：`size > 0 && size == prev` 连续两次（`stable >= 2`）即已写完，轮询耗尽时 `stable >= 1` 亦通过——对应 Java L98-123，含 size poll IOException 的 continue 容忍；去抖 `lastFiredAt`（`Environment.TickCount64` 或 Stopwatch））
 - [ ] **Step 2: `dotnet build -warnaserror`；Step 3: Commit** `feat(core): FileWatcherService (settle poll + debounce, injected marshaling)`
 
 ---
@@ -373,7 +424,7 @@ git add -A && git commit -m "feat(core): AppPaths + AppInfo (Core placement ruli
 ### Task 14: OverviewCalc 下沉 Core + 计划②收尾
 
 **Files:**
-- Create: `src/BroLedger.Core/Parsing/OverviewCalc.cs`（命名空间裁定：纯计算 → `BroLedger.Core.Services`；Java 在 ui/ 包但零 UI 依赖）
+- Create: `src/BroLedger.Core/Services/OverviewCalc.cs`（命名空间 `BroLedger.Core.Services`；Java 在 ui/ 包但零 UI 依赖，宿主 Core 已由规格附录 A 裁定）
 - Test: `tests/BroLedger.Core.Tests/Services/OverviewCalcTests.cs`（迁移 `JAVATEST/ui/OverviewCalcTest.java` 458 行）
 
 **Interfaces:**
