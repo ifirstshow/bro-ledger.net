@@ -10,4 +10,7 @@ namespace BroLedger.Core.Services;
 [JsonSerializable(typeof(AnnotationService.AnnotationsFile))]
 [JsonSerializable(typeof(StatModifier))]
 [JsonSerializable(typeof(StatModifierService.Wrapper))]
+[JsonSerializable(typeof(Role))]
+[JsonSerializable(typeof(RolePack))]
+[JsonSerializable(typeof(RoleService.Wrapper), TypeInfoPropertyName = "RoleServiceWrapper")]
 internal partial class DataJsonContext : JsonSerializerContext;

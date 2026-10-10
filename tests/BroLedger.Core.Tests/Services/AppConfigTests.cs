@@ -6,6 +6,8 @@ namespace BroLedger.Core.Tests.Services;
 
 // Transcribed assertion-by-assertion from JAVATEST/service/AppConfigTest.java.
 // Seams: @TempDir → per-test GUID dir; fresh() reflection bypass → ResetForTest() + Instance.
+// Collection: shares the static AppConfig singleton with RoleServiceTests — must run sequentially.
+[Collection("AppConfig")]
 public class AppConfigTests : IDisposable
 {
     private readonly string Tmp;
