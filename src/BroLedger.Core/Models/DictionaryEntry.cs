@@ -22,4 +22,8 @@ public class DictionaryEntry
     [JsonPropertyName("hitBonus")] public int? HitBonus { get; set; }
     [JsonPropertyName("penetration")] public double? Penetration { get; set; }
     [JsonPropertyName("ammoMax")] public int? AmmoMax { get; set; }
+
+    // Shield stats
+    [JsonPropertyName("mDef")] public int? MDef { get; set; }
+    [JsonPropertyName("rDef")] public int? RDef { get; set; }
 }
