@@ -268,7 +268,7 @@ public class BrotherParser
     /** 由兄弟的身份字段构建 fingerprint 的规范输入串。 */
     internal static string FingerprintInput(string? name, string? backgroundHexId, int[] stars)
     {
-        // Java StringBuilder.append((String)null) 追加字面量 "null"——C# 必须 ?? "null"
+        // backgroundHexId 为 null 时追加字面量 "null"（对齐 Java StringBuilder.append(null) 语义）
         var sb = new StringBuilder(name).Append('|').Append(backgroundHexId ?? "null").Append('|');
         foreach (var s in stars) sb.Append(s);
         return sb.ToString();

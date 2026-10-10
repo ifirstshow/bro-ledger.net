@@ -7,6 +7,7 @@ namespace BroLedger.Core.Tests.Parsing;
 
 // 对真实 .sav 的集成测试。BRO_LEDGER_SAV 指定真实存档路径，缺省用 TestSavefile.sav。
 // IClassFixture 保证存档只解析一次（Java @BeforeAll 等价物）。
+[Collection("DictionaryService")]
 public class SaveParserTests(SaveParserTests.Fixture fixture)
     : IClassFixture<SaveParserTests.Fixture>
 {

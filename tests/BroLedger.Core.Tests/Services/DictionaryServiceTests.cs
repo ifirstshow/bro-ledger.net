@@ -6,6 +6,7 @@ using Xunit;
 
 namespace BroLedger.Core.Tests.Services;
 
+[Collection("DictionaryService")]
 public class DictionaryServiceTests
 {
     // 与 Java 一致：测试共享 getInstance()/Instance 单例，用已知条目 Load 填充后断言。
