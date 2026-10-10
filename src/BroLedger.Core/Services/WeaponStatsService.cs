@@ -18,8 +18,9 @@ public sealed class WeaponStatsService
     private WeaponStatsService() { }
 
     // Legacy {hexId: {weaponClass,…}} 格式（测试缝）。
-    // ponytail: Java load 会原样存入全 null 的 WeaponStats；此处跳过无任何已知字段的值，
-    // 使 Get() 保持"未知 id → null"语义（task-8 简报钉子测试要求）。
+    // Java load(InputStream) 反序列化成 Map 后无条件存入每个 entry
+    // （未知字段被忽略 → 可能产出全 null 的 WeaponStats，仍入库）；
+    // 过滤无 weapon 子对象的 entry 是 loadFromEntries 的行为。
     public void Load(Stream json)
     {
         var root = JsonNode.Parse(json) as JsonObject ?? throw new IOException("expected json object");
@@ -28,7 +29,6 @@ public sealed class WeaponStatsService
             var ws = (node ?? throw new IOException($"null entry {key}"))
                 .Deserialize(DataJsonContext.Default.WeaponStats)
                 ?? throw new IOException($"Failed to parse entry {key}");
-            if (IsEmpty(ws)) continue;
             _entries[key.ToUpperInvariant()] = ws;
         }
     }
@@ -67,9 +67,4 @@ public sealed class WeaponStatsService
     public string? GetWeaponClass(string? hexId) => Get(hexId)?.WeaponClass;
 
     public IReadOnlyDictionary<string, WeaponStats> GetAll() => _entries;
-
-    private static bool IsEmpty(WeaponStats ws) =>
-        ws.WeaponClass == null && ws.Tier == null && ws.Worth == null
-        && ws.DamageMin == null && ws.DamageMax == null
-        && ws.IgnoresArmor == null && ws.VsArmor == null;
 }

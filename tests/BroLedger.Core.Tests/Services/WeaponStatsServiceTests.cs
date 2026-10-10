@@ -1,4 +1,5 @@
 using System.Text;
+using System.Text.Json.Nodes;
 using BroLedger.Core.Services;
 using Xunit;
 
@@ -30,11 +31,38 @@ public class WeaponStatsServiceTests
     }
 
     [Fact]
-    public void Load_IgnoresEntriesWithoutWeaponSubObject()
+    public void Load_StoresAllNullEntry_JavaFaithful()
     {
         var svc = WeaponStatsService.Instance;
+        // Java load(InputStream) deserializes into a Map<String, WeaponStats>
+        // and stores every entry unconditionally — Jackson drops the unknown
+        // "name" property, yielding an all-null WeaponStats that IS stored.
+        // Filtering entries without a "weapon" sub-object is loadFromEntries'
+        // behavior (see next test), not load's.
         svc.Load(new MemoryStream(Encoding.UTF8.GetBytes(
             """{"deadbeef": {"name":"not a weapon"}}""")));
-        Assert.Null(svc.Get("DEADBEEF"));
+        var ws = svc.Get("DEADBEEF");
+        Assert.NotNull(ws);
+        Assert.Null(ws.WeaponClass);
+        Assert.Null(ws.Tier);
+        Assert.Null(ws.Worth);
+        Assert.Null(ws.DamageMin);
+        Assert.Null(ws.DamageMax);
+        Assert.Null(ws.IgnoresArmor);
+        Assert.Null(ws.VsArmor);
+    }
+
+    [Fact]
+    public void LoadFromEntries_SkipsEntriesWithoutWeaponSubObject()
+    {
+        var svc = WeaponStatsService.Instance;
+        // Fresh keys: the singleton already holds DEADBEEF from Load_Stores
+        // above, so filtering must be checked on keys no other test touches.
+        var entries = JsonNode.Parse(
+            """{"cafebabe": {"name":"not a weapon"}, "ff01": {"weapon": {"weaponClass":"1h","tier":2}}}""");
+        svc.LoadFromEntries(entries);
+        Assert.Null(svc.Get("CAFEBABE"));
+        Assert.Equal("1h", svc.GetWeaponClass("FF01"));
+        Assert.Equal(2, svc.GetTier("FF01"));
     }
 }
