@@ -13,4 +13,5 @@ namespace BroLedger.Core.Services;
 [JsonSerializable(typeof(Role))]
 [JsonSerializable(typeof(RolePack))]
 [JsonSerializable(typeof(RoleService.Wrapper), TypeInfoPropertyName = "RoleServiceWrapper")]
+[JsonSerializable(typeof(WeaponStats))]
 internal partial class DataJsonContext : JsonSerializerContext;
