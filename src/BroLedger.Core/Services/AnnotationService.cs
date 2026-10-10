@@ -10,7 +10,7 @@ namespace BroLedger.Core.Services;
 /// <summary>
 /// Persists per-brother role and target-stat annotations adjacent to the save file,
 /// with a fallback location in ~/.bro-ledger/.
-/// Port of JAVA/service/AnnotationService.java（核心半区；对账半区在下一任务）.
+/// Port of JAVA/service/AnnotationService.java（核心半区 + 对账半区）.
 /// Storage format: {"version":1,"uiState":{...},"annotations":{"&lt;fingerprint&gt;":{...}}}
 /// </summary>
 public sealed class AnnotationService
@@ -272,6 +272,323 @@ public sealed class AnnotationService
             [JsonPropertyName("statIncreases")] public int[]? StatIncreases { get; set; }
             [JsonPropertyName("post11Increases")] public int[]? Post11Increases { get; set; }
             [JsonPropertyName("perkPlanStatus")] public Dictionary<string, string>? PerkPlanStatus { get; set; }
+        }
+    }
+
+    // ---- level-up reconciliation -------------------------------------------
+
+    internal const string GiftedPerkId = "9899E380";
+
+    /// <summary>
+    /// One detected level-up (or Gifted-perk selection) after a save reload.
+    /// StatDeltas/ConsumedIncreases: Java EnumMap iterates in enum declaration order —
+    /// carried here as List&lt;KeyValuePair&lt;Stat,int&gt;&gt; built in Stat.Values order (Dictionary 禁用).
+    /// </summary>
+    public sealed record LevelUpEvent(
+        string? Name,
+        bool Adjusted,
+        int LevelsAssigned,
+        IReadOnlyList<KeyValuePair<Stat, int>> StatDeltas,
+        IReadOnlyList<Stat> AdjustedStats,
+        IReadOnlyList<KeyValuePair<Stat, int>> ConsumedIncreases,
+        IReadOnlyList<string> AddedPerkIds,
+        bool Post11);
+
+    internal sealed record Reconciliation(
+        IReadOnlyList<Stat> AdjustedStats,
+        IReadOnlyList<KeyValuePair<Stat, int>> ConsumedIncreases,
+        int[]? UpdatedStatIncreases,
+        int[]? UpdatedPost11Increases,
+        bool Changed);
+
+    /// <summary>
+    /// Compares old vs new brother lists after a save reload and reduces
+    /// statIncreases[] for any brother whose levelPoints count decreased
+    /// (i.e. they assigned a level-up in-game).
+    /// </summary>
+    public List<LevelUpEvent> ReconcileOnReload(List<Brother> oldList, List<Brother> newList)
+    {
+        var events = new List<LevelUpEvent>();
+        Log.LogTrace("reconcileOnReload: checking {New} brothers against {Old} old", newList.Count, oldList.Count);
+        foreach (var nb in newList)
+        {
+            var fp = nb.Fingerprint;
+            if (fp == null)
+            {
+                Log.LogTrace("  skip [{Name}]: no fingerprint", nb.Name);
+                continue;
+            }
+            var ob = FindMatch(oldList, fp);
+            if (ob == null)
+            {
+                Log.LogTrace("  skip [{Name}]: no match in old list (new brother?)", nb.Name);
+                continue;
+            }
+            Log.LogTrace("  [{Name}] old.levelPoints={Old}  new.levelPoints={New}",
+                nb.Name, ob.LevelPoints, nb.LevelPoints);
+            var e = ReconcileBrother(ob, nb);
+            if (e != null) events.Add(e);
+        }
+        Log.LogTrace("reconcileOnReload: done — {Count} level-up event(s)", events.Count);
+        return events;
+    }
+
+    private LevelUpEvent? ReconcileBrother(Brother ob, Brother nb)
+    {
+        var fp = nb.Fingerprint!; // caller checked non-null
+        var addedPerkIds = AddedPerks(ob, nb);
+        if (addedPerkIds.Count > 0)
+        {
+            Log.LogTrace("  [{Name}]: {Count} perk(s) added: {Perks}", nb.Name, addedPerkIds.Count, addedPerkIds);
+        }
+
+        var levelPointsDecreased = nb.LevelPoints < ob.LevelPoints;
+        var giftedSelected = addedPerkIds.Contains(GiftedPerkId);
+
+        if (!levelPointsDecreased && addedPerkIds.Count == 0)
+        {
+            Log.LogTrace("  [{Name}]: no level assigned and no perks added — skipping", nb.Name);
+            return null;
+        }
+
+        if (levelPointsDecreased)
+        {
+            Log.LogTrace("  [{Name}]: {Levels} level(s) assigned in-game", nb.Name, ob.LevelPoints - nb.LevelPoints);
+        }
+        if (giftedSelected)
+        {
+            Log.LogTrace("  [{Name}]: Gifted bonus round — treating as extra level for reconciliation", nb.Name);
+        }
+
+        var levels = LevelsAssigned(ob, nb, giftedSelected);
+        var a = Get(fp);
+        var deltas = StatDeltas(ob, nb);
+        var post11 = levelPointsDecreased && IsPost11Reconcile(ob, nb);
+        Reconciliation r;
+
+        if (post11)
+        {
+            r = ReconcilePost11(a, deltas);
+            if (r.Changed)
+            {
+                Log.LogTrace("  [{Name}]: post-lv11 increases recorded: {Deltas}", nb.Name, deltas);
+                SetPost11Increases(fp, r.UpdatedPost11Increases);
+            }
+            else
+            {
+                Log.LogTrace("  [{Name}]: post-lv11 level-up but no stat deltas detected", nb.Name);
+            }
+        }
+        else if (levelPointsDecreased || giftedSelected)
+        {
+            r = ConsumePlannedIncreases(a, nb, deltas);
+            if (a.StatIncreases == null)
+            {
+                Log.LogTrace("  [{Name}]: no planned statIncreases — recording level-up without adjustment", nb.Name);
+            }
+            else if (r.Changed)
+            {
+                Log.LogTrace("  [{Name}]: saving updated statIncreases", nb.Name);
+                SetStatIncreases(fp, r.UpdatedStatIncreases);
+            }
+            else
+            {
+                Log.LogTrace("  [{Name}]: leveled up but no planned increases were affected", nb.Name);
+            }
+        }
+        else
+        {
+            r = new Reconciliation([], [], null, null, false);
+        }
+
+        return new LevelUpEvent(
+            nb.Name,
+            r.Changed,
+            levels,
+            deltas,
+            r.AdjustedStats,
+            r.ConsumedIncreases,
+            addedPerkIds,
+            post11
+        );
+    }
+
+    // ---- static reconciliation helpers -------------------------------------
+
+    internal static List<KeyValuePair<Stat, int>> StatDeltas(Brother ob, Brother nb)
+    {
+        // Java EnumMap 迭代序 = 枚举声明序；按 Stat.Values 序构建即天然有序
+        var deltas = new List<KeyValuePair<Stat, int>>();
+        foreach (var s in Stat.Values)
+        {
+            var si = s.StatIndex;
+            if (si >= nb.Stats.Length || si >= ob.Stats.Length) continue;
+            var d = nb.Stats[si] - ob.Stats[si];
+            if (d > 0) deltas.Add(new(s, d));
+        }
+        return deltas;
+    }
+
+    internal static int RaisesLowerBound(int statDelta, int statIndex, int stars)
+    {
+        var range = StatPotentialCalculator.RangeForStars(statIndex, stars);
+        var maxPerRoll = range?.Max ?? statDelta;
+        return (int)Math.Ceiling((double)statDelta / maxPerRoll);
+    }
+
+    internal static List<string> AddedPerks(Brother ob, Brother nb) =>
+        nb.PerkIds.Where(id => !ob.PerkIds.Contains(id)).ToList();
+
+    internal static bool IsPost11Reconcile(Brother ob, Brother nb) =>
+        ob.LevelTotal >= 11 && nb.LevelTotal > 11;
+
+    internal static Brother? FindMatch(List<Brother> oldList, string fingerprint) =>
+        oldList.FirstOrDefault(b => fingerprint == b.Fingerprint);
+
+    internal static int LevelsAssigned(Brother ob, Brother nb, bool gifted)
+    {
+        var normal = Math.Max(0, ob.LevelPoints - nb.LevelPoints);
+        return normal + (gifted ? 1 : 0);
+    }
+
+    internal static Reconciliation ReconcilePost11(BrotherAnnotation a, List<KeyValuePair<Stat, int>> deltas)
+    {
+        if (deltas.Count == 0) return new Reconciliation([], [], null, null, false);
+        // Java Arrays.copyOf(x, 8)：短则补零、长则截断
+        var post11 = new int[Stat.Values.Length];
+        if (a.Post11Increases != null)
+        {
+            Array.Copy(a.Post11Increases, post11, Math.Min(a.Post11Increases.Length, post11.Length));
+        }
+        foreach (var (s, v) in deltas)
+        {
+            post11[s.Ordinal] += v;
+        }
+        return new Reconciliation([], [], null, post11, true);
+    }
+
+    internal static Reconciliation ConsumePlannedIncreases(
+        BrotherAnnotation a, Brother nb, List<KeyValuePair<Stat, int>> deltas)
+    {
+        if (a.StatIncreases == null) return new Reconciliation([], [], null, null, false);
+        var statIncreases = (int[])a.StatIncreases.Clone();
+        var adjustedStats = new List<Stat>();
+        var consumedIncreases = new List<KeyValuePair<Stat, int>>();
+        foreach (var (s, delta) in deltas)
+        {
+            var ord = s.Ordinal;
+            var si = s.StatIndex;
+            var planned = ord < statIncreases.Length ? statIncreases[ord] : 0;
+            if (planned <= 0) continue;
+            var stars = si < nb.Stars.Length ? nb.Stars[s.StarIndex] : 0;
+            var toConsume = Math.Min(RaisesLowerBound(delta, si, stars), planned);
+            statIncreases[ord] = planned - toConsume;
+            consumedIncreases.Add(new(s, toConsume));
+            adjustedStats.Add(s);
+        }
+        if (adjustedStats.Count == 0) return new Reconciliation([], [], null, null, false);
+        return new Reconciliation(adjustedStats, consumedIncreases, statIncreases, null, true);
+    }
+
+    // ---- non-destructive preview reconciliation (for ReplayAnalyzer) -------
+
+    /// <summary>
+    /// Non-persisting reconciliation for the replay tool.
+    /// Identical in logic to <see cref="ReconcileOnReload"/> but reads planned/post-11
+    /// increases from the supplied maps and writes updated values back into them —
+    /// no store access, no disk I/O.
+    /// </summary>
+    /// <param name="plannedByFp">mutable map fingerprint → statIncreases (updated in place)</param>
+    /// <param name="post11ByFp">mutable map fingerprint → post11Increases (updated in place)</param>
+    public List<LevelUpEvent> PreviewReconcile(
+        List<Brother> oldList, List<Brother> newList,
+        Dictionary<string, int[]> plannedByFp,
+        Dictionary<string, int[]> post11ByFp)
+    {
+        var events = new List<LevelUpEvent>();
+        foreach (var nb in newList)
+        {
+            var fp = nb.Fingerprint;
+            if (fp == null) continue;
+            var ob = FindMatch(oldList, fp);
+            if (ob == null) continue;
+            var e = PreviewReconcileBrother(ob, nb, plannedByFp, post11ByFp);
+            if (e != null) events.Add(e);
+        }
+        return events;
+    }
+
+    private static LevelUpEvent? PreviewReconcileBrother(
+        Brother ob, Brother nb,
+        Dictionary<string, int[]> plannedByFp,
+        Dictionary<string, int[]> post11ByFp)
+    {
+        var fp = nb.Fingerprint!;
+        var addedPerkIds = AddedPerks(ob, nb);
+        var levelPointsDecreased = nb.LevelPoints < ob.LevelPoints;
+        var giftedSelected = addedPerkIds.Contains(GiftedPerkId);
+
+        if (!levelPointsDecreased && addedPerkIds.Count == 0) return null;
+
+        var levels = LevelsAssigned(ob, nb, giftedSelected);
+        var deltas = StatDeltas(ob, nb);
+        var post11 = levelPointsDecreased && IsPost11Reconcile(ob, nb);
+        Reconciliation r;
+
+        if (post11)
+        {
+            var a = new BrotherAnnotation(fp) { Post11Increases = post11ByFp.GetValueOrDefault(fp) };
+            r = ReconcilePost11(a, deltas);
+            if (r.Changed) post11ByFp[fp] = r.UpdatedPost11Increases!;
+        }
+        else if (levelPointsDecreased || giftedSelected)
+        {
+            var a = new BrotherAnnotation(fp) { StatIncreases = plannedByFp.GetValueOrDefault(fp) };
+            r = ConsumePlannedIncreases(a, nb, deltas);
+            if (r.Changed) plannedByFp[fp] = r.UpdatedStatIncreases!;
+        }
+        else
+        {
+            r = new Reconciliation([], [], null, null, false);
+        }
+
+        return new LevelUpEvent(
+            nb.Name,
+            r.Changed,
+            levels,
+            deltas,
+            r.AdjustedStats,
+            r.ConsumedIncreases,
+            addedPerkIds,
+            post11
+        );
+    }
+
+    /// <summary>
+    /// Reads planned and post-11 stat increases from a <c>.broledger.json</c> file into the
+    /// supplied maps. Silently does nothing if the path is null, absent, or unreadable.
+    /// Intended for use by the replay analyzer.
+    /// </summary>
+    public static void ReadAnnotationMaps(
+        string? annotPath,
+        Dictionary<string, int[]> plannedByFp,
+        Dictionary<string, int[]> post11ByFp)
+    {
+        if (annotPath == null || !File.Exists(annotPath)) return;
+        try
+        {
+            var file = JsonSerializer.Deserialize(
+                File.ReadAllText(annotPath), DataJsonContext.Default.AnnotationsFile);
+            if (file?.Annotations == null) return;
+            foreach (var (fp, ae) in file.Annotations)
+            {
+                if (ae.StatIncreases != null) plannedByFp[fp] = (int[])ae.StatIncreases.Clone();
+                if (ae.Post11Increases != null) post11ByFp[fp] = (int[])ae.Post11Increases.Clone();
+            }
+        }
+        catch (Exception)
+        {
+            // Unreadable snapshot annotations → leave maps empty (no planned increases known)
         }
     }
 }
