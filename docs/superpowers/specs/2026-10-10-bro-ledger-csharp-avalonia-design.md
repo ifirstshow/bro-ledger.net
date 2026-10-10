@@ -96,7 +96,7 @@ JavaFX Controller 模式 → MVVM：
   - **PerkPlanPane**（Java 真源 `ui/PerkPlanPane.java`）：50 perk 网格、拥有/未拥有透明度、tooltip
   - **StarsWidget**（Java 真源 `ui/StarsWidget.java`）：天赋星级显示与交互
   - **BrotherListCell**（Java 真源 `ui/BrotherListCell.java`）：总览行渲染
-  - TooltipFactory（→ ToolTip 模板工厂）, Modals（→ 窗口服务）, OverviewCalc（→ 静态计算类，无 UI 依赖部分可下沉 Core）, HotkeyManager（→ KeyBindings + 全局快捷键）, UiContext（→ App 服务容器/静态上下文）, PerkSortMode（→ 枚举）
+  - TooltipFactory（→ ToolTip 模板工厂）, Modals（→ 窗口服务）, OverviewCalc（→ 纯计算静态类，定 Core）, HotkeyManager（→ KeyBindings + 全局快捷键）, UiContext（→ App 服务容器/静态上下文）, PerkSortMode（→ 枚举）
 - **TableView 列交互验收判据**（真源 `ui/BrotherOverviewPane.java` + `ui/MainController.java`）：①列在所属类目（stats/equipment）内可拖拽重排且顺序持久化 ②跨类目不可拖入 ③重排后兄弟卡片属性排列同步变化 ④排序增强开关四态切换即时生效
 
 ### 4.5 tools/ → Tools/
@@ -165,7 +165,8 @@ fingerprint = hex(hash[0..16])   // 32 个十六进制字符
 - 所有 JSON 序列化/反序列化走 `JsonSerializerContext` source generator；禁止运行时反射序列化
 - 禁用：`Activator.CreateInstance`(字符串)、`Assembly.Load`、`Expression.Compile`、`dynamic`
 - 发布矩阵：`win-x64`、`linux-x64`、`osx-arm64`、`osx-x64`，`dotnet publish -c Release -r <rid>`，单文件自包含
-- CI：GitHub Actions 三平台 matrix。构建/publish 均带 `-p:TreatWarningsAsErrors=true`——AOT/trimmer 分析警告（IL2000–IL2099、IL3000–IL3007、IL3050–IL3056）零容忍，一旦出现即构建失败；`dotnet test` 全绿 + `dotnet publish -c Release -r <rid>` 三平台成功为验收门
+- CI：GitHub Actions 三平台 matrix。构建/publish 均带 `-p:TreatWarningsAsErrors=true`——AOT/trimmer 分析警告（IL2000–IL2099、IL3000–IL3007、IL3050–IL3056）零容忍，一旦出现即构建失败。**注意**：TreatWarningsAsErrors 为全集，nullable 与 xUnit 分析器警告同样升为错误（正是所需；首次 CI 若爆量，逐条修复而非放宽）
+- `dotnet test` 全绿 + `dotnet publish -c Release -r <rid>` 三平台成功为验收门
 
 ## 7. UI 迁移规范
 
@@ -222,16 +223,16 @@ fingerprint = hex(hash[0..16])   // 32 个十六进制字符
 | HexUtilsTest | Core/Utils/HexUtils |
 | ImageMapServiceTest | Core/Services/ImageMapService |
 | MainControllerTest | App/ViewModels/MainViewModel |
-| OverviewCalcTest | OverviewCalc（Core 下沉部分或 App 静态类） |
-| Phase3ResourcesTest / Phase4ResourcesTest | App 嵌入资源存在性/良构性验证（AXAML、样式、字体） |
-| PreviewReconcileTest | Core/Services/ExpectedStatsCalculator（preview reconcile 逻辑） |
+| OverviewCalcTest | Core（OverviewCalc 为纯计算，从 ui/ 下沉至 Core，定 Core 无二义） |
+| Phase3ResourcesTest / Phase4ResourcesTest | App 嵌入资源存在性/良构性验证（Phase3: CSS/AXAML；Phase4: stat 图标 PNG 等） |
+| PreviewReconcileTest | Core/Services/AnnotationService（`previewReconcile`，AnnotationService.java L440） |
 | ReplayAnalyzerTest | Tools/ReplayAnalyzer（Core.Tests 额外引用 BroLedger.Tools） |
 | RoleImportControllerTest | App/ViewModels/RoleImportViewModel |
 | RoleManagerControllerTest | App/ViewModels/RoleManagerViewModel |
 | RolePackTest | Core/Models/RolePack |
 | RoleServiceTest | Core/Services/RoleService |
 | RoleShareControllerTest | App/ViewModels/RoleShareViewModel |
-| RoleShareServiceTest | Core/Services/RoleShareService（本地 stub 端点） |
+| RoleShareServiceTest | Core/Services/RoleShareService——base URL 注入方式对齐 Java 版 `RoleShareService.createForTest(baseUrl)`；本地 stub 对应 Java 内嵌 HttpServer（绑 127.0.0.1 随机端口） |
 | SaveParserTest | Core/Parsing/SaveParser（需 `BRO_LEDGER_SAV` 的集成测试除外） |
 | SaveReplayServiceTest | Core/Services/SaveReplayService |
 | StatModifierServiceTest | Core/Services/StatModifierService |
