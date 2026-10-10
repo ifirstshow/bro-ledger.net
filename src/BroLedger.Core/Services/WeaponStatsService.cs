@@ -40,7 +40,7 @@ public sealed class WeaponStatsService
     }
 
     // 只收带 weapon 子对象的 entry（去掉包装后整包反序列化）
-    public void LoadFromEntries(JsonNode? entriesNode)
+    internal void LoadFromEntries(JsonNode? entriesNode)
     {
         if (entriesNode == null) return;
         foreach (var (key, node) in entriesNode.AsObject())
