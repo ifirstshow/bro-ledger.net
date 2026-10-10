@@ -3,6 +3,8 @@ using BroLedger.Core.Models;
 
 namespace BroLedger.Core.Services;
 
-[JsonSourceGenerationOptions(GenerationMode = JsonSourceGenerationMode.Metadata)]
+[JsonSourceGenerationOptions(WriteIndented = true, GenerationMode = JsonSourceGenerationMode.Metadata)]
 [JsonSerializable(typeof(DictionaryEntry))]
+[JsonSerializable(typeof(AppConfigData))]
+[JsonSerializable(typeof(ShareRecord))]
 internal partial class DataJsonContext : JsonSerializerContext;
