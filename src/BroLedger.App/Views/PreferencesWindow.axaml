@@ -1,0 +1,80 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:BroLedger.App.ViewModels"
+        x:Class="BroLedger.App.PreferencesWindow"
+        x:DataType="vm:PreferencesViewModel"
+        Title="Preferences"
+        Width="420" MinWidth="420" MinHeight="200"
+        SizeToContent="Height"
+        WindowDecorations="None"
+        ExtendClientAreaToDecorationsHint="True"
+        Background="{StaticResource BgAppBrush}">
+
+    <!-- preferences.fxml 1:1: app-frame with custom title bar, three card sections
+         (Expected Stats Mode / Level-Up Modal / Update Replay) and a Close footer. -->
+    <Border Classes="app-frame modal-frame"
+            Background="{StaticResource BgAppBrush}"
+            TextElement.Foreground="{StaticResource GoldBrush}"
+            TextElement.FontSize="13">
+        <DockPanel>
+
+            <Border x:Name="TitleBar" Classes="title-bar" DockPanel.Dock="Top">
+                <DockPanel LastChildFill="True">
+                    <TextBlock Classes="title-bar-label" Text="Preferences"
+                               VerticalAlignment="Center"/>
+                    <Button x:Name="CloseTitleBtn" Classes="window-btn window-btn-close" Content="✕"
+                            Focusable="False" DockPanel.Dock="Right" Click="OnClose"/>
+                </DockPanel>
+            </Border>
+
+            <StackPanel DockPanel.Dock="Bottom" Margin="0,8,24,20"
+                        HorizontalAlignment="Right">
+                <Button Classes="fancy-btn" Content="Close" Focusable="False" Click="OnClose"/>
+            </StackPanel>
+
+            <StackPanel Margin="24,20,24,20" Spacing="16">
+
+                <!-- Expected stats mode -->
+                <StackPanel Classes="card-section" Spacing="8">
+                    <TextBlock Classes="section-header" Text="Expected Stats Mode"/>
+                    <TextBlock Classes="stat-label" TextWrapping="Wrap"
+                               Text="Controls how expected stat values are calculated in the detail view and overview."/>
+                    <StackPanel Orientation="Horizontal" Spacing="16">
+                        <RadioButton Classes="role-radio" GroupName="expectedMode"
+                                     Content="Naive — current + mean × count  (default, always live)"
+                                     IsChecked="{Binding NaiveMode}"/>
+                        <RadioButton Classes="role-radio" GroupName="expectedMode"
+                                     Content="Greedy — optimal selection benefit  (requires full allocation)"
+                                     IsChecked="{Binding GreedyMode}"/>
+                    </StackPanel>
+                </StackPanel>
+
+                <!-- Level-up modal -->
+                <StackPanel Classes="card-section" Spacing="8">
+                    <TextBlock Classes="section-header" Text="Level-Up Modal"/>
+                    <TextBlock Classes="stat-label" TextWrapping="Wrap"
+                               Text="Controls whether a summary is shown when a level-up is detected on save reload."/>
+                    <StackPanel Orientation="Horizontal" Spacing="16">
+                        <RadioButton Classes="role-radio" GroupName="lvlModal"
+                                     Content="Modal" IsChecked="{Binding ModalOnLevelUp}"/>
+                        <RadioButton Classes="role-radio" GroupName="lvlModal"
+                                     Content="Modal — auto-close after 15s" IsChecked="{Binding ModalAutoClose}"/>
+                        <RadioButton Classes="role-radio" GroupName="lvlModal"
+                                     Content="Off" IsChecked="{Binding ModalOff}"/>
+                    </StackPanel>
+                </StackPanel>
+
+                <!-- Update Replay (debug builds only) -->
+                <StackPanel Classes="card-section" Spacing="8" IsVisible="{Binding ReplayVisible}">
+                    <TextBlock Classes="section-header" Text="Update Replay"/>
+                    <TextBlock Classes="stat-label" TextWrapping="Wrap"
+                               Text="Saves a copy of the save file and planned stat increases before each overwrite. Run ReplayAnalyzer to inspect the captured sequence and detect reconciliation errors."/>
+                    <CheckBox Classes="pref-check"
+                              Content="Enable capture on overwrite (stored in ~/.bro-ledger/replay/)"
+                              IsChecked="{Binding ReplayCapture}"/>
+                </StackPanel>
+
+            </StackPanel>
+        </DockPanel>
+    </Border>
+</Window>

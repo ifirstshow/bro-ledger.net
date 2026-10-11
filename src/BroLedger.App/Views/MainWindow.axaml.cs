@@ -34,13 +34,17 @@ public partial class MainWindow : Window
         _vm.Overview.PropertyChanged += (_, _) => UpdateToggleVisuals();
         // Java showOverview row click → showCard.
         _vm.Overview.ShowCardRequested += b => _vm.ShowCard(b);
-        // T5 mount: Java guidePopup — the popup content lands with the level-up task.
-        _vm.Overview.LevelGuideRequested += b => System.Diagnostics.Debug.WriteLine(
-            "T5 mount: level-up guide popup requested for " + b.Name);
+        // Java guidePopup: BrotherOverviewPane mounts its own LevelUpGuidePanel, which
+        // consumes Overview.LevelGuideRequested (the MainWindow debug subscription is gone).
 
         // Java loadSave setOnFailed → showError: parse failure also opens an error modal.
         _vm.ParseFailed += (header, message) =>
             _ = ModalService.ErrorAsync(this, "Error", header, message);
+
+        // Java loadSaveQuiet L483-489: open the level-up modal unless the mode is OFF;
+        // startReloadCountdown closes it on the 15th tick when AUTO_CLOSE.
+        _vm.LevelUpsDetected += OnLevelUpsDetected;
+        _vm.ReloadCountdownFinished += CloseAutoCloseLevelUp;
 
         // Java buildToolbar L128-131: "Excerpt" is a developer/diagnostic export variant —
         // hidden in release builds.
@@ -277,8 +281,54 @@ public partial class MainWindow : Window
     // T6 mount: Java openRoleManager — RoleManager dialog lands with T6.
     private void OnOpenRoleManager(object? sender, RoutedEventArgs e) { }
 
-    // T5 mount: Java openPreferences — Preferences dialog lands with T5.
-    private void OnOpenPreferences(object? sender, RoutedEventArgs e) { }
+    // Java openPreferences: themed modal; onPreferencesChanged repaints card + overview
+    // when the expected-stats mode changed.
+    private void OnOpenPreferences(object? sender, RoutedEventArgs e)
+    {
+        var prefs = new PreferencesWindow();
+        prefs.Prefs.Changed += OnPreferencesChanged;
+        _ = prefs.ShowDialog(this);
+    }
+
+    /// <summary>Java onPreferencesChanged: repopulate the card, re-show the overview.</summary>
+    private void OnPreferencesChanged()
+    {
+        if (!_vm.ShowingOverview && _vm.SelectedBrother != null) _vm.ShowCard(_vm.SelectedBrother);
+        if (_vm.ShowingOverview && _vm.Brothers.Count > 0) _vm.ShowOverview();
+    }
+
+    // ---- level-up modal (Java openLevelUpModal + startReloadCountdown tail) ----
+
+    private Window? _levelUpWindow;
+    private bool _levelUpAutoClose;
+
+    private void OnLevelUpsDetected(IReadOnlyList<AnnotationService.LevelUpEvent> events,
+                                    bool autoClose)
+    {
+        // Java blocks on showAndWait for MODAL, so at most one modal exists; a reload
+        // during an open window replaces it rather than stacking.
+        CloseAutoCloseLevelUp();
+        _levelUpWindow?.Close();
+
+        var levelUp = new LevelUpWindow();
+        levelUp.OpenFor(this, events);
+        _levelUpWindow = levelUp;
+        _levelUpAutoClose = autoClose;
+        levelUp.Closed += (_, _) =>
+        {
+            if (ReferenceEquals(_levelUpWindow, levelUp)) _levelUpWindow = null;
+        };
+    }
+
+    /// <summary>Java startReloadCountdown's 15th tick: close the AUTO_CLOSE stage.</summary>
+    private void CloseAutoCloseLevelUp()
+    {
+        if (_levelUpAutoClose && _levelUpWindow is { } w)
+        {
+            _levelUpAutoClose = false;
+            w.Close();
+        }
+    }
 
     /// <summary>Java resetLayout: default size, top-left of the current screen, re-show overview.</summary>
     private void OnResetLayout(object? sender, RoutedEventArgs e)

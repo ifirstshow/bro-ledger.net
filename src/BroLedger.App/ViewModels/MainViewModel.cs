@@ -49,6 +49,15 @@ internal partial class MainViewModel : ObservableObject
     /// status-only, exactly like the Java original.</summary>
     public event Action<string, string>? ParseFailed;
 
+    /// <summary>Java loadSaveQuiet L483-489: level-ups detected on reload — MainWindow
+    /// opens the LevelUpWindow unless the mode is OFF; the bool is the AUTO_CLOSE variant
+    /// (LevelUpViewModel.ShouldShow / IsAutoClose decide).</summary>
+    public event Action<IReadOnlyList<AnnotationService.LevelUpEvent>, bool>? LevelUpsDetected;
+
+    /// <summary>Raised at the 15th countdown tick — Java's startReloadCountdown closes the
+    /// AUTO_CLOSE level-up stage there.</summary>
+    public event Action? ReloadCountdownFinished;
+
     // Java readVersion(): blank version renders as "" (label simply absent).
     public string VersionLabelText { get; } = FormatVersion();
 
@@ -286,8 +295,18 @@ internal partial class MainViewModel : ObservableObject
                 if (match != null) SelectedBrother = match; // T4 mount: cardController.populate(b)
             }
             if (ShowingOverview) ShowOverview();
-            // T5 mount: the level-up modal itself (LevelUpModalMode MODAL/AUTO_CLOSE/OFF) lands with T5.
-            StartReloadCountdown(events.Count > 0 ? events.Count + " level-up(s) detected" : null);
+            if (events.Count > 0)
+            {
+                // Java loadSaveQuiet: OFF never opens; AUTO_CLOSE opens the auto-closing variant.
+                var mode = AppConfig.Instance.LevelUpModalMode;
+                if (LevelUpViewModel.ShouldShow(mode))
+                    LevelUpsDetected?.Invoke(events, LevelUpViewModel.IsAutoClose(mode));
+                StartReloadCountdown(events.Count + " level-up(s) detected");
+            }
+            else
+            {
+                StartReloadCountdown(null);
+            }
         }, TaskScheduler.FromCurrentSynchronizationContext());
     }
 
@@ -310,7 +329,7 @@ internal partial class MainViewModel : ObservableObject
             {
                 WatchStatusText = "Watching";
                 timer.Stop();
-                // T5 mount: Java closes the AUTO_CLOSE level-up stage here.
+                ReloadCountdownFinished?.Invoke(); // Java closes the AUTO_CLOSE stage here
             }
         };
         timer.Start();

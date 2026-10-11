@@ -103,7 +103,7 @@ internal partial class PerkPlanPane : UserControl
         {
             Width = IconSize,
             Height = IconSize,
-            Source = LoadHexImage(hexId),
+            Source = LoadHexImage(_ctx, hexId),
             Opacity = 1.0, // default: full opacity (no ownership context)
         };
 
@@ -171,11 +171,12 @@ internal partial class PerkPlanPane : UserControl
 
     // ---- image loading (Java PerkPlanPane.loadHexImage) ----------------------
 
-    internal Bitmap LoadHexImage(string hexId)
+    /// <summary>Static so the guide popup (LevelUpGuidePanel) shares the perk-image path.</summary>
+    internal static Bitmap LoadHexImage(UiContext ctx, string hexId)
     {
-        var rel = _ctx.ImageMap.ResolveHex(hexId);
-        var root = _ctx.AppConfig.GameArtRoot();
-        if (rel != null && root != null) return _ctx.ImageCache.Get(root, rel);
+        var rel = ctx.ImageMap.ResolveHex(hexId);
+        var root = ctx.AppConfig.GameArtRoot();
+        if (rel != null && root != null) return ctx.ImageCache.Get(root, rel);
         try
         {
             using var is2 = AssetLoader.Open(
@@ -184,7 +185,7 @@ internal partial class PerkPlanPane : UserControl
         }
         catch (Exception)
         {
-            return _ctx.ImageCache.GetPlaceholder();
+            return ctx.ImageCache.GetPlaceholder();
         }
     }
 }

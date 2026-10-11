@@ -1,0 +1,41 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="BroLedger.App.LevelUpWindow"
+        Title="Level Up Detected"
+        Width="400" MinWidth="400" MinHeight="200"
+        SizeToContent="Height"
+        WindowDecorations="None"
+        ExtendClientAreaToDecorationsHint="True"
+        Background="{StaticResource BgAppBrush}">
+
+    <!-- level-up-modal.fxml 1:1: level-up-frame with title bar (Level Up Detected + ✕),
+         scrollable events container (one card section per brother, built in code-behind
+         from LevelUpViewModel cards) and a Close footer. -->
+    <Border Classes="app-frame modal-frame level-up-frame"
+            Background="{StaticResource BgAppBrush}"
+            TextElement.Foreground="{StaticResource GoldBrush}"
+            TextElement.FontSize="13">
+        <DockPanel>
+
+            <Border x:Name="TitleBar" Classes="title-bar level-up-title-bar" DockPanel.Dock="Top">
+                <DockPanel LastChildFill="True">
+                    <TextBlock Classes="title-bar-label level-up-title-label"
+                               Text="Level Up Detected" VerticalAlignment="Center"/>
+                    <Button x:Name="CloseTitleBtn" Classes="window-btn window-btn-close" Content="✕"
+                            Focusable="False" DockPanel.Dock="Right" Click="OnClose"/>
+                </DockPanel>
+            </Border>
+
+            <StackPanel DockPanel.Dock="Bottom" Margin="0,8,20,16"
+                        HorizontalAlignment="Right">
+                <Button Classes="fancy-btn" Content="Close" Focusable="False" Click="OnClose"/>
+            </StackPanel>
+
+            <ScrollViewer Classes="modal-scroll" HorizontalScrollBarVisibility="Disabled"
+                          VerticalScrollBarVisibility="Auto">
+                <StackPanel x:Name="EventsHost" Margin="20,16,20,8" Spacing="12"/>
+            </ScrollViewer>
+
+        </DockPanel>
+    </Border>
+</Window>

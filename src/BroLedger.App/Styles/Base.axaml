@@ -632,4 +632,111 @@
         <Setter Property="Background" Value="{StaticResource StatCellP2Brush}"/>
         <Setter Property="Foreground" Value="{StaticResource GoldBrush}"/>
     </Style>
+
+    <!-- ===== Task 5 segments (keeper.css level-up modal / guide popup / preferences) ===== -->
+
+    <!-- keeper.css: .level-up-frame (declared after .modal-frame so the amber background
+         and stronger glow win at equal specificity). Glow alpha 0.45 → 0x73. -->
+    <Style Selector="Border.level-up-frame">
+        <Setter Property="Background" Value="#211608"/>
+        <Setter Property="BoxShadow" Value="0 0 24 0 #73d69f23"/>
+    </Style>
+
+    <!-- keeper.css: .level-up-title-bar (overrides .title-bar's 28px with a 32px band) -->
+    <Style Selector="Border.level-up-title-bar">
+        <Setter Property="Background">
+            <LinearGradientBrush StartPoint="0%,0%" EndPoint="0%,100%">
+                <GradientStop Color="#6a3a12" Offset="0"/>
+                <GradientStop Color="#3e2008" Offset="1"/>
+            </LinearGradientBrush>
+        </Setter>
+        <Setter Property="Height" Value="32"/>
+        <Setter Property="MinHeight" Value="32"/>
+        <Setter Property="MaxHeight" Value="32"/>
+        <Setter Property="BorderBrush" Value="{StaticResource GoldBrush}"/>
+        <Setter Property="BorderThickness" Value="0,0,0,2"/>
+        <Setter Property="Padding" Value="10,0,0,0"/>
+    </Style>
+
+    <!-- keeper.css: .level-up-title-label (Cinzel glow dropped — text shadows are not a
+         styled property on TextBlock) -->
+    <Style Selector="TextBlock.level-up-title-label">
+        <Setter Property="Foreground" Value="#f0c060"/>
+        <Setter Property="FontFamily" Value="{StaticResource Cinzel}"/>
+        <Setter Property="FontSize" Value="15"/>
+        <Setter Property="FontWeight" Value="Bold"/>
+    </Style>
+
+    <!-- keeper.css: .modal-scroll -->
+    <Style Selector="ScrollViewer.modal-scroll">
+        <Setter Property="Background" Value="#211608"/>
+    </Style>
+
+    <!-- keeper.css: .priority-guide-tooltip (the guide popup's content root; the Java
+         VBox's border/background/padding need a Border wrapper in Avalonia) -->
+    <Style Selector="Border.priority-guide-tooltip">
+        <Setter Property="Background" Value="#0f0a04"/>
+        <Setter Property="BorderBrush" Value="#3a2510"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="Padding" Value="8"/>
+    </Style>
+
+    <Style Selector="TextBlock.priority-guide-header">
+        <Setter Property="FontSize" Value="12"/>
+        <Setter Property="FontWeight" Value="Bold"/>
+        <Setter Property="Foreground" Value="#dddddd"/>
+        <Setter Property="Margin" Value="0,0,0,4"/>
+    </Style>
+
+    <Style Selector="TextBlock.priority-guide-section">
+        <Setter Property="FontSize" Value="11"/>
+        <Setter Property="Foreground" Value="#aaaaaa"/>
+        <Setter Property="Margin" Value="0,4,0,1"/>
+    </Style>
+
+    <Style Selector="TextBlock.priority-guide-name">
+        <Setter Property="FontSize" Value="12"/>
+        <Setter Property="Foreground" Value="#dddddd"/>
+        <Setter Property="MinWidth" Value="100"/>
+    </Style>
+
+    <Style Selector="TextBlock.priority-guide-roll">
+        <Setter Property="FontSize" Value="12"/>
+        <Setter Property="Foreground" Value="#cccccc"/>
+        <Setter Property="MinWidth" Value="20"/>
+        <Setter Property="TextAlignment" Value="Right"/>
+    </Style>
+
+    <Style Selector="TextBlock.priority-guide-dev-pos">
+        <Setter Property="FontSize" Value="11"/>
+        <Setter Property="Foreground" Value="#78c87a"/>
+        <Setter Property="MinWidth" Value="42"/>
+    </Style>
+
+    <Style Selector="TextBlock.priority-guide-dev-neg">
+        <Setter Property="FontSize" Value="11"/>
+        <Setter Property="Foreground" Value="#e07070"/>
+        <Setter Property="MinWidth" Value="42"/>
+    </Style>
+
+    <!-- keeper.css: .perk-plan-section / .perk-plan-perk-name -->
+    <Style Selector="TextBlock.perk-plan-section">
+        <Setter Property="FontSize" Value="11"/>
+        <Setter Property="Foreground" Value="#aaaaaa"/>
+        <Setter Property="Margin" Value="0,6,0,2"/>
+    </Style>
+    <Style Selector="TextBlock.perk-plan-perk-name">
+        <Setter Property="FontSize" Value="12"/>
+        <Setter Property="Foreground" Value="#dddddd"/>
+    </Style>
+
+    <!-- keeper.css: .role-radio (gold radio text; FluentTheme supplies the box) -->
+    <Style Selector="RadioButton.role-radio">
+        <Setter Property="Foreground" Value="#d69f23"/>
+    </Style>
+
+    <!-- keeper.css: .pref-check (gold check text; FluentTheme supplies the box) -->
+    <Style Selector="CheckBox.pref-check">
+        <Setter Property="Foreground" Value="#d69f23"/>
+    </Style>
 </Styles>

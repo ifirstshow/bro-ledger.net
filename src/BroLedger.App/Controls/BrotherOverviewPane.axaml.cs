@@ -69,6 +69,8 @@ internal partial class BrotherOverviewPane : UserControl
     {
         public Border Container = container;
         public Brother Brother = brother;
+        /// <summary>The level cell's clickable box — the guide popup's anchor (T5).</summary>
+        public Control? LevelCell;
     }
 
     private readonly UiContext _ctx;
@@ -76,6 +78,7 @@ internal partial class BrotherOverviewPane : UserControl
     private readonly List<Row> _rows = [];
     private List<ColumnSpec> _columns = [];
     private Dictionary<string, long> _perkCounts = [];
+    private LevelUpGuidePanel? _guide;
 
     // Column drag state (header cells).
     private Border? _colDragIndicator;
@@ -105,11 +108,18 @@ internal partial class BrotherOverviewPane : UserControl
 
         // A valid reorder anywhere (header drag) re-applies the persisted order.
         _vm.ColumnOrderChanged += ApplyPersistedColumnOrder;
+
+        // Java guidePopup (T5): the sticky level-cell guide — consumes the level-cell
+        // clicks the cells raise via Overview.LevelGuideRequested.
+        _guide = new LevelUpGuidePanel(_ctx, _vm, AnchorOf);
+        _guide.Attach();
+
         // Panes are recreated per navigation — drop the VM subscriptions when detached.
         DetachedFromVisualTree += (_, _) =>
         {
             _vm.PropertyChanged -= OnVmPropertyChanged;
             _vm.ColumnOrderChanged -= ApplyPersistedColumnOrder;
+            _guide.Detach();
         };
 
         BodyScroll.ScrollChanged += (_, _) => HeaderScroll.Offset = BodyScroll.Offset;
@@ -221,6 +231,9 @@ internal partial class BrotherOverviewPane : UserControl
 
     private void RebuildRows()
     {
+        // Cells are about to be rebuilt — the popup's anchor would dangle (Java updateItem
+        // hides the popup on every cell reuse).
+        _guide?.Hide();
         RowsHost.Children.Clear();
         for (var i = 0; i < _rows.Count; i++)
         {
@@ -264,7 +277,11 @@ internal partial class BrotherOverviewPane : UserControl
         var panel = (StackPanel)row.Container.Child!;
         panel.Children.Clear();
         foreach (var col in _columns)
-            panel.Children.Add(WrapCell(BuildCell(col, row.Brother), col));
+        {
+            var cell = BuildCell(col, row.Brother);
+            if (col.Kind == ColumnKind.Level) row.LevelCell = cell;
+            panel.Children.Add(WrapCell(cell, col));
+        }
     }
 
     private static Border WrapCell(Control content, ColumnSpec col)
@@ -406,10 +423,8 @@ internal partial class BrotherOverviewPane : UserControl
                 allottedLabel.Classes.Add("level-allotted-green");
         }
 
-        var hasPlanned = b.PerkPoints > 0 && HasPlannedPerkEntries(b, planStatus);
-        var guideReady = budget.Used == budget.TotalBudget && increases != null
-            && budget.Cap > 0 && !budget.Post11
-            && OverviewCalc.AllWithinCap(increases, budget.Cap);
+        var hasPlanned = b.PerkPoints > 0 && _guide?.BuildPlannedPerks(b).Count > 0;
+        var guideReady = LevelUpGuidePanel.IsGuideReady(budget, increases);
         var hasContent = guideReady || hasPlanned;
 
         // Java: cells with the sticky guide popup get no tooltip (setTooltip(null) — the
@@ -613,6 +628,14 @@ internal partial class BrotherOverviewPane : UserControl
         return new Border { Background = Brushes.Transparent, Padding = new Thickness(4, 0, 0, 0), Child = box };
     }
 
+    /// <summary>The guide popup's anchor: the clicked brother's level-cell box.</summary>
+    private Control? AnchorOf(Brother b)
+    {
+        foreach (var r in _rows)
+            if (ReferenceEquals(r.Brother, b)) return r.LevelCell;
+        return null;
+    }
+
     private List<string> SortedPerkIds(Brother b)
     {
         var mode = _vm.PerkSort;
@@ -624,22 +647,6 @@ internal partial class BrotherOverviewPane : UserControl
             id => _perkCounts.GetValueOrDefault(id.ToUpperInvariant()),
             name => _ctx.Dict.GetName(name)));
         return sorted;
-    }
-
-    /// <summary>Java buildPlannedPerkEntries, reduced to the count the level-cell click needs.</summary>
-    private bool HasPlannedPerkEntries(Brother b, IReadOnlyDictionary<string, string>? plan)
-    {
-        if (plan == null || plan.Count == 0) return false;
-        var owned = b.PerkIds.ToHashSet(StringComparer.OrdinalIgnoreCase);
-        var tierCap = b.PerkUsed + 1;
-        foreach (var (hexId, status) in plan)
-        {
-            if (owned.Contains(hexId)) continue;
-            if (status is not ("PLANNED" or "OPTIONAL")) continue;
-            var tier = _ctx.StatModifier.GetTier(hexId);
-            if (tier is not null && tier <= tierCap) return true;
-        }
-        return false;
     }
 
     private Role? ResolveRole(Brother b)
