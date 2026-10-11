@@ -56,15 +56,15 @@ public static class ReplayAnalyzer
                 useDir = true;
                 resolvedDir = args[++i];
             }
-            else if (savArg == null && !args[i].StartsWith("--"))
+            else if (savArg == null && !args[i].StartsWith("--", StringComparison.Ordinal))
             {
                 savArg = args[i];
             }
-            else if (transitionArg == null && !args[i].StartsWith("--"))
+            else if (transitionArg == null && !args[i].StartsWith("--", StringComparison.Ordinal))
             {
                 transitionArg = args[i];
             }
-            else if (outputPath == null && !args[i].StartsWith("--"))
+            else if (outputPath == null && !args[i].StartsWith("--", StringComparison.Ordinal))
             {
                 outputPath = args[i];
             }

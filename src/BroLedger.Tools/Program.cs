@@ -19,12 +19,6 @@ public static class Program
         };
     }
 
-    private static int NotYetAvailable(string verb)
-    {
-        Console.Error.WriteLine($"{verb}: not yet available");
-        return 1;
-    }
-
     private static int UnknownVerb(string verb)
     {
         Console.Error.WriteLine($"Unknown verb: {verb}");
