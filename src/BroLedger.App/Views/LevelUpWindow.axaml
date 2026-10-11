@@ -11,8 +11,9 @@
     <!-- level-up-modal.fxml 1:1: level-up-frame with title bar (Level Up Detected + ✕),
          scrollable events container (one card section per brother, built in code-behind
          from LevelUpViewModel cards) and a Close footer. -->
+    <!-- No local Background: .level-up-frame's amber #211608 must win (Java root pane is
+         #211608, not the plain .root #1a1209 the other modals use). -->
     <Border Classes="app-frame modal-frame level-up-frame"
-            Background="{StaticResource BgAppBrush}"
             TextElement.Foreground="{StaticResource GoldBrush}"
             TextElement.FontSize="13">
         <DockPanel>

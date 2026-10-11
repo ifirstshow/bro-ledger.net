@@ -15,12 +15,12 @@
 
     <!-- keeper.css: .modal-frame (applied together with .app-frame on dialogs; declared
          later so it wins at equal specificity, mirroring the CSS source order).
-         JavaFX dropshadow spread 0.4 approximated: Avalonia's spread is a length, not a
-         fraction — kept 0, alpha carries the 0.4. -->
+         JavaFX spread is a fraction (0.4 × radius 18 ≈ 7px solid core); Avalonia's is a
+         length, so the fraction is folded in here. -->
     <Style Selector="Border.modal-frame">
         <Setter Property="BorderBrush" Value="{StaticResource GoldBrush}"/>
         <Setter Property="BorderThickness" Value="2"/>
-        <Setter Property="BoxShadow" Value="0 0 18 0 #66d69f23"/>
+        <Setter Property="BoxShadow" Value="0 0 18 7 #66d69f23"/>
     </Style>
 
     <!-- keeper.css: .title-bar -->
@@ -52,7 +52,9 @@
     </Style>
 
     <!-- keeper.css: .window-btn. FluentTheme's ControlTheme paints the hover background on
-         the template's ContentPresenter, so background overrides must target that part. -->
+         the template's ContentPresenter, so background overrides must target that part.
+         Java's -fx-focus-color/-fx-faint-focus-color transparent is covered by every
+         window-btn instance being Focusable=False (no focus ring can appear). -->
     <Style Selector="Button.window-btn">
         <Setter Property="Foreground" Value="{StaticResource WindowBtnBrush}"/>
         <Setter Property="FontSize" Value="13"/>
@@ -115,6 +117,25 @@
         <Setter Property="Foreground" Value="{StaticResource WatchStatusBrush}"/>
         <Setter Property="FontSize" Value="11"/>
         <Setter Property="VerticalAlignment" Value="Center"/>
+    </Style>
+
+    <!-- keeper.css: .scroll-bar (track #120d05; every scrollbar in the app). The Fluent
+         geometry (thin auto-hiding overlay bar) is kept — the chunky always-visible JavaFX
+         bar with arrow buttons is not reproducible without a full ControlTheme replacement;
+         only the palette is ported. Increment/decrement buttons stay Fluent-hidden. -->
+    <Style Selector="ScrollBar">
+        <Setter Property="Background" Value="{StaticResource FieldBgBrush}"/>
+    </Style>
+    <!-- keeper.css: .scroll-bar .thumb (#3a2510, radius 3) + :hover (#4d3218) -->
+    <Style Selector="ScrollBar Thumb">
+        <Setter Property="Background" Value="{StaticResource FieldBorderBrush}"/>
+        <Setter Property="CornerRadius" Value="3"/>
+    </Style>
+    <Style Selector="ScrollBar Thumb:pointerover /template/ Border">
+        <Setter Property="Background" Value="#4d3218"/>
+    </Style>
+    <Style Selector="ScrollBar Thumb:pressed /template/ Border">
+        <Setter Property="Background" Value="#4d3218"/>
     </Style>
 
     <!-- keeper.css: .center-pane (and its .viewport) — both #1a1209 -->
@@ -184,21 +205,22 @@
     <Style Selector="Border.btn-led.led-muted">
         <Setter Property="Opacity" Value="0.55"/>
     </Style>
-    <!-- keeper.css: .btn-led.led-lit.* (lit color 1.0 + gaussian glow; alpha 0.6 → 0x99) -->
+    <!-- keeper.css: .btn-led.led-lit.* (lit color 1.0 + gaussian glow; alpha 0.6 → 0x99,
+         spread 0.6 × radius 5 ≈ 3px solid core) -->
     <Style Selector="Border.btn-led.led-lit.led-red">
         <Setter Property="Background" Value="{StaticResource LedRedLitBrush}"/>
         <Setter Property="Opacity" Value="1"/>
-        <Setter Property="BoxShadow" Value="0 0 5 0 #99e53935"/>
+        <Setter Property="BoxShadow" Value="0 0 5 3 #99e53935"/>
     </Style>
     <Style Selector="Border.btn-led.led-lit.led-green">
         <Setter Property="Background" Value="{StaticResource LedGreenLitBrush}"/>
         <Setter Property="Opacity" Value="1"/>
-        <Setter Property="BoxShadow" Value="0 0 5 0 #9943a047"/>
+        <Setter Property="BoxShadow" Value="0 0 5 3 #9943a047"/>
     </Style>
     <Style Selector="Border.btn-led.led-lit.led-yellow">
         <Setter Property="Background" Value="{StaticResource GoldBrush}"/>
         <Setter Property="Opacity" Value="1"/>
-        <Setter Property="BoxShadow" Value="0 0 5 0 #99d69f23"/>
+        <Setter Property="BoxShadow" Value="0 0 5 3 #99d69f23"/>
     </Style>
 
     <!-- keeper.css: .section-header. The -fx-border-width 0 0 1 0 underline is dropped —
@@ -331,19 +353,21 @@
         <Setter Property="FontStyle" Value="Italic"/>
     </Style>
 
-    <!-- keeper.css: .overview-stat-val -->
+    <!-- keeper.css: .overview-stat-val (-fx-translate-y 1 → render translate, no layout shift) -->
     <Style Selector="TextBlock.overview-stat-val">
         <Setter Property="Foreground" Value="{StaticResource StatValBrush}"/>
         <Setter Property="FontSize" Value="15"/>
         <Setter Property="FontWeight" Value="Bold"/>
         <Setter Property="TextAlignment" Value="Center"/>
+        <Setter Property="RenderTransform" Value="translate(0px, 1px)"/>
     </Style>
 
-    <!-- keeper.css: .overview-potential-val -->
+    <!-- keeper.css: .overview-potential-val (raised 4px to hug the stat value baseline) -->
     <Style Selector="TextBlock.overview-potential-val">
         <Setter Property="Foreground" Value="{StaticResource PotentialValBrush}"/>
         <Setter Property="FontSize" Value="13"/>
         <Setter Property="TextAlignment" Value="Center"/>
+        <Setter Property="RenderTransform" Value="translate(0px, -4px)"/>
     </Style>
 
     <!-- keeper.css: .overview-expected-val -->
@@ -427,6 +451,18 @@
         <Setter Property="Background" Value="{StaticResource RoleComboBgBrush}"/>
         <Setter Property="Foreground" Value="{StaticResource GoldBrush}"/>
     </Style>
+    <!-- keeper.css: .role-combo .list-cell (dropdown items: gold text on the dark field;
+         the generic .list-cell :filled:hover/:selected rules chain on top — #2a1a08 / #3a2510) -->
+    <Style Selector="ComboBox.role-combo ComboBoxItem">
+        <Setter Property="Foreground" Value="{StaticResource GoldBrush}"/>
+        <Setter Property="Background" Value="{StaticResource RoleComboBgBrush}"/>
+    </Style>
+    <Style Selector="ComboBox.role-combo ComboBoxItem:pointerover /template/ ContentPresenter">
+        <Setter Property="Background" Value="{StaticResource BgOverviewRowHoverBrush}"/>
+    </Style>
+    <Style Selector="ComboBox.role-combo ComboBoxItem:selected /template/ ContentPresenter">
+        <Setter Property="Background" Value="{StaticResource BorderStatusBarBrush}"/>
+    </Style>
 
     <!-- ===== Task 4 segments (keeper.css brother card / bro developer / perk plan) ===== -->
 
@@ -490,7 +526,12 @@
         <Setter Property="Padding" Value="0"/>
         <Setter Property="FontSize" Value="11"/>
         <Setter Property="Cursor" Value="Hand"/>
-        <Setter Property="CornerRadius" Value="2"/>
+        <Setter Property="CornerRadius" Value="3"/>
+    </Style>
+    <!-- keeper.css: .increase-count -->
+    <Style Selector="TextBlock.increase-count">
+        <Setter Property="FontSize" Value="12"/>
+        <Setter Property="Foreground" Value="#aaaaaa"/>
     </Style>
     <Style Selector="Button.increase-btn /template/ ContentPresenter#PART_ContentPresenter">
         <Setter Property="Background" Value="{StaticResource IncreaseBtnBgBrush}"/>
@@ -522,6 +563,10 @@
     <Style Selector="TextBlock.stat-target">
         <Setter Property="FontSize" Value="13"/>
         <Setter Property="FontWeight" Value="Bold"/>
+        <Setter Property="Foreground" Value="{StaticResource TargetMetBrush}"/>
+    </Style>
+    <!-- keeper.css: .stat-target-met (explicit state class; same gold-green as the base) -->
+    <Style Selector="TextBlock.stat-target.stat-target-met">
         <Setter Property="Foreground" Value="{StaticResource TargetMetBrush}"/>
     </Style>
     <Style Selector="TextBlock.stat-target.stat-target-p2">
@@ -562,7 +607,7 @@
         <Setter Property="Background" Value="{StaticResource FieldBgBrush}"/>
         <Setter Property="BorderBrush" Value="{StaticResource FieldBorderBrush}"/>
         <Setter Property="BorderThickness" Value="1"/>
-        <Setter Property="CornerRadius" Value="3"/>
+        <Setter Property="CornerRadius" Value="4"/>
         <Setter Property="Padding" Value="4"/>
     </Style>
     <Style Selector="TextBlock.equip-slot-label">
@@ -636,10 +681,11 @@
     <!-- ===== Task 5 segments (keeper.css level-up modal / guide popup / preferences) ===== -->
 
     <!-- keeper.css: .level-up-frame (declared after .modal-frame so the amber background
-         and stronger glow win at equal specificity). Glow alpha 0.45 → 0x73. -->
+         and stronger glow win at equal specificity). Glow alpha 0.45 → 0x73,
+         spread 0.45 × radius 24 ≈ 11px solid core. -->
     <Style Selector="Border.level-up-frame">
         <Setter Property="Background" Value="#211608"/>
-        <Setter Property="BoxShadow" Value="0 0 24 0 #73d69f23"/>
+        <Setter Property="BoxShadow" Value="0 0 24 11 #73d69f23"/>
     </Style>
 
     <!-- keeper.css: .level-up-title-bar (overrides .title-bar's 28px with a 32px band) -->
@@ -658,13 +704,16 @@
         <Setter Property="Padding" Value="10,0,0,0"/>
     </Style>
 
-    <!-- keeper.css: .level-up-title-label (Cinzel glow dropped — text shadows are not a
-         styled property on TextBlock) -->
+    <!-- keeper.css: .level-up-title-label (JavaFX text dropshadow → Effect; gaussian
+         rgba(210,160,0,0.7) radius 8 → blur 8, opacity 0.7) -->
     <Style Selector="TextBlock.level-up-title-label">
         <Setter Property="Foreground" Value="#f0c060"/>
         <Setter Property="FontFamily" Value="{StaticResource Cinzel}"/>
         <Setter Property="FontSize" Value="15"/>
         <Setter Property="FontWeight" Value="Bold"/>
+        <Setter Property="Effect">
+            <DropShadowEffect BlurRadius="8" Color="#d2a000" Opacity="0.7" OffsetX="0" OffsetY="0"/>
+        </Setter>
     </Style>
 
     <!-- keeper.css: .modal-scroll -->
