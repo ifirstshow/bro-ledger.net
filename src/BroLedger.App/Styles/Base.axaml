@@ -1,0 +1,101 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <!-- Translated from JAVARES css/keeper.css, base segments:
+         custom window chrome (.app-frame / .modal-frame), .title-bar family,
+         .window-btn family, .status-bar family. Remaining segments (toolbar,
+         sidebar, list, table, card, modals) are translated per view task.
+         Convention: chrome containers are Border, text is TextBlock — compiled XAML
+         needs the selector's target type, so CSS class selectors become Border.x / TextBlock.x. -->
+
+    <!-- keeper.css: .app-frame -->
+    <Style Selector="Border.app-frame">
+        <Setter Property="BorderBrush" Value="{StaticResource BorderAppBrush}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+    </Style>
+
+    <!-- keeper.css: .modal-frame (applied together with .app-frame on dialogs; declared
+         later so it wins at equal specificity, mirroring the CSS source order).
+         JavaFX dropshadow spread 0.4 approximated: Avalonia's spread is a length, not a
+         fraction — kept 0, alpha carries the 0.4. -->
+    <Style Selector="Border.modal-frame">
+        <Setter Property="BorderBrush" Value="{StaticResource GoldBrush}"/>
+        <Setter Property="BorderThickness" Value="2"/>
+        <Setter Property="BoxShadow" Value="0 0 18 0 #66d69f23"/>
+    </Style>
+
+    <!-- keeper.css: .title-bar -->
+    <Style Selector="Border.title-bar">
+        <Setter Property="Background" Value="{StaticResource BgTitleBarBrush}"/>
+        <Setter Property="Padding" Value="10,0,0,0"/>
+        <Setter Property="Height" Value="28"/>
+        <Setter Property="MinHeight" Value="28"/>
+        <Setter Property="MaxHeight" Value="28"/>
+        <Setter Property="BorderBrush" Value="{StaticResource BorderTitleBarBrush}"/>
+        <Setter Property="BorderThickness" Value="0,0,1,0"/>
+    </Style>
+
+    <!-- keeper.css: .title-bar-label -->
+    <Style Selector="TextBlock.title-bar-label">
+        <Setter Property="Foreground" Value="{StaticResource GoldBrush}"/>
+        <Setter Property="FontFamily" Value="{StaticResource Cinzel}"/>
+        <Setter Property="FontSize" Value="13"/>
+        <Setter Property="FontWeight" Value="Bold"/>
+    </Style>
+
+    <!-- keeper.css: .title-bar-version (left padding 8 + translate-y 1 → margin) -->
+    <Style Selector="TextBlock.title-bar-version">
+        <Setter Property="Foreground" Value="{StaticResource VersionBrush}"/>
+        <Setter Property="FontFamily" Value="{StaticResource Cinzel}"/>
+        <Setter Property="FontSize" Value="10"/>
+        <Setter Property="Margin" Value="8,1,0,0"/>
+        <Setter Property="VerticalAlignment" Value="Center"/>
+    </Style>
+
+    <!-- keeper.css: .window-btn. FluentTheme's ControlTheme paints the hover background on
+         the template's ContentPresenter, so background overrides must target that part. -->
+    <Style Selector="Button.window-btn">
+        <Setter Property="Foreground" Value="{StaticResource WindowBtnBrush}"/>
+        <Setter Property="FontSize" Value="13"/>
+        <Setter Property="Padding" Value="12,4,12,4"/>
+        <Setter Property="MinWidth" Value="40"/>
+        <Setter Property="Cursor" Value="Hand"/>
+        <Setter Property="CornerRadius" Value="0"/>
+    </Style>
+    <Style Selector="Button.window-btn /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Background" Value="Transparent"/>
+    </Style>
+
+    <!-- keeper.css: .window-btn:hover -->
+    <Style Selector="Button.window-btn:pointerover">
+        <Setter Property="Foreground" Value="{StaticResource GoldBrush}"/>
+    </Style>
+    <Style Selector="Button.window-btn:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Background" Value="{StaticResource BorderAppBrush}"/>
+    </Style>
+
+    <!-- keeper.css: .window-btn-close:hover (later source order wins over .window-btn:hover) -->
+    <Style Selector="Button.window-btn-close:pointerover">
+        <Setter Property="Foreground" Value="{StaticResource CloseHoverTextBrush}"/>
+    </Style>
+    <Style Selector="Button.window-btn-close:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Background" Value="{StaticResource CloseHoverBgBrush}"/>
+    </Style>
+
+    <!-- keeper.css: .status-bar -->
+    <Style Selector="Border.status-bar">
+        <Setter Property="Background" Value="{StaticResource BgStatusBarBrush}"/>
+        <Setter Property="BorderBrush" Value="{StaticResource BorderStatusBarBrush}"/>
+        <Setter Property="BorderThickness" Value="0,1,0,0"/>
+    </Style>
+
+    <!-- keeper.css: .status-label -->
+    <Style Selector="TextBlock.status-label">
+        <Setter Property="Foreground" Value="{StaticResource StatusTextBrush}"/>
+        <Setter Property="FontSize" Value="11"/>
+    </Style>
+
+    <!-- keeper.css: .status-label.warning -->
+    <Style Selector="TextBlock.status-label.warning">
+        <Setter Property="Foreground" Value="{StaticResource WarningBrush}"/>
+    </Style>
+</Styles>

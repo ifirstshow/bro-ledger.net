@@ -1,0 +1,24 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <!-- keeper.css palette — the "variable segment". Avalonia has no :root selector, so the
+         shared colors live here as resources; translated styles reference them by key.
+         Values are ported verbatim from JAVARES css/keeper.css. -->
+    <SolidColorBrush x:Key="BgAppBrush" Color="#1a1209" />
+    <SolidColorBrush x:Key="BgTitleBarBrush" Color="#050302" />
+    <SolidColorBrush x:Key="BgStatusBarBrush" Color="#0f0a04" />
+
+    <SolidColorBrush x:Key="BorderAppBrush" Color="#2a1a08" />
+    <SolidColorBrush x:Key="BorderTitleBarBrush" Color="#1a1005" />
+    <SolidColorBrush x:Key="BorderStatusBarBrush" Color="#3a2510" />
+
+    <SolidColorBrush x:Key="GoldBrush" Color="#d69f23" />
+    <SolidColorBrush x:Key="VersionBrush" Color="#7a5c2a" />
+    <SolidColorBrush x:Key="WindowBtnBrush" Color="#4a3820" />
+    <SolidColorBrush x:Key="CloseHoverBgBrush" Color="#6b1515" />
+    <SolidColorBrush x:Key="CloseHoverTextBrush" Color="#f0c0c0" />
+    <SolidColorBrush x:Key="StatusTextBrush" Color="#8a7040" />
+    <SolidColorBrush x:Key="WarningBrush" Color="#c87820" />
+
+    <!-- Cinzel regular + bold faces (keeper.css -fx-font-family: 'Cinzel'). -->
+    <FontFamily x:Key="Cinzel">avares://BroLedger.App/Assets/Cinzel-Regular.otf#Cinzel,avares://BroLedger.App/Assets/Cinzel-Bold.otf#Cinzel</FontFamily>
+</ResourceDictionary>
