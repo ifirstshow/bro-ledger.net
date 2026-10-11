@@ -47,8 +47,9 @@ internal partial class BrotherOverviewPane : UserControl
     private static readonly string[] EquipSlotName = ["body", "helmet", "weapon", "shield", "trinket", "quiver"];
     private static readonly string[] EquipHdr = ["Arm", "Hlm", "Wpn", "Shd", "Trk", "Quv", "P1", "P2", "P3", "P4"];
 
-    // Java TRAIT_NAME_BLOCKLIST.
-    private static readonly HashSet<string> TraitNameBlocklist = ["Unknown", "Morale"];
+    // Java TRAIT_NAME_BLOCKLIST. Internal: the brother card's traits pane shares it
+    // (Java BrotherCardController references BrotherOverviewPane.TRAIT_NAME_BLOCKLIST).
+    internal static readonly HashSet<string> TraitNameBlocklist = ["Unknown", "Morale"];
 
     private enum ColumnKind { Portrait, Name, Role, Level, Stat, Equip, Traits, Perks }
 

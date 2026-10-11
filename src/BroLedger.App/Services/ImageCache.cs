@@ -20,7 +20,9 @@ public sealed class ImageCache
     private readonly object _gate = new();
     private readonly Dictionary<string, Bitmap> _cache = new(MaxSize + 1);
     private readonly LinkedList<string> _lru = new();
-    private readonly Bitmap _placeholder = BuildPlaceholder();
+    // Lazy: RenderTargetBitmap needs a live Avalonia platform — constructing it inside the
+    // singleton's ctor crashes non-headless (pure VM) unit tests that touch UiContext.
+    private Bitmap? _placeholder;
 
     private ImageCache()
     {
@@ -32,7 +34,7 @@ public sealed class ImageCache
     /// </summary>
     public Bitmap Get(string gameArtRoot, string? relativePath)
     {
-        if (relativePath is null) return _placeholder;
+        if (relativePath is null) return GetPlaceholder();
 
         var key = gameArtRoot + "/" + relativePath;
         lock (_gate)
@@ -60,7 +62,7 @@ public sealed class ImageCache
         }
     }
 
-    public Bitmap GetPlaceholder() => _placeholder;
+    public Bitmap GetPlaceholder() => _placeholder ??= BuildPlaceholder();
 
     public void Invalidate()
     {
@@ -74,14 +76,14 @@ public sealed class ImageCache
     private Bitmap LoadOrPlaceholder(string gameArtRoot, string relativePath)
     {
         var file = Path.Combine(gameArtRoot, relativePath.Replace('/', Path.DirectorySeparatorChar));
-        if (!File.Exists(file)) return _placeholder;
+        if (!File.Exists(file)) return GetPlaceholder();
         try
         {
             return new Bitmap(file);
         }
         catch (Exception)
         {
-            return _placeholder;
+            return GetPlaceholder();
         }
     }
 

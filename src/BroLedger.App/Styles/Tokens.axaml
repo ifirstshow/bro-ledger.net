@@ -79,4 +79,21 @@
     <SolidColorBrush x:Key="TierDotBorderBrush" Color="#1e1508" />
     <SolidColorBrush x:Key="RoleComboBgBrush" Color="#120d05" />
     <SolidColorBrush x:Key="RoleComboBorderBrush" Color="#3a2510" />
+
+    <!-- Task 4 segments: brother card (keeper.css card / bro-developer / perk-plan rules). -->
+    <SolidColorBrush x:Key="StatColHeaderBrush" Color="#6a5830" />
+    <SolidColorBrush x:Key="IncreaseBtnBgBrush" Color="#2a2a2a" />
+    <SolidColorBrush x:Key="IncreaseBtnHoverBrush" Color="#3a3a3a" />
+    <SolidColorBrush x:Key="IncreaseBtnBorderBrush" Color="#555555" />
+    <SolidColorBrush x:Key="IncreaseBtnFgBrush" Color="#d0d0d0" />
+    <SolidColorBrush x:Key="TargetMetBrush" Color="#4caf50" />
+    <SolidColorBrush x:Key="TargetPotentialBrush" Color="#d4c532" />
+    <SolidColorBrush x:Key="TargetUnmetBrush" Color="#e53935" />
+    <SolidColorBrush x:Key="StatColAltBrush" Color="#201610" />
+    <!-- .equip-slot-label and .perk-tier-label share keeper.css's #5a4820. -->
+    <SolidColorBrush x:Key="EquipSlotLabelBrush" Color="#5a4820" />
+    <SolidColorBrush x:Key="PerkOptionalBrush" Color="#3a7ac8" />
+    <SolidColorBrush x:Key="PerkPlannedBrush" Color="#3aaa5a" />
+    <SolidColorBrush x:Key="PerkBadgeBrush" Color="#6aaa6a" />
+    <SolidColorBrush x:Key="ToggleBgBrush" Color="#1e1508" />
 </ResourceDictionary>

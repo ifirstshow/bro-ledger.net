@@ -1,0 +1,6 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="BroLedger.App.Controls.PerkPlanPane">
+    <!-- Java PerkPlanPane: one HBox row per perk tier, slots built in code (build()). -->
+    <StackPanel x:Name="RowsHost" Spacing="2"/>
+</UserControl>

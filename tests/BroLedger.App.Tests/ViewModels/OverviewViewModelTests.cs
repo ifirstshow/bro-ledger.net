@@ -167,7 +167,9 @@ public class OverviewViewModelTests : IDisposable
 
             Assert.False(vm.TryCommitColumnOrder(order));
             Assert.False(raised);
-            Assert.Null(config.OverviewColumnOrder);
+            // Rejection leaves the persisted order untouched (compared against what this test
+            // saw at its start — sibling test collections may legitimately hold a commit).
+            Assert.Equal(savedOrder, config.OverviewColumnOrder);
         }
         finally
         {

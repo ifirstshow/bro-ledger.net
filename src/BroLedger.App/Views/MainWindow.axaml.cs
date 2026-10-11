@@ -311,16 +311,14 @@ public partial class MainWindow : Window
         }
         else
         {
-            // T4 mount: BrotherCard replaces this placeholder.
+            // T4: the card scrolls inside the outer viewer (Java put it in a ScrollPane).
             CenterPane.VerticalScrollBarVisibility = ScrollBarVisibility.Auto;
             CenterPane.HorizontalScrollBarVisibility = ScrollBarVisibility.Disabled;
-            CenterContent.Content = new TextBlock
-            {
-                Text = _vm.SelectedBrother?.Name is { } name ? name + " — card lands in Task 4" : "",
-                HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Center,
-                VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center,
-                Opacity = 0.6,
-            };
+            var card = new Controls.BrotherCard(
+                UiContext.Defaults(), _vm.Overview, _vm.SelectedBrother!);
+            // Java setOnBack → mainController.showOverview().
+            card.BackRequested += () => _vm.ShowOverview();
+            CenterContent.Content = card;
         }
     }
 }

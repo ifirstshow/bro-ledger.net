@@ -16,6 +16,12 @@
     <Using Include="Xunit" />
   </ItemGroup>
 
+  <!-- The test classes share process-global singletons (AppConfig/AnnotationService/RoleService
+       and the BROLEDGER_DATADIR env redirect) — collections must not run in parallel. -->
+  <ItemGroup>
+    <None Include="xunit.runner.json" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
   <ItemGroup>
     <ProjectReference Include="..\..\src\BroLedger.App\BroLedger.App.csproj" />
   </ItemGroup>

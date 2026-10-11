@@ -427,4 +427,209 @@
         <Setter Property="Background" Value="{StaticResource RoleComboBgBrush}"/>
         <Setter Property="Foreground" Value="{StaticResource GoldBrush}"/>
     </Style>
+
+    <!-- ===== Task 4 segments (keeper.css brother card / bro developer / perk plan) ===== -->
+
+    <!-- keeper.css: .brother-card -->
+    <Style Selector="Border.brother-card">
+        <Setter Property="Background" Value="{StaticResource BgAppBrush}"/>
+    </Style>
+
+    <!-- keeper.css: .card-header -->
+    <Style Selector="Border.card-header">
+        <Setter Property="Background" Value="{StaticResource FieldBgBrush}"/>
+        <Setter Property="BorderBrush" Value="{StaticResource BorderStatusBarBrush}"/>
+        <Setter Property="BorderThickness" Value="0,0,0,1"/>
+        <Setter Property="Padding" Value="10"/>
+    </Style>
+
+    <Style Selector="TextBlock.card-name">
+        <Setter Property="FontFamily" Value="{StaticResource Cinzel}"/>
+        <Setter Property="FontSize" Value="18"/>
+        <Setter Property="FontWeight" Value="Bold"/>
+        <Setter Property="Foreground" Value="{StaticResource GoldBrush}"/>
+    </Style>
+    <Style Selector="TextBlock.card-title">
+        <Setter Property="FontSize" Value="13"/>
+        <Setter Property="FontStyle" Value="Italic"/>
+        <Setter Property="Foreground" Value="{StaticResource PotentialValBrush}"/>
+    </Style>
+    <Style Selector="TextBlock.card-background">
+        <Setter Property="FontSize" Value="12"/>
+        <Setter Property="Foreground" Value="{StaticResource StatusTextBrush}"/>
+    </Style>
+
+    <!-- keeper.css: stats-grid column headers -->
+    <Style Selector="TextBlock.stat-col-header">
+        <Setter Property="FontSize" Value="10"/>
+        <Setter Property="Foreground" Value="{StaticResource StatColHeaderBrush}"/>
+    </Style>
+
+    <!-- keeper.css: .stat-value / .stat-potential / .stat-expected (card grid) -->
+    <Style Selector="TextBlock.stat-value">
+        <Setter Property="FontSize" Value="13"/>
+        <Setter Property="FontWeight" Value="Bold"/>
+        <Setter Property="Foreground" Value="{StaticResource StatValBrush}"/>
+    </Style>
+    <Style Selector="TextBlock.stat-potential">
+        <Setter Property="FontSize" Value="13"/>
+        <Setter Property="FontStyle" Value="Italic"/>
+        <Setter Property="Foreground" Value="{StaticResource PotentialValBrush}"/>
+    </Style>
+    <Style Selector="TextBlock.stat-expected">
+        <Setter Property="FontSize" Value="13"/>
+        <Setter Property="FontStyle" Value="Italic"/>
+        <Setter Property="Foreground" Value="{StaticResource ExpectedValBrush}"/>
+    </Style>
+
+    <!-- keeper.css: .increase-btn (dark grey square). FluentTheme paints hover/disabled on
+         the template's ContentPresenter, so those states target that part. -->
+    <Style Selector="Button.increase-btn">
+        <Setter Property="Width" Value="20"/>
+        <Setter Property="Height" Value="18"/>
+        <Setter Property="Padding" Value="0"/>
+        <Setter Property="FontSize" Value="11"/>
+        <Setter Property="Cursor" Value="Hand"/>
+        <Setter Property="CornerRadius" Value="2"/>
+    </Style>
+    <Style Selector="Button.increase-btn /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Background" Value="{StaticResource IncreaseBtnBgBrush}"/>
+        <Setter Property="BorderBrush" Value="{StaticResource IncreaseBtnBorderBrush}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="Foreground" Value="{StaticResource IncreaseBtnFgBrush}"/>
+    </Style>
+    <Style Selector="Button.increase-btn:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Background" Value="{StaticResource IncreaseBtnHoverBrush}"/>
+    </Style>
+    <Style Selector="Button.increase-btn:disabled /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Opacity" Value="0.35"/>
+    </Style>
+
+    <!-- keeper.css: .increases-remaining-label + state colours (reuses the overview palette) -->
+    <Style Selector="TextBlock.increases-remaining-label">
+        <Setter Property="FontSize" Value="12"/>
+        <Setter Property="FontStyle" Value="Italic"/>
+        <Setter Property="Foreground" Value="{StaticResource AllottedBrush}"/>
+    </Style>
+    <Style Selector="TextBlock.increases-remaining-label.increases-remaining-green">
+        <Setter Property="Foreground" Value="{StaticResource AllottedGreenBrush}"/>
+    </Style>
+    <Style Selector="TextBlock.increases-remaining-label.increases-remaining-red">
+        <Setter Property="Foreground" Value="{StaticResource AllottedRedBrush}"/>
+    </Style>
+
+    <!-- keeper.css: .stat-target + state colour + priority weight (P1 default bold) -->
+    <Style Selector="TextBlock.stat-target">
+        <Setter Property="FontSize" Value="13"/>
+        <Setter Property="FontWeight" Value="Bold"/>
+        <Setter Property="Foreground" Value="{StaticResource TargetMetBrush}"/>
+    </Style>
+    <Style Selector="TextBlock.stat-target.stat-target-p2">
+        <Setter Property="FontWeight" Value="Normal"/>
+    </Style>
+    <Style Selector="TextBlock.stat-target.stat-target-p3">
+        <Setter Property="FontWeight" Value="Normal"/>
+        <Setter Property="FontStyle" Value="Italic"/>
+        <Setter Property="Opacity" Value="0.75"/>
+    </Style>
+    <Style Selector="TextBlock.stat-target.stat-target-potential">
+        <Setter Property="Foreground" Value="{StaticResource TargetPotentialBrush}"/>
+    </Style>
+    <Style Selector="TextBlock.stat-target.stat-target-unmet">
+        <Setter Property="Foreground" Value="{StaticResource TargetUnmetBrush}"/>
+    </Style>
+
+    <!-- keeper.css: .stat-col-alt (zebra tint on extra role columns) -->
+    <Style Selector="TextBlock.stat-col-alt">
+        <Setter Property="Background" Value="{StaticResource StatColAltBrush}"/>
+    </Style>
+    <Style Selector="StackPanel.stat-col-alt">
+        <Setter Property="Background" Value="{StaticResource StatColAltBrush}"/>
+    </Style>
+
+    <!-- keeper.css: card-grid stars (slightly larger than the overview's) -->
+    <Style Selector="TextBlock.star-filled">
+        <Setter Property="FontSize" Value="11"/>
+        <Setter Property="Foreground" Value="{StaticResource GoldBrush}"/>
+    </Style>
+    <Style Selector="TextBlock.star-empty">
+        <Setter Property="FontSize" Value="11"/>
+        <Setter Property="Foreground" Value="{StaticResource StarEmptyBrush}"/>
+    </Style>
+
+    <!-- keeper.css: .equip-cell / .equip-slot-label -->
+    <Style Selector="Border.equip-cell">
+        <Setter Property="Background" Value="{StaticResource FieldBgBrush}"/>
+        <Setter Property="BorderBrush" Value="{StaticResource FieldBorderBrush}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="CornerRadius" Value="3"/>
+        <Setter Property="Padding" Value="4"/>
+    </Style>
+    <Style Selector="TextBlock.equip-slot-label">
+        <Setter Property="FontSize" Value="10"/>
+        <Setter Property="Foreground" Value="{StaticResource EquipSlotLabelBrush}"/>
+        <Setter Property="TextAlignment" Value="Center"/>
+    </Style>
+
+    <!-- keeper.css: .card-footer / .footer-stat -->
+    <Style Selector="Border.card-footer">
+        <Setter Property="Background" Value="{StaticResource FieldBgBrush}"/>
+        <Setter Property="BorderBrush" Value="{StaticResource BorderStatusBarBrush}"/>
+        <Setter Property="BorderThickness" Value="0,1,0,0"/>
+        <Setter Property="Padding" Value="8"/>
+    </Style>
+    <Style Selector="TextBlock.footer-stat">
+        <Setter Property="FontSize" Value="12"/>
+        <Setter Property="Foreground" Value="{StaticResource StatusTextBrush}"/>
+    </Style>
+
+    <!-- keeper.css: .tooltip (dark panel, gold text) -->
+    <Style Selector="ToolTip.item-tooltip">
+        <Setter Property="Background" Value="#0f0a04"/>
+        <Setter Property="Foreground" Value="{StaticResource GoldBrush}"/>
+        <Setter Property="BorderBrush" Value="{StaticResource FieldBorderBrush}"/>
+        <Setter Property="FontSize" Value="12"/>
+        <Setter Property="Padding" Value="6,4"/>
+    </Style>
+
+    <!-- keeper.css: .perk-status-circle states (ring around the perk icon) -->
+    <Style Selector="Ellipse.perk-status-circle">
+        <Setter Property="StrokeThickness" Value="2.5"/>
+        <Setter Property="Fill" Value="Transparent"/>
+    </Style>
+    <Style Selector="Ellipse.perk-status-circle.perk-status-optional">
+        <Setter Property="Stroke" Value="{StaticResource PerkOptionalBrush}"/>
+    </Style>
+    <Style Selector="Ellipse.perk-status-circle.perk-status-planned">
+        <Setter Property="Stroke" Value="{StaticResource PerkPlannedBrush}"/>
+    </Style>
+
+    <!-- keeper.css: .perk-tier-label / .perk-plan-badge -->
+    <Style Selector="TextBlock.perk-tier-label">
+        <Setter Property="FontSize" Value="10"/>
+        <Setter Property="Foreground" Value="{StaticResource EquipSlotLabelBrush}"/>
+    </Style>
+    <Style Selector="TextBlock.perk-plan-badge">
+        <Setter Property="FontSize" Value="11"/>
+        <Setter Property="Foreground" Value="{StaticResource PerkBadgeBrush}"/>
+    </Style>
+
+    <!-- keeper.css: .overview-potential-toggle (small dark pill; the card reuses it for
+         back / clear / reset / auto-assign). FluentTheme needs the template part override. -->
+    <Style Selector="Button.overview-potential-toggle">
+        <Setter Property="FontSize" Value="12"/>
+        <Setter Property="Padding" Value="8,3"/>
+        <Setter Property="CornerRadius" Value="3"/>
+        <Setter Property="Cursor" Value="Hand"/>
+    </Style>
+    <Style Selector="Button.overview-potential-toggle /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Background" Value="{StaticResource ToggleBgBrush}"/>
+        <Setter Property="BorderBrush" Value="{StaticResource FieldBorderBrush}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="Foreground" Value="{StaticResource StatusTextBrush}"/>
+    </Style>
+    <Style Selector="Button.overview-potential-toggle:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Background" Value="{StaticResource StatCellP2Brush}"/>
+        <Setter Property="Foreground" Value="{StaticResource GoldBrush}"/>
+    </Style>
 </Styles>

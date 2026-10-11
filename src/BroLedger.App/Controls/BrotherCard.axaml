@@ -1,0 +1,87 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="BroLedger.App.Controls.BrotherCard">
+    <!-- Port of JAVA/fxml/brother-card.fxml: the stats grid, perk grid and equipment pane
+         are populated programmatically (buildStatRows / PerkPlanPane / buildEquipmentPane). -->
+    <Border Classes="brother-card">
+        <StackPanel Spacing="14" Margin="16,14,16,16">
+
+            <!-- 0. Navigation toolbar -->
+            <StackPanel Orientation="Horizontal">
+                <Button x:Name="BackBtn" Content="← Back" Classes="overview-potential-toggle"/>
+            </StackPanel>
+
+            <!-- 1. Header: portrait + name / title / background -->
+            <Border Classes="card-header">
+                <StackPanel Orientation="Horizontal" Spacing="14" VerticalAlignment="Center">
+                    <Image x:Name="PortraitView" Width="96" Height="96" Stretch="Uniform"/>
+                    <StackPanel Spacing="4" VerticalAlignment="Center">
+                        <TextBlock x:Name="NameLabel" Classes="card-name"/>
+                        <TextBlock x:Name="TitleLabel" Classes="card-title"/>
+                        <TextBlock x:Name="BackgroundLabel" Classes="card-background"/>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+
+            <!-- 2. Traits -->
+            <StackPanel Classes="card-section" Spacing="6">
+                <TextBlock Text="Traits" Classes="section-header"/>
+                <WrapPanel x:Name="TraitsHost"/>
+            </StackPanel>
+
+            <!-- 3. Role -->
+            <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                <TextBlock Text="Role:" Classes="field-label" VerticalAlignment="Center"/>
+                <ComboBox x:Name="RoleCombo" Classes="role-combo" MaxWidth="300"
+                          HorizontalAlignment="Left" VerticalAlignment="Center"/>
+                <Button x:Name="ClearRoleBtn" Content="Clear" Classes="overview-potential-toggle"/>
+                <Control HorizontalAlignment="Stretch"/>
+                <Button x:Name="ResetRolesBtn" Content="Reset" Classes="overview-potential-toggle"/>
+                <Button x:Name="ShowAllRolesBtn" Content="Show All" Classes="overview-potential-toggle"/>
+                <Button x:Name="FrontlineRolesBtn" Content="Frontline" Classes="overview-potential-toggle"/>
+                <Button x:Name="BacklineRolesBtn" Content="Backline" Classes="overview-potential-toggle"/>
+            </StackPanel>
+
+            <!-- 4. Stats grid (populated programmatically) -->
+            <StackPanel Classes="card-section" Spacing="6">
+                <StackPanel Orientation="Horizontal" Spacing="12">
+                    <TextBlock Text="Attributes" Classes="section-header"/>
+                    <Control HorizontalAlignment="Stretch"/>
+                    <Button x:Name="AutoAssignBtn" Content="Auto-assign by role"
+                            Classes="overview-potential-toggle"/>
+                </StackPanel>
+                <Grid x:Name="StatsGrid"/>
+            </StackPanel>
+
+            <!-- 5. Perks (populated programmatically) -->
+            <StackPanel Classes="card-section" Spacing="6">
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                    <TextBlock Text="Perks" Classes="section-header"/>
+                    <TextBlock x:Name="PerkPointsLabel" Classes="level-pending-badge" IsVisible="False"/>
+                    <TextBlock x:Name="PerkPlanBadgeLabel" Classes="perk-plan-badge" IsVisible="False"/>
+                    <Control HorizontalAlignment="Stretch"/>
+                    <Button x:Name="ClearPlanBtn" Content="Clear" Classes="overview-potential-toggle"
+                            IsVisible="False"/>
+                    <Button x:Name="InitPlanBtn" Classes="overview-potential-toggle" IsVisible="False"/>
+                </StackPanel>
+                <StackPanel x:Name="PerkPlanHost"/>
+            </StackPanel>
+
+            <!-- 6. Equipment (populated programmatically) -->
+            <StackPanel Classes="card-section" Spacing="6">
+                <TextBlock Text="Equipment" Classes="section-header"/>
+                <StackPanel x:Name="EquipmentHost" Orientation="Horizontal" Spacing="10"/>
+            </StackPanel>
+
+            <!-- 7. Footer: derived stats -->
+            <Border Classes="card-footer">
+                <StackPanel Orientation="Horizontal" Spacing="24">
+                    <TextBlock x:Name="ArmorLabel" Classes="footer-stat"/>
+                    <TextBlock x:Name="FatigueLabel" Classes="footer-stat"/>
+                    <TextBlock x:Name="DamageLabel" Classes="footer-stat"/>
+                </StackPanel>
+            </Border>
+
+        </StackPanel>
+    </Border>
+</UserControl>
