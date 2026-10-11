@@ -31,7 +31,7 @@
         <Setter Property="MinHeight" Value="28"/>
         <Setter Property="MaxHeight" Value="28"/>
         <Setter Property="BorderBrush" Value="{StaticResource BorderTitleBarBrush}"/>
-        <Setter Property="BorderThickness" Value="0,0,1,0"/>
+        <Setter Property="BorderThickness" Value="0,0,0,1"/>
     </Style>
 
     <!-- keeper.css: .title-bar-label -->

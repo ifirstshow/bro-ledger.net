@@ -121,6 +121,4 @@ public class AppResourceTests
         stream.CopyTo(ms);
         return ms.ToArray();
     }
-
-    private static string ReadAssetText(string uri) => System.Text.Encoding.UTF8.GetString(ReadAsset(uri));
 }
