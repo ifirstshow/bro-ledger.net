@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>BroLedger.Tools</RootNamespace>
+    <!-- ponytail: 不设 PublishAot——规格 §3，仅 App 项目 AOT -->
+  </PropertyGroup>
+  <ItemGroup>
+    <InternalsVisibleTo Include="BroLedger.Core.Tests" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\BroLedger.Core\BroLedger.Core.csproj" />
+  </ItemGroup>
+
+</Project>
