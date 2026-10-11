@@ -94,7 +94,7 @@ JavaFX Controller 模式 → MVVM：
 - 纯自定义面板 → Avalonia 自定义控件，**各控件行为真源标注如下**：
   - **BrotherOverviewPane**（总览表，Java 真源 `ui/BrotherOverviewPane.java`）：列重排（同类目内拖拽）、按角色排序、四个增强开关、列顺序联动卡片、**Level-up 指南粘性面板**（点击 level 单元格弹出/ESC/再点击/焦点外关闭——粘性面板宿主即此控件内部弹出层）
   - **PerkPlanPane**（Java 真源 `ui/PerkPlanPane.java`）：50 perk 网格、拥有/未拥有透明度、tooltip
-  - **StarsWidget**（Java 真源 `ui/StarsWidget.java`）：天赋星级显示与交互
+  - **StarsWidget**（Java 真源 `ui/StarsWidget.java`）：天赋星级显示（纯显示控件，无交互）
   - **BrotherListCell**（Java 真源 `ui/BrotherListCell.java`）：总览行渲染
   - TooltipFactory（→ ToolTip 模板工厂）, Modals（→ 窗口服务）, OverviewCalc（→ 纯计算静态类，定 Core）, HotkeyManager（→ KeyBindings + 全局快捷键）, UiContext（→ App 服务容器/静态上下文）, PerkSortMode（→ 枚举）
 - **TableView 列交互验收判据**（真源 `ui/BrotherOverviewPane.java` + `ui/MainController.java`）：①列在所属类目（stats/equipment）内可拖拽重排且顺序持久化 ②跨类目不可拖入 ③重排后兄弟卡片属性排列同步变化 ④排序增强开关四态切换即时生效
@@ -172,7 +172,7 @@ fingerprint = hex(hash[0..16])   // 32 个十六进制字符
 
 - 布局结构 1:1：FXML 层级 → AXAML 层级；keeper.css 选择器 → Avalonia 样式（类名/伪类按 Avalonia 习惯命名，视觉值不变）
 - JavaFX `Property` → `[ObservableProperty]`；`ObservableList` → `ObservableCollection<T>`
-- TableView 行为：列重排（同类目内拖拽）、按角色排序、四个增强开关（Weapon Tier / Armor Stats / Perk Sorting / Stat Values）交互一致；列顺序变化联动兄弟卡片属性排列
+- TableView 行为：列重排（同类目内拖拽）、按角色排序、四个增强开关（Weapon Tier / Armor Stats / Perk Sorting / **Potential**——5 态：Off / Current+Pot. / Pot. Only / Current+Exp. / Exp. Only）交互一致；列顺序变化联动兄弟卡片属性排列
 - 拖放：Avalonia `DragDrop`；兄弟卡片排序拖放持久化到 keeper.json `sortIndex`
 - 快捷键语义一致：Ctrl+O 打开、Ctrl+W 停止监视、Enter 开卡片、ESC 逐层返回（卡片→总览；引导面板；各模态）
 - 升级通知弹窗三态（Modal / Auto-close 15s / Off）由 Preferences 控制，持久化于 AppConfig
