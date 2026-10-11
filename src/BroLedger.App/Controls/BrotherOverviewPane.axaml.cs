@@ -61,6 +61,9 @@ internal partial class BrotherOverviewPane : UserControl
 
     private sealed record SlotAndName(InventorySlot? Slot, string SlotName);
 
+    /// <summary>Equip column's overlay kind (Java equipCol/pouchCol) + its slot resolver.</summary>
+    private sealed record EquipTag(EquipKind Kind, Func<Brother, SlotAndName> Resolve);
+
     private sealed class Row(Border container, Brother brother)
     {
         public Border Container = container;
@@ -76,6 +79,7 @@ internal partial class BrotherOverviewPane : UserControl
     // Column drag state (header cells).
     private Border? _colDragIndicator;
     private ColumnSpec? _colDragSpec;
+    private int _colDragInsertIndex = -1; // last indicator drop position among the header cells
 
     public BrotherOverviewPane(UiContext ctx, OverviewViewModel vm, IEnumerable<Brother> brothers)
     {
@@ -163,11 +167,11 @@ internal partial class BrotherOverviewPane : UserControl
                 var kind = p is 0 or 1 ? EquipKind.Durability
                     : EquipSlotName[p] == "weapon" ? EquipKind.Tier : EquipKind.Plain;
                 return new ColumnSpec(id, suffix, WEquip, ColumnKind.Equip,
-                    new Func<Brother, SlotAndName>(b => SlotAt(b, EquipSlotIdx[p], EquipSlotName[p])));
+                    new EquipTag(kind, b => SlotAt(b, EquipSlotIdx[p], EquipSlotName[p])));
             }
             // Java pouchCol(p): tier dot overlay.
             return new ColumnSpec(id, suffix, WEquip, ColumnKind.Equip,
-                new Func<Brother, SlotAndName>(b =>
+                new EquipTag(EquipKind.Tier, b =>
                 {
                     var pouches = OverviewCalc.GatherPouches(b.EquippedSlots, b.ExtraPouches);
                     var idx = int.Parse(suffix[1..]) - 1;
@@ -283,7 +287,7 @@ internal partial class BrotherOverviewPane : UserControl
             ColumnKind.Role => BuildRoleCell(b),
             ColumnKind.Level => BuildLevelCell(b),
             ColumnKind.Stat => BuildStatCell((Stat)col.Tag!, b),
-            ColumnKind.Equip => BuildEquipCell((Func<Brother, SlotAndName>)col.Tag!, b),
+            ColumnKind.Equip => BuildEquipCell((EquipTag)col.Tag!, b),
             ColumnKind.Traits => BuildTraitsCell(b),
             _ => BuildPerksCell(b),
         };
@@ -407,8 +411,10 @@ internal partial class BrotherOverviewPane : UserControl
             && OverviewCalc.AllWithinCap(increases, budget.Cap);
         var hasContent = guideReady || hasPlanned;
 
-        // Java: sticky guide popup when content exists, plain progress tooltip otherwise.
-        ToolTip.SetTip(box, LevelTooltipText(b, budget));
+        // Java: cells with the sticky guide popup get no tooltip (setTooltip(null) — the
+        // popup itself is the affordance); plain cells show the progress tooltip.
+        if (!hasContent)
+            ToolTip.SetTip(box, LevelTooltipText(b, budget));
         if (hasContent)
         {
             box.PointerReleased += (sender, e) =>
@@ -491,9 +497,9 @@ internal partial class BrotherOverviewPane : UserControl
         return cell;
     }
 
-    private Control BuildEquipCell(Func<Brother, SlotAndName> resolver, Brother b)
+    private Control BuildEquipCell(EquipTag tag, Brother b)
     {
-        var sn = resolver(b);
+        var sn = tag.Resolve(b);
         var image = new Image
         {
             Width = WEquip - 6,
@@ -508,7 +514,8 @@ internal partial class BrotherOverviewPane : UserControl
         var panel = new Grid { Width = WEquip - 6, Height = WEquip - 6 };
         panel.Children.Add(image);
 
-        // Durability/fatigue overlay (Armor Stats toggle; Arm and Hlm columns only).
+        // Durability/fatigue overlay (Armor Stats toggle; Arm and Hlm columns only —
+        // Java refreshCell L800: showDur = i==0 || i==1).
         var slotStats = slot?.Stats;
         var dur = new TextBlock
         {
@@ -516,7 +523,8 @@ internal partial class BrotherOverviewPane : UserControl
             VerticalAlignment = VerticalAlignment.Bottom,
             HorizontalAlignment = HorizontalAlignment.Center,
         };
-        dur.IsVisible = _vm.Armor != OverviewViewModel.ArmorMode.OFF && slotStats != null;
+        dur.IsVisible = tag.Kind == EquipKind.Durability
+            && _vm.Armor != OverviewViewModel.ArmorMode.OFF && slotStats != null;
         if (slotStats != null)
         {
             dur.Text = _vm.Armor switch
@@ -530,14 +538,16 @@ internal partial class BrotherOverviewPane : UserControl
         }
         panel.Children.Add(dur);
 
-        // Weapon tier colour dot (Weapon Tier toggle; weapon + pouch columns).
+        // Weapon tier colour dot (Weapon Tier toggle; weapon + pouch columns only —
+        // Java refreshCell L801/L822-829).
         var dot = new Border
         {
             Classes = { "weapon-tier-dot" },
             VerticalAlignment = VerticalAlignment.Bottom,
             HorizontalAlignment = HorizontalAlignment.Right,
         };
-        dot.IsVisible = _vm.WeaponTier == OverviewViewModel.WeaponTierMode.ON
+        dot.IsVisible = tag.Kind == EquipKind.Tier
+            && _vm.WeaponTier == OverviewViewModel.WeaponTierMode.ON
             && slot is { Empty: false, ItemId: not null };
         if (slot is { Empty: false, ItemId: not null })
         {
@@ -800,6 +810,7 @@ internal partial class BrotherOverviewPane : UserControl
                 if (Math.Abs(pos.X - start.X) < 5 && Math.Abs(pos.Y - start.Y) < 5) return;
                 dragging = true;
                 _colDragSpec = (ColumnSpec?)headerCell.Tag;
+                _colDragInsertIndex = -1;
                 _colDragIndicator = new Border
                 {
                     Classes = { "column-drag-indicator" },
@@ -811,28 +822,34 @@ internal partial class BrotherOverviewPane : UserControl
 
         headerCell.PointerReleased += (s, e) =>
         {
-            e.Pointer.Capture(null);
+            // Commit before releasing capture: Capture(null) raises PointerCaptureLost,
+            // which clears the drag state below.
             if (dragging) CommitColumnDrag();
+            e.Pointer.Capture(null);
             RemoveIndicator();
             dragging = false;
             _colDragSpec = null;
+            _colDragInsertIndex = -1;
         };
         headerCell.PointerCaptureLost += (s, e) =>
         {
             RemoveIndicator();
             dragging = false;
             _colDragSpec = null;
+            _colDragInsertIndex = -1;
         };
     }
 
     private void MoveIndicator(double x)
     {
         if (_colDragIndicator == null) return;
-        var index = ComputeInsertIndex(x);
         HeaderHost.Children.Remove(_colDragIndicator);
+        // Compute against the indicator-less list, so the index is a pure drop position
+        // among the header cells (first half of a cell → before it, second half → after).
+        var index = ComputeInsertIndex(x);
         // Keep the indicator inside the group's zone so the user sees where drops land;
         // the group bound itself is enforced on commit.
-        index = Math.Clamp(index, 0, HeaderHost.Children.Count);
+        _colDragInsertIndex = index;
         HeaderHost.Children.Insert(index, _colDragIndicator);
     }
 
@@ -841,7 +858,6 @@ internal partial class BrotherOverviewPane : UserControl
         double acc = 0;
         for (var i = 0; i < HeaderHost.Children.Count; i++)
         {
-            if (HeaderHost.Children[i] == _colDragIndicator) continue;
             var w = ((Border)HeaderHost.Children[i]).Width;
             if (x < acc + w / 2) return i;
             acc += w;
@@ -851,16 +867,17 @@ internal partial class BrotherOverviewPane : UserControl
 
     private void CommitColumnDrag()
     {
-        if (_colDragSpec == null) return;
-        var ids = HeaderHost.Children
-            .OfType<Border>()
-            .Where(c => c != _colDragIndicator)
-            .Select(c => ((ColumnSpec)c.Tag!).Id)
-            .ToList();
-        if (!ids.SequenceEqual(_columns.Select(c => c.Id)))
-            _vm.TryCommitColumnOrder(ids); // invalid → ColumnOrderChanged not raised, header rebuilt below
-        else
-            BuildHeader(); // released back where it started — just drop the indicator state
+        if (_colDragSpec == null || _colDragInsertIndex < 0) return;
+        var ids = _columns.Select(c => c.Id).ToList();
+        var from = ids.IndexOf(_colDragSpec.Id);
+        if (from < 0) return;
+        // Header cells never move during the drag (only the 2px indicator does) — the new
+        // order is the old one with the dragged column re-inserted at the drop position.
+        var insert = _colDragInsertIndex > from ? _colDragInsertIndex - 1 : _colDragInsertIndex;
+        ids.RemoveAt(from);
+        ids.Insert(insert, _colDragSpec.Id);
+        if (!ids.SequenceEqual(_columns.Select(c => c.Id)) && !_vm.TryCommitColumnOrder(ids))
+            ApplyPersistedColumnOrder(); // outside the group bound → snap back to the persisted order
     }
 
     private void RemoveIndicator()

@@ -265,7 +265,7 @@
     <Style Selector="Border.overview-header-cell">
         <Setter Property="Background" Value="{StaticResource BgOverviewHeaderBrush}"/>
         <Setter Property="BorderBrush" Value="{StaticResource BorderStatusBarBrush}"/>
-        <Setter Property="BorderThickness" Value="0,1,0,0"/>
+        <Setter Property="BorderThickness" Value="0,0,1,0"/>
         <Setter Property="Height" Value="42"/>
         <Setter Property="Padding" Value="2,3"/>
     </Style>

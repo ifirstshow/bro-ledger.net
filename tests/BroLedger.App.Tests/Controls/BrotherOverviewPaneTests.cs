@@ -1,5 +1,8 @@
+using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Headless;
 using Avalonia.Headless.XUnit;
+using Avalonia.Input;
 using BroLedger.App.Controls;
 using BroLedger.App.ViewModels;
 using BroLedger.Core.Services;
@@ -8,9 +11,9 @@ namespace BroLedger.App.Tests.Controls;
 
 /// <summary>
 /// Headless smoke for the T3 overview pane with the real TestSavefile.sav: construction
-/// (header column count + one row per brother), the four-toggle cycle rebuilding rows, and
-/// a valid column-order commit rebuilding the header. Drag interactions themselves need a
-/// real pointer — covered by the manual checklist in task-3-report.md.
+/// (header column count + one row per brother), the four-toggle cycle rebuilding rows, a
+/// valid column-order commit rebuilding the header, and real header-drag pointer sequences
+/// (press/move/release through the headless window) committing or rejecting the reorder.
 /// </summary>
 public class BrotherOverviewPaneTests : IDisposable
 {
@@ -120,4 +123,82 @@ public class BrotherOverviewPaneTests : IDisposable
             vm.StopWatcher();
         }
     }
+
+    [AvaloniaFact]
+    public void HeaderDragWithinStatGroup_CommitsOrderAndRaisesColumnOrderChanged()
+    {
+        var (vm, pane) = BuildPane();
+        var window = new Window { Width = 1200, Height = 800, Content = pane };
+        try
+        {
+            window.Show();
+            window.Dispatcher.RunJobs();
+
+            var header = pane.GetControl<StackPanel>("HeaderHost");
+            var labelsBefore = HeaderLabels(header).ToList();
+            var expectedIds = OverviewViewModel.DefaultColumnIds().ToList();
+            (expectedIds[4], expectedIds[5]) = (expectedIds[5], expectedIds[4]);
+
+            var changed = 0;
+            vm.Overview.ColumnOrderChanged += () => changed++;
+
+            // Press the first stat header, drop in the first half of the second stat
+            // header → the pair swaps (within-group move passes validation).
+            var from = ((Border)header.Children[4]).TranslatePoint(new Point(24, 21), window)!.Value;
+            var to = ((Border)header.Children[6]).TranslatePoint(new Point(23, 21), window)!.Value;
+            window.MouseDown(from, MouseButton.Left);
+            window.MouseMove(to);
+            window.MouseUp(to, MouseButton.Left);
+            window.Dispatcher.RunJobs();
+
+            Assert.Equal(1, changed);
+            Assert.Equal(expectedIds, AppConfig.Instance.OverviewColumnOrder);
+
+            // Header rebuilt in the committed order: the dragged column's label moved.
+            var expectedLabels = labelsBefore.ToList();
+            (expectedLabels[4], expectedLabels[5]) = (expectedLabels[5], expectedLabels[4]);
+            Assert.Equal(expectedLabels, HeaderLabels(header));
+        }
+        finally
+        {
+            vm.StopWatcher();
+        }
+    }
+
+    [AvaloniaFact]
+    public void HeaderDragAcrossCategory_RejectedAndSnapsBack()
+    {
+        var (vm, pane) = BuildPane();
+        var window = new Window { Width = 1200, Height = 800, Content = pane };
+        try
+        {
+            window.Show();
+            window.Dispatcher.RunJobs();
+
+            var header = pane.GetControl<StackPanel>("HeaderHost");
+            var labelsBefore = HeaderLabels(header).ToList();
+
+            var changed = 0;
+            vm.Overview.ColumnOrderChanged += () => changed++;
+
+            var from = ((Border)header.Children[4]).TranslatePoint(new Point(24, 21), window)!.Value;
+            // Drop deep in the equipment zone → stat column outside indices 4-11 → rejected.
+            var to = header.TranslatePoint(new Point(1100, 21), window)!.Value;
+            window.MouseDown(from, MouseButton.Left);
+            window.MouseMove(to);
+            window.MouseUp(to, MouseButton.Left);
+            window.Dispatcher.RunJobs();
+
+            Assert.Equal(0, changed);
+            Assert.Null(AppConfig.Instance.OverviewColumnOrder);
+            Assert.Equal(labelsBefore, HeaderLabels(header)); // snapped back to the persisted order
+        }
+        finally
+        {
+            vm.StopWatcher();
+        }
+    }
+
+    private static IEnumerable<string?> HeaderLabels(StackPanel header) =>
+        header.Children.OfType<Border>().Select(b => ((TextBlock)b.Child!).Text);
 }
