@@ -14,8 +14,7 @@ public static class Program
         {
             "savefile" => Parser.BrotherSavefileExporter.Run(args[1..]),
             "replay"   => ReplayAnalyzer.Run(args[1..]),
-            // Task 3: BrotherCsvExporter
-            "csv"      => NotYetAvailable("csv"),
+            "csv"      => BrotherCsvExporter.Run(args[1..]),
             _          => UnknownVerb(args[0]),
         };
     }
