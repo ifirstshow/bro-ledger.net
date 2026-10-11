@@ -1,3 +1,5 @@
+using Avalonia;
+using Avalonia.Media;
 using Avalonia.Media.Imaging;
 
 namespace BroLedger.App.Services;
@@ -83,22 +85,15 @@ public sealed class ImageCache
         }
     }
 
-    // 1×1 gray PNG, bytes ported verbatim from Java ImageCache.buildPlaceholder (L69-79)
-    // so no resource file is needed.
+    // Java ImageCache.buildPlaceholder (L69-79) inlines a hand-assembled 1×1 gray PNG whose
+    // IHDR CRC is wrong (0x3A7E9B55; correct is 0xC4A0EB47) — JavaFX's lenient loader
+    // swallowed it, Skia throws "Unable to load bitmap" (crashed first launch). Draw the
+    // same 1×1 gray square natively instead of porting the corrupt bytes.
     private static Bitmap BuildPlaceholder()
     {
-        byte[] grayPng =
-        [
-            0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A,          // PNG signature
-            0x00, 0x00, 0x00, 0x0D, 0x49, 0x48, 0x44, 0x52,          // IHDR chunk (13 bytes)
-            0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x01,          // width=1, height=1
-            0x08, 0x00, 0x00, 0x00, 0x00, 0x3A, 0x7E, 0x9B, 0x55,    // bit depth=8, color=grayscale, crc
-            0x00, 0x00, 0x00, 0x0A, 0x49, 0x44, 0x41, 0x54,          // IDAT chunk (10 bytes)
-            0x78, 0x9C, 0x62, 0x60, 0x00, 0x00, 0x00, 0x02, 0x00, 0x01, // zlib-compressed gray pixel
-            0xE2, 0x21, 0xBC, 0x33,                                  // IDAT crc
-            0x00, 0x00, 0x00, 0x00, 0x49, 0x45, 0x4E, 0x44,          // IEND chunk
-            0xAE, 0x42, 0x60, 0x82,                                  // IEND crc
-        ];
-        return new Bitmap(new MemoryStream(grayPng));
+        var rtb = new RenderTargetBitmap(new PixelSize(1, 1), new Vector(96, 96));
+        using (var ctx = rtb.CreateDrawingContext())
+            ctx.FillRectangle(Brushes.Gray, new Rect(0, 0, 1, 1));
+        return rtb;
     }
 }

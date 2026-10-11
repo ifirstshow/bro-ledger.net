@@ -19,6 +19,39 @@
     <SolidColorBrush x:Key="StatusTextBrush" Color="#8a7040" />
     <SolidColorBrush x:Key="WarningBrush" Color="#c87820" />
 
+    <!-- Task 2 segments: toolbar / fancy buttons / leds / fields / section headers. -->
+    <SolidColorBrush x:Key="BgToolbarBrush" Color="#0f0a04" />
+    <SolidColorBrush x:Key="WatchStatusBrush" Color="#6a9a38" />
+    <SolidColorBrush x:Key="SectionHeaderBrush" Color="#ba9238" />
+
+    <!-- .fancy-btn gradient (top/bottom) + border; hover lightens, pressed reverses. -->
+    <SolidColorBrush x:Key="FancyBorderBrush" Color="#6a4a28" />
+    <LinearGradientBrush x:Key="FancyBgBrush" StartPoint="0%,0%" EndPoint="0%,100%">
+        <GradientStop Color="#4a3018" Offset="0" />
+        <GradientStop Color="#2d1d0c" Offset="1" />
+    </LinearGradientBrush>
+    <LinearGradientBrush x:Key="FancyBgHoverBrush" StartPoint="0%,0%" EndPoint="0%,100%">
+        <GradientStop Color="#5a3a20" Offset="0" />
+        <GradientStop Color="#3a2510" Offset="1" />
+    </LinearGradientBrush>
+    <LinearGradientBrush x:Key="FancyBgPressedBrush" StartPoint="0%,0%" EndPoint="0%,100%">
+        <GradientStop Color="#2d1d0c" Offset="0" />
+        <GradientStop Color="#4a3018" Offset="1" />
+    </LinearGradientBrush>
+
+    <!-- .btn-led colors; lit variants add the dropshadow glow in Base.axaml. -->
+    <SolidColorBrush x:Key="LedRedBrush" Color="#8b2222" />
+    <SolidColorBrush x:Key="LedGreenBrush" Color="#1e6b1e" />
+    <SolidColorBrush x:Key="LedYellowBrush" Color="#7a6418" />
+    <SolidColorBrush x:Key="LedRedLitBrush" Color="#e53935" />
+    <SolidColorBrush x:Key="LedGreenLitBrush" Color="#43a047" />
+
+    <!-- .text-field base (dark amber field look for every TextBox). -->
+    <SolidColorBrush x:Key="FieldBgBrush" Color="#120d05" />
+    <SolidColorBrush x:Key="FieldBorderBrush" Color="#3a2510" />
+    <SolidColorBrush x:Key="FieldFocusBrush" Color="#ba9238" />
+    <SolidColorBrush x:Key="FieldPlaceholderBrush" Color="#4a3820" />
+
     <!-- Cinzel regular + bold faces (keeper.css -fx-font-family: 'Cinzel'). -->
     <FontFamily x:Key="Cinzel">avares://BroLedger.App/Assets/Cinzel-Regular.otf#Cinzel,avares://BroLedger.App/Assets/Cinzel-Bold.otf#Cinzel</FontFamily>
 </ResourceDictionary>

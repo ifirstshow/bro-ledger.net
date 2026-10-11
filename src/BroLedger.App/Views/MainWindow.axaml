@@ -1,0 +1,80 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:BroLedger.App.ViewModels"
+        x:Class="BroLedger.App.MainWindow"
+        x:DataType="vm:MainViewModel"
+        Title="Bro Ledger"
+        Width="1280" Height="800"
+        MinWidth="1100" MinHeight="900"
+        ExtendClientAreaToDecorationsHint="True"
+        WindowDecorations="BorderOnly"
+        ExtendClientAreaTitleBarHeightHint="28"
+        Background="{StaticResource BgAppBrush}">
+
+    <!-- main.fxml 1:1 (BorderPane → DockPanel): top = VBox(title-bar + toolbar),
+         center = ScrollViewer, bottom = status-bar. Window chrome: content extends into
+         the decorations, BorderOnly keeps the native resize frame without caption buttons;
+         title-bar drag/double-click-maximize and the three buttons are wired in code-behind
+         (MainController.setupWindowControls / minimizeWindow / toggleMaximize / closeWindow). -->
+    <Border Classes="app-frame"
+            Background="{StaticResource BgAppBrush}"
+            TextElement.Foreground="{StaticResource GoldBrush}"
+            TextElement.FontSize="13">
+        <DockPanel>
+
+            <StackPanel DockPanel.Dock="Top">
+                <Border x:Name="TitleBar" Classes="title-bar">
+                    <DockPanel LastChildFill="True">
+                        <StackPanel Orientation="Horizontal" DockPanel.Dock="Left" VerticalAlignment="Center">
+                            <TextBlock Classes="title-bar-label" Text="Bro Ledger"/>
+                            <TextBlock Classes="title-bar-version" Text="{Binding VersionLabelText}"/>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" DockPanel.Dock="Right" HorizontalAlignment="Right">
+                            <Button x:Name="MinimizeBtn" Classes="window-btn" Content="–" Focusable="False" Click="OnMinimizeWindow"/>
+                            <Button x:Name="MaximizeBtn" Classes="window-btn" Content="□" Focusable="False" Click="OnToggleMaximize"/>
+                            <Button x:Name="CloseBtn" Classes="window-btn window-btn-close" Content="✕" Focusable="False" Click="OnCloseWindow"/>
+                        </StackPanel>
+                    </DockPanel>
+                </Border>
+
+                <!-- Java buildToolbar: left = Open Save + watch status, center = overview
+                     toggles (T3 mount), right = Roles / Preferences / Reset Layout. -->
+                <Border Classes="main-toolbar">
+                    <Grid ColumnDefinitions="Auto,*,Auto">
+                        <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="8">
+                            <Button Classes="fancy-btn" Focusable="False" Click="OnOpenSave">
+                                <StackPanel Spacing="2">
+                                    <TextBlock Classes="btn-header" Text="Open Save"/>
+                                    <TextBlock Classes="btn-desc" Text="{Binding CurrentFileName}"/>
+                                </StackPanel>
+                            </Button>
+                            <TextBlock Classes="watch-status-label" Text="{Binding WatchStatusText}"/>
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8"
+                                    HorizontalAlignment="Center"
+                                    IsVisible="{Binding OverviewTogglesVisible}">
+                            <!-- T3 mount: Weapon Tier / Armor Stats / Perk Sorting / Potential toggles -->
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8">
+                            <Button Classes="fancy-btn" Content="Roles" Focusable="False" Click="OnOpenRoleManager"/>
+                            <Button Classes="fancy-btn" Content="Preferences" Focusable="False" Click="OnOpenPreferences"/>
+                            <Button Classes="fancy-btn" Content="Reset Layout" Focusable="False" Click="OnResetLayout"/>
+                        </StackPanel>
+                    </Grid>
+                </Border>
+            </StackPanel>
+
+            <Border DockPanel.Dock="Bottom" Classes="status-bar" Padding="8,3">
+                <TextBlock x:Name="StatusLabel" Classes="status-label"
+                           Text="{Binding StatusText}"/>
+            </Border>
+
+            <ScrollViewer x:Name="CenterPane" Classes="center-pane">
+                <ContentControl x:Name="CenterContent"/>
+            </ScrollViewer>
+
+        </DockPanel>
+    </Border>
+</Window>

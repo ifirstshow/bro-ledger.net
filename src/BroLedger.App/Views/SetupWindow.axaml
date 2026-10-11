@@ -1,0 +1,80 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:BroLedger.App.ViewModels"
+        x:Class="BroLedger.App.SetupWindow"
+        x:DataType="vm:SetupViewModel"
+        Title="Game Art Setup"
+        Width="540" MinWidth="540" MinHeight="340" SizeToContent="Height"
+        WindowDecorations="None"
+        ExtendClientAreaToDecorationsHint="True"
+        Background="{StaticResource BgAppBrush}">
+
+    <!-- setup.fxml 1:1: VBox app-frame with custom title bar (✕ = skip), extract section,
+         "— or —" divider, select-existing, skip. -->
+    <Border Classes="app-frame"
+            Background="{StaticResource BgAppBrush}"
+            TextElement.Foreground="{StaticResource GoldBrush}"
+            TextElement.FontSize="13">
+        <DockPanel>
+
+            <Border x:Name="TitleBar" Classes="title-bar" DockPanel.Dock="Top">
+                <DockPanel LastChildFill="True">
+                    <TextBlock Classes="title-bar-label" Text="Game Art Setup"
+                               VerticalAlignment="Center"/>
+                    <Button x:Name="SkipTitleBtn" Classes="window-btn window-btn-close" Content="✕"
+                            Focusable="False" DockPanel.Dock="Right" Click="OnSkip"/>
+                </DockPanel>
+            </Border>
+
+            <StackPanel Margin="24,20,24,24" Spacing="16">
+
+                <TextBlock Classes="stat-label" Text="{Binding HeaderText}" TextWrapping="Wrap"/>
+
+                <StackPanel Classes="card-section" Spacing="10">
+                    <TextBlock Classes="section-header" Text="Extract from game data"/>
+                    <TextBlock Classes="stat-label" TextWrapping="Wrap"
+                               Text="Point to data_001.dat in your Battle Brothers installation and choose an output folder."/>
+
+                    <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="8">
+                        <TextBlock Grid.Column="0" Classes="field-label" Text="data_001.dat:"
+                                   MinWidth="110" VerticalAlignment="Center"/>
+                        <TextBox x:Name="DatPathField" Grid.Column="1"
+                                 PlaceholderText="Select data_001.dat…" IsReadOnly="True"
+                                 Text="{Binding DatPath}"/>
+                        <Button Grid.Column="2" Classes="fancy-btn" Content="Browse" MinWidth="70"
+                                Focusable="False" Click="OnBrowseDat"/>
+                    </Grid>
+
+                    <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="8">
+                        <TextBlock Grid.Column="0" Classes="field-label" Text="Output folder:"
+                                   MinWidth="110" VerticalAlignment="Center"/>
+                        <TextBox x:Name="OutDirField" Grid.Column="1"
+                                 PlaceholderText="Output directory…" IsReadOnly="True"
+                                 Text="{Binding OutDir}"/>
+                        <Button Grid.Column="2" Classes="fancy-btn" Content="Browse" MinWidth="70"
+                                Focusable="False" Click="OnBrowseOutDir"/>
+                    </Grid>
+
+                    <ProgressBar x:Name="ProgressBar" Maximum="1.0" Value="{Binding Progress}"
+                                 IsVisible="{Binding ProgressVisible}"/>
+                    <TextBlock Classes="stat-label" Text="{Binding ProgressText}"
+                               TextWrapping="Wrap" IsVisible="{Binding ProgressVisible}"/>
+
+                    <Button x:Name="ExtractBtn" Classes="fancy-btn" Content="Extract"
+                            Focusable="False" HorizontalAlignment="Stretch"
+                            IsEnabled="{Binding CanExtract}" Command="{Binding ExtractCommand}"/>
+                </StackPanel>
+
+                <TextBlock Classes="stat-label" Text="— or —" HorizontalAlignment="Center"/>
+
+                <Button x:Name="SelectExistingBtn" Classes="fancy-btn" Content="Select existing game-art folder"
+                        Focusable="False" HorizontalAlignment="Stretch" Click="OnSelectExisting"/>
+
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,16,0,0">
+                    <Button Classes="fancy-btn" Content="Skip for now" Focusable="False" Click="OnSkip"/>
+                </StackPanel>
+
+            </StackPanel>
+        </DockPanel>
+    </Border>
+</Window>

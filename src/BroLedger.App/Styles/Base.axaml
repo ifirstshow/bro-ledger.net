@@ -98,4 +98,152 @@
     <Style Selector="TextBlock.status-label.warning">
         <Setter Property="Foreground" Value="{StaticResource WarningBrush}"/>
     </Style>
+
+    <!-- ===== Task 2 segments (keeper.css) ===== -->
+
+    <!-- keeper.css: .main-toolbar. Note: the segment's `.main-toolbar .button` sub-rules are
+         NOT translated — in the Java main window every toolbar button carries .fancy-btn
+         (fancyActionButton/fancyToggle, never a plain Button), so those rules have no live
+         target; if a plain button ever lands in the toolbar, add them then. -->
+    <Style Selector="Border.main-toolbar">
+        <Setter Property="Background" Value="{StaticResource BgToolbarBrush}"/>
+        <Setter Property="Padding" Value="8,4"/>
+    </Style>
+
+    <!-- keeper.css: .watch-status-label -->
+    <Style Selector="TextBlock.watch-status-label">
+        <Setter Property="Foreground" Value="{StaticResource WatchStatusBrush}"/>
+        <Setter Property="FontSize" Value="11"/>
+        <Setter Property="VerticalAlignment" Value="Center"/>
+    </Style>
+
+    <!-- keeper.css: .center-pane (and its .viewport) — both #1a1209 -->
+    <Style Selector="ScrollViewer.center-pane">
+        <Setter Property="Background" Value="{StaticResource BgAppBrush}"/>
+        <Setter Property="BorderThickness" Value="0"/>
+    </Style>
+
+    <!-- keeper.css: .fancy-btn. JavaFX paints 4 distinct border sides
+         (#6a4a28 #3a2510 #2a1a08 #5a3a18); Avalonia has one BorderBrush per control —
+         flattened to the lit top-left value #6a4a28. The 3-pass dropshadow is dropped
+         (near-invisible on the dark base). -->
+    <Style Selector="Button.fancy-btn">
+        <Setter Property="Foreground" Value="{StaticResource GoldBrush}"/>
+        <Setter Property="FontSize" Value="11"/>
+        <Setter Property="FontWeight" Value="Bold"/>
+        <Setter Property="Padding" Value="14,5"/>
+        <Setter Property="MinWidth" Value="80"/>
+        <Setter Property="Cursor" Value="Hand"/>
+        <Setter Property="CornerRadius" Value="4"/>
+        <Setter Property="HorizontalContentAlignment" Value="Center"/>
+    </Style>
+    <Style Selector="Button.fancy-btn /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="BorderBrush" Value="{StaticResource FancyBorderBrush}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="CornerRadius" Value="4"/>
+        <Setter Property="Background" Value="{StaticResource FancyBgBrush}"/>
+    </Style>
+
+    <!-- keeper.css: .fancy-btn:hover -->
+    <Style Selector="Button.fancy-btn:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Background" Value="{StaticResource FancyBgHoverBrush}"/>
+    </Style>
+
+    <!-- keeper.css: .fancy-btn:pressed (gradient reversed, border flipped, shadow none —
+         the flattened border already matches the pressed top-left value) -->
+    <Style Selector="Button.fancy-btn:pressed /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Background" Value="{StaticResource FancyBgPressedBrush}"/>
+    </Style>
+
+    <!-- keeper.css: .btn-header / .btn-desc -->
+    <Style Selector="TextBlock.btn-header">
+        <Setter Property="FontWeight" Value="Bold"/>
+        <Setter Property="FontSize" Value="11"/>
+        <Setter Property="Foreground" Value="{StaticResource GoldBrush}"/>
+    </Style>
+    <Style Selector="TextBlock.btn-desc">
+        <Setter Property="FontSize" Value="10"/>
+        <Setter Property="Foreground" Value="{StaticResource StatusTextBrush}"/>
+    </Style>
+
+    <!-- keeper.css: .btn-led + color/lit/muted variants (8x8 rounded dot) -->
+    <Style Selector="Border.btn-led">
+        <Setter Property="Width" Value="8"/>
+        <Setter Property="Height" Value="8"/>
+        <Setter Property="CornerRadius" Value="4"/>
+    </Style>
+    <Style Selector="Border.btn-led.led-red">
+        <Setter Property="Background" Value="{StaticResource LedRedBrush}"/>
+    </Style>
+    <Style Selector="Border.btn-led.led-green">
+        <Setter Property="Background" Value="{StaticResource LedGreenBrush}"/>
+    </Style>
+    <Style Selector="Border.btn-led.led-yellow">
+        <Setter Property="Background" Value="{StaticResource LedYellowBrush}"/>
+    </Style>
+    <Style Selector="Border.btn-led.led-muted">
+        <Setter Property="Opacity" Value="0.55"/>
+    </Style>
+    <!-- keeper.css: .btn-led.led-lit.* (lit color 1.0 + gaussian glow; alpha 0.6 → 0x99) -->
+    <Style Selector="Border.btn-led.led-lit.led-red">
+        <Setter Property="Background" Value="{StaticResource LedRedLitBrush}"/>
+        <Setter Property="Opacity" Value="1"/>
+        <Setter Property="BoxShadow" Value="0 0 5 0 #99e53935"/>
+    </Style>
+    <Style Selector="Border.btn-led.led-lit.led-green">
+        <Setter Property="Background" Value="{StaticResource LedGreenLitBrush}"/>
+        <Setter Property="Opacity" Value="1"/>
+        <Setter Property="BoxShadow" Value="0 0 5 0 #9943a047"/>
+    </Style>
+    <Style Selector="Border.btn-led.led-lit.led-yellow">
+        <Setter Property="Background" Value="{StaticResource GoldBrush}"/>
+        <Setter Property="Opacity" Value="1"/>
+        <Setter Property="BoxShadow" Value="0 0 5 0 #99d69f23"/>
+    </Style>
+
+    <!-- keeper.css: .section-header. The -fx-border-width 0 0 1 0 underline is dropped —
+         TextBlock renders no border; views needing the line wrap it in a bordered Border. -->
+    <Style Selector="TextBlock.section-header">
+        <Setter Property="Foreground" Value="{StaticResource SectionHeaderBrush}"/>
+        <Setter Property="FontSize" Value="12"/>
+        <Setter Property="FontWeight" Value="Bold"/>
+        <Setter Property="Padding" Value="0,0,0,2"/>
+    </Style>
+
+    <!-- keeper.css: .card-section (padding-only; any container can carry the class) -->
+    <Style Selector="StackPanel.card-section">
+        <Setter Property="Margin" Value="0,4"/>
+    </Style>
+
+    <!-- keeper.css: .field-label / .stat-label / .dim-label -->
+    <Style Selector="TextBlock.field-label">
+        <Setter Property="Foreground" Value="{StaticResource StatusTextBrush}"/>
+        <Setter Property="FontSize" Value="12"/>
+    </Style>
+    <Style Selector="TextBlock.stat-label">
+        <Setter Property="Foreground" Value="{StaticResource StatusTextBrush}"/>
+        <Setter Property="FontSize" Value="12"/>
+    </Style>
+    <Style Selector="TextBlock.dim-label">
+        <Setter Property="Foreground" Value="{StaticResource StatusTextBrush}"/>
+        <Setter Property="FontSize" Value="11"/>
+    </Style>
+    <Style Selector="TextBlock.dim-label.warning">
+        <Setter Property="Foreground" Value="{StaticResource WarningBrush}"/>
+    </Style>
+
+    <!-- keeper.css: .text-field base (dark amber field for every TextBox). The
+         -fx-prompt-text-fill #4a3820 deviation: Avalonia's placeholder color is a theme
+         resource, not a styled property — left at theme default. -->
+    <Style Selector="TextBox">
+        <Setter Property="Background" Value="{StaticResource FieldBgBrush}"/>
+        <Setter Property="Foreground" Value="{StaticResource GoldBrush}"/>
+        <Setter Property="BorderBrush" Value="{StaticResource FieldBorderBrush}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="CornerRadius" Value="3"/>
+        <Setter Property="Padding" Value="4,3"/>
+    </Style>
+    <Style Selector="TextBox:focus">
+        <Setter Property="BorderBrush" Value="{StaticResource FieldFocusBrush}"/>
+    </Style>
 </Styles>
