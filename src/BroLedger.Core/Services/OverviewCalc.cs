@@ -164,7 +164,7 @@ public static class OverviewCalc
             PerkSortMode.Tier => Chain(byTier, byName),
             PerkSortMode.Commonality => Chain(byCommon, byName),
             PerkSortMode.TierThenCommon => Chain(Chain(byTier, byCommon), byName),
-            _ => Comparer<string>.Default,
+            _ => StringComparer.Ordinal, // Java naturalOrder() = UTF-16 code-unit order, not culture order
         };
     }
 

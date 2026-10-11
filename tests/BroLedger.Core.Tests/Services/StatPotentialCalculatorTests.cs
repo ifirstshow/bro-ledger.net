@@ -5,6 +5,8 @@ namespace BroLedger.Core.Tests.Services;
 
 // Transcribed assertion-by-assertion from JAVATEST/service/StatPotentialCalculatorTest.java.
 // Seam: JUnit @CsvSource table → xUnit [InlineData] rows; record accessors → positional properties.
+// Collection: shares the static StatModifierService.Instance with StatModifierServiceTests.
+[Collection("StatModifierService")]
 public class StatPotentialCalculatorTests
 {
     // ---- RangeForStars: wiki table coverage --------------------------------

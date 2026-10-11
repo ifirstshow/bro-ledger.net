@@ -3,6 +3,7 @@ using Xunit;
 
 namespace BroLedger.Core.Tests.Utils;
 
+[Collection("EnvVar-BroLedgerDataDir")]
 public class AppPathsTests : IDisposable
 {
     private readonly string? _saved = Environment.GetEnvironmentVariable("BROLEDGER_DATADIR");

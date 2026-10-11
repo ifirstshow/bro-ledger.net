@@ -8,6 +8,7 @@ namespace BroLedger.Core.Tests.Services;
 // (reconcileOnReload half excluded — next task). Seams: @TempDir → per-test GUID dir;
 // reflection singleton reset → ResetForTest(); fallback dir → BROLEDGER_DATADIR override
 // (same seam as AppPathsTests).
+[Collection("EnvVar-BroLedgerDataDir")]
 public class AnnotationServiceTests : IDisposable
 {
     private readonly string Tmp;

@@ -7,6 +7,8 @@ namespace BroLedger.Core.Tests.Services;
 
 // Transcribed assertion-by-assertion from JAVATEST/service/StatModifierServiceTest.java.
 // Seam: loadFromStream(new ByteArrayInputStream(...)) → LoadFromStream(new MemoryStream(...)).
+// Collection: shares the static StatModifierService.Instance with StatPotentialCalculatorTests.
+[Collection("StatModifierService")]
 public class StatModifierServiceTests
 {
     private readonly StatModifierService _svc;

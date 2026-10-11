@@ -7,6 +7,7 @@ namespace BroLedger.Core.Tests.Services;
 // @TempDir → per-test GUID dir; reflection singleton reset → ResetForTest().
 // LevelUpEvent.StatDeltas/ConsumedIncreases are List<KeyValuePair<Stat,int>> in
 // Stat.Values order — Java Map equality becomes ordered sequence equality here.
+[Collection("EnvVar-BroLedgerDataDir")]
 public class PreviewReconcileTests : IDisposable
 {
     private readonly string Tmp;
