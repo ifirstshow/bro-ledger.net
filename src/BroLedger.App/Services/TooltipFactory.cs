@@ -28,13 +28,16 @@ internal static class TooltipFactory
         [Stat.RangedDefense] = "icon-rDefense.png",
     };
 
-    /// <summary>Installs a styled item-tooltip; empty text installs nothing (Java skips null).</summary>
+    /// <summary>
+    /// Installs a styled item-tooltip. Null/empty text clears any stale tip — Java callers do
+    /// <c>control.setTooltip(TooltipFactory.forSlot(...))</c>, where a null tooltip clears.
+    /// The class lives on the ToolTip instance, so clearing the tip drops it with it.
+    /// </summary>
     public static void Install(Control control, string? text)
     {
-        if (string.IsNullOrEmpty(text)) return;
-        var tt = new ToolTip { Content = text };
-        tt.Classes.Add("item-tooltip");
-        ToolTip.SetTip(control, tt);
+        ToolTip.SetTip(control, string.IsNullOrEmpty(text)
+            ? null
+            : new ToolTip { Content = text, Classes = { "item-tooltip" } });
     }
 
     // ---- equipped item slot (Java forSlot) ---------------------------------
@@ -258,8 +261,13 @@ internal static class TooltipFactory
 
     private static string Pct(double v) => (v * 100).ToString("F0") + "%";
 
-    private static bool IsWeaponType(string? t) => t != null && t.Contains("weapon");
+    // Java: t.toLowerCase().contains("...") — OrdinalIgnoreCase keeps that semantics for the
+    // camelCase dictionary types (genericWeapon/namedArmor/genericHelmet/genericShield).
+    private static bool IsWeaponType(string? t) =>
+        t != null && t.Contains("weapon", StringComparison.OrdinalIgnoreCase);
     private static bool IsArmorType(string? t) =>
-        t != null && (t.Contains("armor") || t.Contains("helmet"));
-    private static bool IsShieldType(string? t) => t != null && t.Contains("shield");
+        t != null && (t.Contains("armor", StringComparison.OrdinalIgnoreCase)
+            || t.Contains("helmet", StringComparison.OrdinalIgnoreCase));
+    private static bool IsShieldType(string? t) =>
+        t != null && t.Contains("shield", StringComparison.OrdinalIgnoreCase);
 }
