@@ -60,10 +60,12 @@
                             <TextBlock Classes="watch-status-label" Text="{Binding WatchStatusText}"/>
                         </StackPanel>
 
-                        <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8"
+                        <StackPanel x:Name="OverviewTogglesHost" Grid.Column="1" Orientation="Horizontal" Spacing="8"
                                     HorizontalAlignment="Center"
                                     IsVisible="{Binding OverviewTogglesVisible}">
-                            <!-- T3 mount: Weapon Tier / Armor Stats / Perk Sorting / Potential toggles -->
+                            <!-- Java buildToolbar: Weapon Tier / Armor Stats / Perk Sorting /
+                                 Potential toggles, built in code-behind from
+                                 OverviewViewModel.Toggles (LedDef tables). -->
                         </StackPanel>
 
                         <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8">

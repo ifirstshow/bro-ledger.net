@@ -54,4 +54,29 @@
 
     <!-- Cinzel regular + bold faces (keeper.css -fx-font-family: 'Cinzel'). -->
     <FontFamily x:Key="Cinzel">avares://BroLedger.App/Assets/Cinzel-Regular.otf#Cinzel,avares://BroLedger.App/Assets/Cinzel-Bold.otf#Cinzel</FontFamily>
+
+    <!-- Task 3 segments: overview table (keeper.css overview/level/stat-cell/tier rules). -->
+    <SolidColorBrush x:Key="BgOverviewHeaderBrush" Color="#0f0a04" />
+    <SolidColorBrush x:Key="BgOverviewRowAltBrush" Color="#1d1309" />
+    <SolidColorBrush x:Key="BgOverviewRowHoverBrush" Color="#2a1a08" />
+    <SolidColorBrush x:Key="BgOverviewDragTargetBrush" Color="#3d2a0e" />
+    <SolidColorBrush x:Key="BorderOverviewCellBrush" Color="#241608" />
+    <SolidColorBrush x:Key="BorderFrontlineDividerBrush" Color="#ba9238" />
+    <SolidColorBrush x:Key="StatValBrush" Color="#d69f23" />
+    <SolidColorBrush x:Key="PotentialValBrush" Color="#ba9238" />
+    <SolidColorBrush x:Key="ExpectedValBrush" Color="#78c87a" />
+    <SolidColorBrush x:Key="StarEmptyBrush" Color="#3a2510" />
+    <SolidColorBrush x:Key="AllottedBrush" Color="#888888" />
+    <SolidColorBrush x:Key="AllottedGreenBrush" Color="#78c87a" />
+    <SolidColorBrush x:Key="AllottedRedBrush" Color="#e07070" />
+    <SolidColorBrush x:Key="PendingBadgeBrush" Color="#78c87a" />
+    <SolidColorBrush x:Key="StatCellP1Brush" Color="#3c2712" />
+    <SolidColorBrush x:Key="StatCellP2Brush" Color="#2d1c0b" />
+    <SolidColorBrush x:Key="Tier1Brush" Color="#4ea84e" />
+    <SolidColorBrush x:Key="Tier2Brush" Color="#d9c022" />
+    <SolidColorBrush x:Key="Tier3Brush" Color="#d97a22" />
+    <SolidColorBrush x:Key="TierNamedBrush" Color="#c14040" />
+    <SolidColorBrush x:Key="TierDotBorderBrush" Color="#1e1508" />
+    <SolidColorBrush x:Key="RoleComboBgBrush" Color="#120d05" />
+    <SolidColorBrush x:Key="RoleComboBorderBrush" Color="#3a2510" />
 </ResourceDictionary>

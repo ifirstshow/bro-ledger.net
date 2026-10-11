@@ -3,7 +3,8 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
-using Avalonia.Markup.Xaml;
+using Avalonia.Controls.Primitives;
+using Avalonia.Layout;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform;
 using Avalonia.Platform.Storage;
@@ -23,12 +24,20 @@ public partial class MainWindow : Window
 
     public MainWindow()
     {
-        InitializeComponent();
-        AvaloniaXamlLoader.Load(this);
+        InitializeComponent(); // Avalonia 12 generated init already loads the XAML — a second
+        // AvaloniaXamlLoader.Load(this) re-inflates the tree and orphans every code-behind
+        // reference (toggles/pane built into a detached tree; window displayed the stale one).
 
         DataContext = _vm;
         _vm.CenterChanged += UpdateCenterContent;
         _vm.PropertyChanged += OnViewModelPropertyChanged;
+        _vm.Overview.PropertyChanged += (_, _) => UpdateToggleVisuals();
+        // Java showOverview row click → showCard.
+        _vm.Overview.ShowCardRequested += b => _vm.ShowCard(b);
+        // T5 mount: Java guidePopup — the popup content lands with the level-up task.
+        _vm.Overview.LevelGuideRequested += b => System.Diagnostics.Debug.WriteLine(
+            "T5 mount: level-up guide popup requested for " + b.Name);
+
         // Java loadSave setOnFailed → showError: parse failure also opens an error modal.
         _vm.ParseFailed += (header, message) =>
             _ = ModalService.ErrorAsync(this, "Error", header, message);
@@ -37,10 +46,77 @@ public partial class MainWindow : Window
         // hidden in release builds.
         ExcerptBtn.IsVisible = AppInfo.IsDebug();
 
+        BuildOverviewToggles();
+
         Icon = new WindowIcon(new Bitmap(AssetLoader.Open(
             new Uri("avares://BroLedger.App/Assets/BroLedger.ico"))));
 
         TitleBar.PointerPressed += OnTitleBarPointerPressed;
+    }
+
+    // ---- overview toggles (Java buildToolbar fancyToggle segment) -----------
+
+    private readonly List<TextBlock> _toggleDescLabels = [];
+    private readonly List<List<Avalonia.Controls.Border>> _toggleDots = [];
+
+    private void BuildOverviewToggles()
+    {
+        for (var i = 0; i < OverviewViewModel.Toggles.Count; i++)
+        {
+            var spec = OverviewViewModel.Toggles[i];
+            var toggleIndex = i;
+
+            var ledRow = new StackPanel { Orientation = Orientation.Horizontal, Spacing = 4, HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Center };
+            var dots = new List<Avalonia.Controls.Border>();
+            foreach (var option in spec.Options)
+            {
+                var dot = new Avalonia.Controls.Border { Classes = { "btn-led", option.LedClass } };
+                dots.Add(dot);
+                ledRow.Children.Add(dot);
+            }
+
+            var desc = new TextBlock { Classes = { "btn-desc" } };
+            _toggleDescLabels.Add(desc);
+            _toggleDots.Add(dots);
+
+            var button = new Button
+            {
+                Classes = { "fancy-btn" },
+                Focusable = false,
+                Content = new StackPanel
+                {
+                    Spacing = 2,
+                    Children = { ledRow, new TextBlock { Classes = { "btn-header" }, Text = spec.Title }, desc },
+                },
+            };
+            button.Click += (_, _) => _vm.Overview.CycleNext(toggleIndex);
+            OverviewTogglesHost.Children.Add(button);
+        }
+        UpdateToggleVisuals();
+    }
+
+    /// <summary>Java fancyToggle's update runnable: the active option's led lights up and
+    /// its description becomes the button's second line.</summary>
+    private void UpdateToggleVisuals()
+    {
+        var vm = _vm.Overview;
+        object[] current =
+        {
+            vm.WeaponTier, vm.Armor, vm.PerkSort, vm.Potential,
+        };
+        for (var t = 0; t < OverviewViewModel.Toggles.Count; t++)
+        {
+            var options = OverviewViewModel.Toggles[t].Options;
+            for (var o = 0; o < options.Count; o++)
+            {
+                var active = Equals(options[o].Value, current[t]);
+                var dot = _toggleDots[t][o];
+                dot.Classes.Remove("led-lit");
+                dot.Classes.Remove("led-muted");
+                dot.Classes.Add(active ? "led-lit" : "led-muted");
+                if (active) _toggleDescLabels[t].Text = options[o].Desc;
+            }
+        }
     }
 
     private void OnViewModelPropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -126,6 +202,11 @@ public partial class MainWindow : Window
                 break;
             case Key.Escape:
                 _vm.NavigateBack();
+                e.Handled = true;
+                break;
+            case Key.Enter when _vm.ShowingOverview && _vm.SelectedBrother != null:
+                // Java hotkeys "overview" scope: ENTER opens the selected brother's card.
+                _vm.ShowCard(_vm.SelectedBrother);
                 e.Handled = true;
                 break;
         }
@@ -221,18 +302,18 @@ public partial class MainWindow : Window
     {
         if (_vm.ShowingOverview)
         {
-            // T3 mount: BrotherOverviewPane.build(...) replaces this placeholder.
-            CenterContent.Content = new TextBlock
-            {
-                Text = _vm.Brothers.Count + " brother(s) loaded — overview lands in Task 3",
-                HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Center,
-                VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center,
-                Opacity = 0.6,
-            };
+            // T3: BrotherOverviewPane manages its own scrolling — the outer ScrollViewer
+            // must stretch it to the viewport instead of giving it unbounded height.
+            CenterPane.VerticalScrollBarVisibility = ScrollBarVisibility.Disabled;
+            CenterPane.HorizontalScrollBarVisibility = ScrollBarVisibility.Disabled;
+            CenterContent.Content = new Controls.BrotherOverviewPane(
+                UiContext.Defaults(), _vm.Overview, _vm.Brothers);
         }
         else
         {
             // T4 mount: BrotherCard replaces this placeholder.
+            CenterPane.VerticalScrollBarVisibility = ScrollBarVisibility.Auto;
+            CenterPane.HorizontalScrollBarVisibility = ScrollBarVisibility.Disabled;
             CenterContent.Content = new TextBlock
             {
                 Text = _vm.SelectedBrother?.Name is { } name ? name + " — card lands in Task 4" : "",

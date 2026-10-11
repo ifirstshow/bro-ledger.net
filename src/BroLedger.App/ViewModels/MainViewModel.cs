@@ -37,6 +37,9 @@ internal partial class MainViewModel : ObservableObject
     public Brother? SelectedBrother { get; private set; }
     public bool ShowingOverview { get; private set; }
 
+    /// <summary>Overview toggle modes, column order and pane events (T3).</summary>
+    public OverviewViewModel Overview { get; } = new();
+
     /// <summary>Raised when the center content must be swapped (overview placeholder now;
     /// T3 swaps in BrotherOverviewPane, T4 the BrotherCard).</summary>
     public event Action? CenterChanged;
@@ -100,7 +103,8 @@ internal partial class MainViewModel : ObservableObject
         SelectedBrother = null;
 
         _ctx.Annotation.LoadFor(savePath);
-        // T3 mount: Java restoreUiState() — the four overview toggles land with BrotherOverviewPane.
+        // Java restoreUiState(): the four overview toggles come back from the annotation file.
+        Overview.RestoreUiState(_ctx.Annotation);
 
         var parser = new SaveParser(_ctx.Dict);
         ParseAsync(parser, savePath).ContinueWith(t =>
