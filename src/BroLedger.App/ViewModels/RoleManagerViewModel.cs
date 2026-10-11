@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using BroLedger.App.Controls;
 using BroLedger.Core.Models;
 using BroLedger.Core.Services;
 
@@ -6,13 +7,14 @@ namespace BroLedger.App.ViewModels;
 
 /// <summary>
 /// UI-free half of the role manager (Java ui/RoleManagerController): the role list CRUD +
-/// ordering, the per-stat target/priority form state and the delete-confirmation text.
-/// The window (role-manager.fxml half) builds the stat editor grid and pushes/pulls this
-/// state; the perk-plan template pane is not embedded (see RoleManagerWindow).
+/// ordering, the per-stat target/priority form state, the perk-plan template state and the
+/// delete-confirmation text. The window (role-manager.fxml half) builds the stat editor grid
+/// and pushes/pulls this state; the perk-plan template pane hosts it via IPerkPlanState.
 /// </summary>
-internal sealed class RoleManagerViewModel
+internal sealed class RoleManagerViewModel : IPerkPlanState
 {
     private readonly UiContext _ctx;
+    private readonly Dictionary<string, string> _template = new();
 
     public RoleManagerViewModel(UiContext ctx)
     {
@@ -145,6 +147,33 @@ internal sealed class RoleManagerViewModel
         RolesChanged?.Invoke();
     }
 
+    // ---- perk plan template (Java setUiContext's pane callback + populateForm half) ----
+
+    /// <summary>Current template map of the selected role (snapshot copy for rendering).</summary>
+    public IReadOnlyDictionary<string, string> PlanStatus => _template;
+
+    /// <summary>Fired after every template mutation — pane slots + badge refresh.</summary>
+    public event Action? PlanChanged;
+
+    /// <summary>
+    /// Java PerkPlanPane.setOnChange: cycle one slot NOT → PLANNED → OPTIONAL → NOT, write the
+    /// template back to the selected role (null when empty), persist + notify.
+    /// </summary>
+    public void CyclePerkStatus(string hexId)
+    {
+        var selected = Selected;
+        if (selected == null) return;
+        var next = PerkPlanStatusLogic.FromString(_template.GetValueOrDefault(hexId)).Next();
+        if (next == PerkPlanStatus.Not) _template.Remove(hexId);
+        else _template[hexId] = next.ToString().ToUpperInvariant();
+        selected.PerkPlanTemplate = _template.Count == 0
+            ? null
+            : new Dictionary<string, string>(_template);
+        _ctx.Roles.Update(selected);
+        PlanChanged?.Invoke();
+        RolesChanged?.Invoke();
+    }
+
     /// <summary>Java selection listener → populateForm / setFormDisabled.</summary>
     public void Select(Role? r)
     {
@@ -153,6 +182,7 @@ internal sealed class RoleManagerViewModel
         {
             Name = "";
             Frontline = true;
+            _template.Clear();
             foreach (var row in StatRows)
             {
                 row.Target = "";
@@ -163,6 +193,11 @@ internal sealed class RoleManagerViewModel
         {
             Name = r.Name ?? "";
             Frontline = r.Frontline;
+            _template.Clear();
+            if (r.PerkPlanTemplate != null)
+            {
+                foreach (var (hexId, status) in r.PerkPlanTemplate) _template[hexId] = status;
+            }
             foreach (var row in StatRows)
             {
                 var idx = row.Stat.Ordinal;

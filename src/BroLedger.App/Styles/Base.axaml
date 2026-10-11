@@ -211,7 +211,7 @@
     </Style>
 
     <!-- keeper.css: .card-section (padding-only; any container can carry the class) -->
-    <Style Selector="StackPanel.card-section">
+    <Style Selector="StackPanel.card-section, Grid.card-section">
         <Setter Property="Margin" Value="0,4"/>
     </Style>
 
@@ -757,7 +757,7 @@
     </Style>
 
     <!-- keeper.css: .role-editor -->
-    <Style Selector="StackPanel.role-editor">
+    <Style Selector="StackPanel.role-editor, DockPanel.role-editor">
         <Setter Property="Background" Value="#1a1209"/>
     </Style>
 
@@ -807,7 +807,7 @@
     <Style Selector="ListBox.role-list ListBoxItem">
         <Setter Property="Background" Value="Transparent"/>
         <Setter Property="Foreground" Value="#d69f23"/>
-        <Setter Property="Padding" Value="6,3"/>
+        <Setter Property="Padding" Value="0"/>
     </Style>
     <Style Selector="ListBox.role-list ListBoxItem /template/ ContentPresenter#PART_ContentPresenter">
         <Setter Property="TextBlock.Foreground" Value="{Binding $parent[ListBoxItem].Foreground}"/>
@@ -817,5 +817,8 @@
     </Style>
     <Style Selector="ListBox.role-list ListBoxItem:selected /template/ ContentPresenter#PART_ContentPresenter">
         <Setter Property="Background" Value="#3a2510"/>
+    </Style>
+    <Style Selector="ListBox.role-list ListBoxItem:selected:focus /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Background" Value="#4d3218"/>
     </Style>
 </Styles>

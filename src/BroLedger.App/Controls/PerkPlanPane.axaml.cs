@@ -13,11 +13,27 @@ using BroLedger.Core.Services;
 namespace BroLedger.App.Controls;
 
 /// <summary>
-/// Shared perk plan grid used by the brother detail card (and the Role Manager, T6) — port of
+/// Plan-state seam (Java PerkPlanPane owned the map + setOnChange callback; the C# pane reads
+/// through this instead): current plan map, the click cycle and the change notification.
+/// Implemented by <see cref="BrotherCardViewModel"/> (annotation-backed) and
+/// <see cref="RoleManagerViewModel"/> (role template).
+/// </summary>
+internal interface IPerkPlanState
+{
+    IReadOnlyDictionary<string, string> PlanStatus { get; }
+
+    /// <summary>Fired after every plan mutation — the pane refreshes its slots.</summary>
+    event Action? PlanChanged;
+
+    void CyclePerkStatus(string hexId);
+}
+
+/// <summary>
+/// Shared perk plan grid used by the brother detail card and the Role Manager — port of
 /// Java ui/PerkPlanPane.java. All perks grouped by tier row (alphabetical within tier, tier 4
 /// weapons follow the in-game mastery order). LMB click cycles NOT → PLANNED → OPTIONAL via
-/// <see cref="BrotherCardViewModel.CyclePerkStatus"/>, which owns the plan state and persists
-/// it. <see cref="SetOwnedPerks"/> applies the brother-card opacity (1.0 owned / 0.3 not);
+/// <see cref="IPerkPlanState.CyclePerkStatus"/>, whose owner persists the plan.
+/// <see cref="SetOwnedPerks"/> applies the brother-card opacity (1.0 owned / 0.3 not);
 /// skip it where there is no ownership context (Role Manager).
 /// </summary>
 internal partial class PerkPlanPane : UserControl
@@ -27,17 +43,17 @@ internal partial class PerkPlanPane : UserControl
     private const double SlotSize = 50;
 
     private readonly UiContext _ctx;
-    private readonly BrotherCardViewModel _vm;
+    private readonly IPerkPlanState _state;
     private readonly Dictionary<string, Panel> _slots = new();
 
-    public PerkPlanPane(UiContext ctx, BrotherCardViewModel vm)
+    public PerkPlanPane(UiContext ctx, IPerkPlanState state)
     {
         InitializeComponent(); // Avalonia 12 generated init already loads the XAML.
         _ctx = ctx;
-        _vm = vm;
+        _state = state;
         Build();
-        _vm.PlanChanged += RefreshAll;
-        DetachedFromVisualTree += (_, _) => _vm.PlanChanged -= RefreshAll;
+        _state.PlanChanged += RefreshAll;
+        DetachedFromVisualTree += (_, _) => _state.PlanChanged -= RefreshAll;
     }
 
     // ---- build (once) -------------------------------------------------------
@@ -115,7 +131,7 @@ internal partial class PerkPlanPane : UserControl
             Children = { circle, iv },
         };
         TooltipFactory.Install(sp, TooltipFactory.ForHex(hexId));
-        sp.Tapped += (_, _) => _vm.CyclePerkStatus(hexId);
+        sp.Tapped += (_, _) => _state.CyclePerkStatus(hexId);
         return sp;
     }
 
@@ -132,7 +148,7 @@ internal partial class PerkPlanPane : UserControl
     private void ApplySlotStatus(string hexId, Panel slot)
     {
         var circle = (Ellipse)slot.Children[0];
-        var status = PerkPlanStatusLogic.FromString(_vm.PlanStatus.GetValueOrDefault(hexId));
+        var status = PerkPlanStatusLogic.FromString(_state.PlanStatus.GetValueOrDefault(hexId));
         circle.Classes.Remove("perk-status-optional");
         circle.Classes.Remove("perk-status-planned");
         switch (status)

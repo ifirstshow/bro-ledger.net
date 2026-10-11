@@ -213,4 +213,47 @@ public class RoleManagerViewModelTests : IDisposable
         Assert.False(vm.FormEnabled);
         Assert.Equal(1, changed);
     }
+
+    // ---- perk-plan template editing (Java setUiContext's pane callback + populateForm) --
+
+    [Fact]
+    public void CyclePerkStatus_CyclesTemplateWritesBackAndNotifies()
+    {
+        var vm = Vm();
+        vm.AddRole();
+        var changed = 0;
+        vm.RolesChanged += () => changed++;
+        var planEvents = 0;
+        vm.PlanChanged += () => planEvents++;
+
+        vm.CyclePerkStatus("0017"); // NOT → PLANNED
+        Assert.Equal("PLANNED", vm.PlanStatus["0017"]);
+        Assert.Equal("PLANNED", vm.Selected!.PerkPlanTemplate!["0017"]);
+
+        vm.CyclePerkStatus("0017"); // PLANNED → OPTIONAL
+        Assert.Equal("OPTIONAL", vm.Selected!.PerkPlanTemplate!["0017"]);
+
+        vm.CyclePerkStatus("0017"); // OPTIONAL → NOT: empty template → null
+        Assert.DoesNotContain("0017", vm.PlanStatus);
+        Assert.Null(vm.Selected!.PerkPlanTemplate);
+
+        Assert.Equal(3, changed);
+        Assert.Equal(3, planEvents);
+    }
+
+    [Fact]
+    public void Select_RoundTripsTemplate_AndClearsOnNull()
+    {
+        var vm = Vm();
+        vm.AddRole();
+        vm.CyclePerkStatus("0017");
+        vm.CyclePerkStatus("0022");
+
+        vm.Select(null);
+        Assert.Empty(vm.PlanStatus); // Java setFormDisabled: pane.setStatus(null)
+
+        vm.Select(vm.Roles[0]); // populateForm: pane.setStatus(r.perkPlanTemplate)
+        Assert.Equal("PLANNED", vm.PlanStatus["0017"]);
+        Assert.Equal("PLANNED", vm.PlanStatus["0022"]);
+    }
 }

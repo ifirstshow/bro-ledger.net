@@ -1,3 +1,4 @@
+using BroLedger.App.Controls;
 using BroLedger.Core.Models;
 using BroLedger.Core.Services;
 
@@ -40,7 +41,7 @@ internal static class PerkPlanStatusLogic
 /// role, the role-fit target styling, the perk-plan edits and the extra role-comparison
 /// columns. Visual construction (grids, images, tooltips) lives in <c>BrotherCard</c>.
 /// </summary>
-internal sealed class BrotherCardViewModel
+internal sealed class BrotherCardViewModel : IPerkPlanState
 {
     private readonly UiContext _ctx;
     private readonly Dictionary<string, string> _plan = new();

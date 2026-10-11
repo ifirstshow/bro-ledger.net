@@ -4,6 +4,7 @@ using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Layout;
 using Avalonia.Media;
+using BroLedger.App.Controls;
 using BroLedger.App.Services;
 using BroLedger.App.ViewModels;
 using BroLedger.Core.Models;
@@ -13,14 +14,14 @@ namespace BroLedger.App;
 
 /// <summary>
 /// Port of JAVA role-manager.fxml + ui/RoleManagerController.java's window half: title-bar
-/// drag, the ESC filter, the code-built stat editor grid (Java buildStatEditorGrid) and the
-/// delete confirmation. Decisions and persistence live in <see cref="RoleManagerViewModel"/>.
-/// Deviation: the perk-plan template pane is not embedded — the C# PerkPlanPane is coupled
-/// to the brother card's annotation-backed plan state; template editing lands with that seam.
+/// drag, the ESC filter, the code-built stat editor grid (Java buildStatEditorGrid), the
+/// embedded perk-plan template pane and the delete confirmation. Decisions and persistence
+/// live in <see cref="RoleManagerViewModel"/>.
 /// </summary>
 public partial class RoleManagerWindow : Window
 {
     private readonly RoleManagerViewModel _vm;
+    private readonly PerkPlanPane _perkPlanPane;
     private readonly Dictionary<int, TextBox> _targetBoxes = [];
     private readonly Dictionary<int, ToggleButton[]> _prioToggles = [];
     private bool _syncing;
@@ -28,9 +29,15 @@ public partial class RoleManagerWindow : Window
     public RoleManagerWindow()
     {
         InitializeComponent();
-        _vm = new RoleManagerViewModel(UiContext.Defaults());
+        var ctx = UiContext.Defaults();
+        _vm = new RoleManagerViewModel(ctx);
         DataContext = _vm;
         _vm.FormChanged += SyncForm;
+        _vm.PlanChanged += () => UpdatePerkBadge(_vm.PlanStatus);
+
+        // Java setUiContext: the shared perk pane edits the selected role's template.
+        _perkPlanPane = new PerkPlanPane(ctx, _vm);
+        PerkPlanScroll.Content = _perkPlanPane;
 
         RoleList.SelectionChanged += OnRoleListSelectionChanged;
 
@@ -138,12 +145,22 @@ public partial class RoleManagerWindow : Window
                 for (var i = 0; i < toggles.Length; i++)
                     toggles[i].IsChecked = i + 1 == row.Priority;
             }
-            Editor.IsEnabled = _vm.FormEnabled;
+            _perkPlanPane.RefreshPlan(); // Java populateForm: pane.setStatus(r.perkPlanTemplate)
+            UpdatePerkBadge(_vm.PlanStatus);
+            Editor.IsEnabled = _vm.FormEnabled; // Java setFormDisabled: pane disabled/cleared too
         }
         finally
         {
             _syncing = false;
         }
+    }
+
+    /// <summary>Java updatePerkBadge — hidden when the plan has no planned/optional entries.</summary>
+    private void UpdatePerkBadge(IReadOnlyDictionary<string, string>? plan)
+    {
+        var text = BrotherCardViewModel.PlanBadgeText(plan);
+        PerkPlanBadge.Text = text ?? "";
+        PerkPlanBadge.IsVisible = text != null;
     }
 
     /// <summary>Pushes the controls' current state into the VM (Java saveRole's read half).</summary>
