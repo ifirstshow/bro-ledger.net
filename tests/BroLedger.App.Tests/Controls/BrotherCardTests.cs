@@ -103,6 +103,33 @@ public class BrotherCardTests : IDisposable
     }
 
     [AvaloniaFact]
+    public void LayoutSizeRebuild_KeepsStatValuesPainted()
+    {
+        var (vm, card) = BuildCard();
+        var window = new Window { Width = 1200, Height = 800, Content = card };
+        try
+        {
+            window.Show();
+            window.Dispatcher.RunJobs();
+
+            // First measurement fires StatsGrid.SizeChanged → UpdateMaxExtras → the grid
+            // rebuilds (extra-column budget). The rebuilt cells must carry the brother's
+            // values again, not come up blank.
+            var grid = card.GetControl<Grid>("StatsGrid");
+            var vals = grid.Children.OfType<TextBlock>()
+                .Where(t => Grid.GetColumn(t) == 3 && Grid.GetRow(t) >= 1)
+                .ToList();
+            Assert.Equal(8, vals.Count);
+            Assert.All(vals, v => Assert.False(string.IsNullOrEmpty(v.Text)));
+        }
+        finally
+        {
+            window.Close();
+            vm.StopWatcher();
+        }
+    }
+
+    [AvaloniaFact]
     public void RepopulateWithAnotherBrother_RetargetsCard()
     {
         var (vm, card) = BuildCard();

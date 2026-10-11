@@ -161,8 +161,7 @@ internal partial class BrotherCard : UserControl
     private void OnColumnOrderChanged()
     {
         if (_vm.StatOrder().Select(s => s.Ordinal).SequenceEqual(_lastStatOrder)) return;
-        RebuildGrid();
-        RefreshStatValues();
+        RebuildGrid(); // includes the value refresh
     }
 
     private void OnStatsGridSizeChanged(object? sender, SizeChangedEventArgs e)
@@ -277,6 +276,11 @@ internal partial class BrotherCard : UserControl
         AddCell(_persistentRoleHeader, StatHeaderRow, PersistentTargetCol);
 
         BuildExtraColumns();
+
+        // The grid rebuilds outside populate too (size budget, column order, role refresh).
+        // Java's rebuildExtraColumns only re-laid the extras; ours recreates the fixed rows
+        // as well, so repaint the current brother into the fresh cells.
+        RefreshStatValues();
     }
 
     private void AddCell(Control cell, int row, int col)
@@ -309,7 +313,7 @@ internal partial class BrotherCard : UserControl
             {
                 Classes = { "role-combo" },
                 Width = ExtraColWidth,
-                PlaceholderText = "role…",
+                // Java's extras combo has no placeholder — the button always reads "Choose".
                 ItemsSource = _ctx.Roles.GetAll(),
                 ItemTemplate = new FuncDataTemplate<Role>((r, _) =>
                     new TextBlock { Text = r?.Name ?? "" }),
@@ -507,8 +511,7 @@ internal partial class BrotherCard : UserControl
             if (extra == null) continue;
             _vm.Extras[i] = _ctx.Roles.GetAll().FirstOrDefault(r => r.Id == extra.Id);
         }
-        RebuildGrid();
-        RefreshStatValues();
+        RebuildGrid(); // includes the value refresh
     }
 
     // ---- perks (Java buildPerkPlanPane + badge/button updates) -------------------
