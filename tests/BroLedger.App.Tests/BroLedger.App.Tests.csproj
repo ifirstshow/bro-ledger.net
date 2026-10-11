@@ -20,4 +20,10 @@
     <ProjectReference Include="..\..\src\BroLedger.App\BroLedger.App.csproj" />
   </ItemGroup>
 
+  <!-- Real-save fixture shared with Core.Tests (linked, not duplicated). The Export button
+       nail parses it and asserts the CSV lands next to it. -->
+  <ItemGroup>
+    <Content Include="..\BroLedger.Core.Tests\TestData\TestSavefile.sav" Link="TestData\TestSavefile.sav" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
 </Project>

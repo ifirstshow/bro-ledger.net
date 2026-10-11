@@ -3,7 +3,10 @@ using BroLedger.Core;
 using BroLedger.Core.Models;
 using BroLedger.Core.Parsing;
 using BroLedger.Core.Services;
+using BroLedger.Tools;
+using BroLedger.Tools.Parser;
 using CommunityToolkit.Mvvm.ComponentModel;
+using System.Text.RegularExpressions;
 
 namespace BroLedger.App.ViewModels;
 
@@ -37,6 +40,11 @@ internal partial class MainViewModel : ObservableObject
     /// <summary>Raised when the center content must be swapped (overview placeholder now;
     /// T3 swaps in BrotherOverviewPane, T4 the BrotherCard).</summary>
     public event Action? CenterChanged;
+
+    /// <summary>Raised on the UI thread when a save parse fails — MainWindow shows the
+    /// Java setOnFailed→showError modal (the VM stays window-free). loadSaveQuiet stays
+    /// status-only, exactly like the Java original.</summary>
+    public event Action<string, string>? ParseFailed;
 
     // Java readVersion(): blank version renders as "" (label simply absent).
     public string VersionLabelText { get; } = FormatVersion();
@@ -99,7 +107,9 @@ internal partial class MainViewModel : ObservableObject
         {
             if (t.IsFaulted)
             {
-                SetStatus("Failed to parse save file: " + t.Exception?.GetBaseException().Message, true);
+                var message = t.Exception?.GetBaseException().Message ?? "unknown error";
+                SetStatus("Failed to parse save file: " + message, true);
+                ParseFailed?.Invoke("Failed to parse save file", message);
                 return;
             }
             ApplyResult(parser, t.Result);
@@ -140,6 +150,55 @@ internal partial class MainViewModel : ObservableObject
         ShowingOverview = false;
         OverviewTogglesVisible = false;
         CenterChanged?.Invoke();
+    }
+
+    // ---- export (Java exportSave / exportExcerpt) --------------------------
+
+    /// <summary>Java exportSave: last save's brothers → sibling .csv (semicolon-separated).</summary>
+    public void ExportSave()
+    {
+        var target = ExportTarget(".csv");
+        if (target == null) return;
+        try
+        {
+            new BrotherCsvExporter(_ctx.Dict, _ctx.StatModifier, _ctx.Annotation, _ctx.Roles)
+                .Export(AppConfig.Instance, target.Value.Save, target.Value.Out);
+            SetStatus("Exported to " + Path.GetFileName(target.Value.Out), false);
+        }
+        catch (IOException e)
+        {
+            SetStatus("Export failed: " + e.Message, true);
+        }
+    }
+
+    /// <summary>Java exportExcerpt: raw parse trace → sibling .tsv (debug-only button).</summary>
+    public void ExportExcerpt()
+    {
+        var target = ExportTarget(".tsv");
+        if (target == null) return;
+        try
+        {
+            new BrotherSavefileExporter(_ctx.Dict).Write(target.Value.Save, target.Value.Out);
+            SetStatus("Excerpt written to " + Path.GetFileName(target.Value.Out), false);
+        }
+        catch (IOException e)
+        {
+            SetStatus("Excerpt failed: " + e.Message, true);
+        }
+    }
+
+    /// <summary>Shared guard + sibling-path rule of Java exportSave/exportExcerpt: no last save
+    /// → warning status and null; else the save path and its "&lt;base&gt;&lt;ext&gt;" neighbour.</summary>
+    private (string Save, string Out)? ExportTarget(string extension)
+    {
+        var savePath = AppConfig.Instance.LastSaveFilePath;
+        if (string.IsNullOrWhiteSpace(savePath))
+        {
+            SetStatus("No save file loaded — open a save first", true);
+            return null;
+        }
+        var baseName = Regex.Replace(Path.GetFileName(savePath), @"\.[^.]+$", "");
+        return (savePath, Path.Combine(Path.GetDirectoryName(savePath) ?? "", baseName + extension));
     }
 
     // ---- internals ---------------------------------------------------------

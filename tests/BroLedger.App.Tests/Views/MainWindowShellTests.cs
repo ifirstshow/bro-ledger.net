@@ -1,6 +1,9 @@
 using Avalonia.Controls;
 using Avalonia.Headless.XUnit;
+using Avalonia.Interactivity;
 using BroLedger.App.ViewModels;
+using BroLedger.Core;
+using BroLedger.Core.Services;
 
 namespace BroLedger.App.Tests.Views;
 
@@ -45,5 +48,62 @@ public class MainWindowShellTests
         // out-dir defaults to ~/game-art.
         Assert.False(vm.CanExtract);
         Assert.EndsWith("game-art", vm.OutDir, StringComparison.Ordinal);
+    }
+
+    // ---- toolbar Export/Excerpt wiring (Java exportSave / exportExcerpt) ----
+
+    [AvaloniaFact]
+    public void ExportAndExcerptButtons_RouteToViewModelExportGuard()
+    {
+        var window = new MainWindow();
+        var vm = Assert.IsType<MainViewModel>(window.DataContext);
+
+        // Excerpt is debug-only (Java buildToolbar L128-131); dev builds are always debug.
+        Assert.Equal(AppInfo.IsDebug(), window.GetControl<Button>("ExcerptBtn").IsVisible);
+
+        var saved = AppConfig.Instance.LastSaveFilePath;
+        try
+        {
+            AppConfig.Instance.LastSaveFilePath = null;
+            window.GetControl<Button>("ExportBtn").RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+            Assert.Equal("No save file loaded — open a save first", vm.StatusText);
+            Assert.True(vm.StatusIsWarning);
+
+            window.GetControl<Button>("ExcerptBtn").RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+            Assert.Equal("No save file loaded — open a save first", vm.StatusText);
+        }
+        finally
+        {
+            AppConfig.Instance.LastSaveFilePath = saved;
+        }
+    }
+
+    [AvaloniaFact]
+    public void ExportSave_WritesCsvNextToSaveAndReportsStatus()
+    {
+        DictionaryService.Instance.LoadFromEmbeddedResource();
+        StatModifierService.Instance.LoadFromEmbeddedResource();
+
+        var save = Path.Combine(AppContext.BaseDirectory, "TestData", "TestSavefile.sav");
+        var csv = Path.Combine(AppContext.BaseDirectory, "TestData", "TestSavefile.csv");
+        File.Delete(csv);
+
+        var window = new MainWindow();
+        var vm = Assert.IsType<MainViewModel>(window.DataContext);
+        var saved = AppConfig.Instance.LastSaveFilePath;
+        try
+        {
+            AppConfig.Instance.LastSaveFilePath = save;
+            window.GetControl<Button>("ExportBtn").RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+
+            Assert.True(File.Exists(csv), "CSV should be written next to the save");
+            Assert.Equal("Exported to TestSavefile.csv", vm.StatusText);
+            Assert.False(vm.StatusIsWarning);
+        }
+        finally
+        {
+            AppConfig.Instance.LastSaveFilePath = saved;
+            File.Delete(csv);
+        }
     }
 }

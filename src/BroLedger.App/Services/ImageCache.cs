@@ -86,9 +86,11 @@ public sealed class ImageCache
     }
 
     // Java ImageCache.buildPlaceholder (L69-79) inlines a hand-assembled 1×1 gray PNG whose
-    // IHDR CRC is wrong (0x3A7E9B55; correct is 0xC4A0EB47) — JavaFX's lenient loader
-    // swallowed it, Skia throws "Unable to load bitmap" (crashed first launch). Draw the
-    // same 1×1 gray square natively instead of porting the corrupt bytes.
+    // IDAT chunk is corrupt (its CRC should be 0x8405A4EF, and the zlib stream itself is
+    // invalid — the Java author's hand-typed bytes; the IHDR CRC 0x3A7E9B55 is the correct
+    // canonical value). JavaFX's lenient loader swallowed it, Skia throws "Unable to load
+    // bitmap" (crashed first launch). Draw the same 1×1 gray square natively instead of
+    // porting the corrupt bytes.
     private static Bitmap BuildPlaceholder()
     {
         var rtb = new RenderTargetBitmap(new PixelSize(1, 1), new Vector(96, 96));

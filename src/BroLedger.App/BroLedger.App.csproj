@@ -13,6 +13,9 @@
 
   <ItemGroup>
     <ProjectReference Include="..\BroLedger.Core\BroLedger.Core.csproj" />
+    <!-- Java ui→tools 1:1: toolbar Export/Excerpt buttons call the exporters (ui/MainController
+         depends on tools/BrotherCsvExporter + BrotherSavefileExporter). -->
+    <ProjectReference Include="..\BroLedger.Tools\BroLedger.Tools.csproj" />
   </ItemGroup>
 
   <ItemGroup>

@@ -7,7 +7,9 @@ using Avalonia.Markup.Xaml;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform;
 using Avalonia.Platform.Storage;
+using BroLedger.App.Services;
 using BroLedger.App.ViewModels;
+using BroLedger.Core;
 using BroLedger.Core.Services;
 
 namespace BroLedger.App;
@@ -27,6 +29,13 @@ public partial class MainWindow : Window
         DataContext = _vm;
         _vm.CenterChanged += UpdateCenterContent;
         _vm.PropertyChanged += OnViewModelPropertyChanged;
+        // Java loadSave setOnFailed → showError: parse failure also opens an error modal.
+        _vm.ParseFailed += (header, message) =>
+            _ = ModalService.ErrorAsync(this, "Error", header, message);
+
+        // Java buildToolbar L128-131: "Excerpt" is a developer/diagnostic export variant —
+        // hidden in release builds.
+        ExcerptBtn.IsVisible = AppInfo.IsDebug();
 
         Icon = new WindowIcon(new Bitmap(AssetLoader.Open(
             new Uri("avares://BroLedger.App/Assets/BroLedger.ico"))));
@@ -100,6 +109,9 @@ public partial class MainWindow : Window
 
     // ---- hotkeys (Java HotkeyManager "global" scope: Ctrl+O / Ctrl+W / ESC) ----
 
+    // ponytail: Java binds KeyCodeCombination.SHORTCUT_DOWN (Cmd on macOS); these cases match
+    // KeyModifiers.Control (Win/Linux) only — map to KeyModifiers.Meta on OS X in 计划⑤'s
+    // cross-platform acceptance pass.
     protected override void OnKeyDown(KeyEventArgs e)
     {
         switch (e.Key)
@@ -150,15 +162,21 @@ public partial class MainWindow : Window
 
     // ---- toolbar ------------------------------------------------------------
 
-    /// <summary>Java openSave: picker → remember in config → loadSave.</summary>
+    /// <summary>Java openSave: picker (starting in the last save's directory) → remember in
+    /// config → loadSave.</summary>
     private async Task OpenSaveAsync()
     {
-        var files = await StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
+        var options = new FilePickerOpenOptions
         {
             Title = "Open Battle Brothers Save File",
             AllowMultiple = false,
             FileTypeFilter = [new FilePickerFileType("Save files (*.sav)") { Patterns = ["*.sav"] }],
-        });
+        };
+        // Java openSave L345-349: setInitialDirectory to the last save's folder.
+        if (Path.GetDirectoryName(AppConfig.Instance.LastSaveFilePath) is { } dir && Directory.Exists(dir))
+            options.SuggestedStartLocation = await StorageProvider.TryGetFolderFromPathAsync(dir);
+
+        var files = await StorageProvider.OpenFilePickerAsync(options);
         if (files.Count == 0) return;
 
         var path = files[0].Path.LocalPath;
@@ -169,6 +187,11 @@ public partial class MainWindow : Window
     }
 
     private void OnOpenSave(object? sender, RoutedEventArgs e) => _ = OpenSaveAsync();
+
+    // Java exportSave / exportExcerpt — button handlers; logic lives in MainViewModel.
+    private void OnExportSave(object? sender, RoutedEventArgs e) => _vm.ExportSave();
+
+    private void OnExportExcerpt(object? sender, RoutedEventArgs e) => _vm.ExportExcerpt();
 
     // T6 mount: Java openRoleManager — RoleManager dialog lands with T6.
     private void OnOpenRoleManager(object? sender, RoutedEventArgs e) { }
