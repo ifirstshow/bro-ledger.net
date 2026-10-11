@@ -2,7 +2,7 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** 移植 RoleShareService（同一云端 Worker 端点，分享码与 Java 版互通）与 3 个控制台工具，迁移 2 个测试类（37 个测试）。
+**Goal:** 移植 RoleShareService（同一云端 Worker 端点，分享码与 Java 版互通）与 3 个控制台工具，迁移 2 个测试类（Java 侧 39 个 @Test：RoleShareServiceTest 19 + ReplayAnalyzerTest 20）。
 
 **Architecture:** 新增 `src/BroLedger.Tools`（单一控制台项目、动词式分发 `replay|csv|savefile`——见 Global Constraints 裁决），三个工具类各自暴露 `public static int Run(string[] args)`。RoleShareService 归 `BroLedger.Core/Services/`，HTTP 用 BCL `HttpClient`，测试用自写 `HttpTestServer`（TcpListener 最小 HTTP stub，零新依赖）。Core.Tests 已引用 Tools（计划①配置），需补 Tools 的 InternalsVisibleTo。
 
@@ -12,7 +12,7 @@
 
 **Java 真源根**（简写 `JAVA` = `C:\Users\afly\Documents\Projects\BattleBrothers\bro-ledger\src\main\java\se\niclas\broledger`；`JAVATEST` = 同仓 `src\test\java\se\niclas\broledger`）。
 
-**既有接口**（计划①②产出，勿改）：`SaveParser.Parse/Warnings`、`BrotherLocator/HexReader/ItemParser/HexUtils`、`SaveReplayService`（`Instance/ReplayDir/AnnotationsFor/ListAll/Snapshots/Prune`、`ReplayEntry`）、`AnnotationService`（`Instance/PreviewReconcile/ReadAnnotationMaps`、`LevelUpEvent`——其 `StatDeltas/ConsumedIncreases` 为 `List<KeyValuePair<Stat,int>>` 按 Stat.Values 序）、`DictionaryService/RoleService/AppConfig/StatModifierService/StatPotentialCalculator`、`OverviewCalc`（含 `TierOrMax/DecoratePerkName`）、`Role/RolePack`（`PackSchemaVersion` 常量、`ForSharing`）、`DataJsonContext`（internal partial，追加 [JsonSerializable]；JSON 一律泛型重载——计划②裁决）。
+**既有接口**（计划①②产出，勿改）：`SaveParser.Parse/Warnings`、`BrotherLocator/HexReader/ItemParser/HexUtils`、`SaveReplayService`（`Instance/ReplayDir/AnnotationsFor/ListAll/Snapshots/Prune`、`ReplayEntry`）、`AnnotationService`（`Instance/PreviewReconcile/ReadAnnotationMaps`、`LevelUpEvent`——其 `StatDeltas/ConsumedIncreases` 为 `List<KeyValuePair<Stat,int>>` 按 Stat.Values 序）、`DictionaryService/RoleService/AppConfig/StatModifierService/StatPotentialCalculator`、`OverviewCalc`（含 `TierOrMax/DecoratePerkName`）、`Role/RolePack`（**常量 `RolePack.SchemaVersion = 1`、实例属性 `PackSchemaVersion`**——计划②产出名，wire 名 `schemaVersion`；`ForSharing`）、`LevelUpEvent`（8 字段：`Name/Adjusted/LevelsAssigned/StatDeltas/AdjustedStats/ConsumedIncreases/AddedPerkIds/Post11`）、`DataJsonContext`（internal partial，追加 [JsonSerializable]；JSON 一律泛型重载——计划②裁决）。
 
 ## Global Constraints
 
@@ -40,7 +40,7 @@
 ### Task 1: Tools 项目脚手架 + BrotherSavefileExporter
 
 **Files:**
-- Create: `src/BroLedger.Tools/BroLedger.Tools.csproj`（Exe；`<InternalsVisibleTo Include="BroLedger.Core.Tests" />`；ProjectReference Core）
+- Create: `src/BroLedger.Tools/BroLedger.Tools.csproj`（Exe；**不设 PublishAot**（规格 §3——仅 App 项目 AOT）；`<InternalsVisibleTo Include="BroLedger.Core.Tests" />`；ProjectReference Core）
 - Create: `src/BroLedger.Tools/Program.cs`（动词分发）
 - Create: `src/BroLedger.Tools/Tools/Parser/BrotherSavefileExporter.cs`（Java `tools/parser/` 子包结构保留）
 - Modify: `BroLedger.sln`（add project）
@@ -62,15 +62,16 @@
 
 **Files:**
 - Create: `src/BroLedger.Tools/Tools/ReplayAnalyzer.cs`
+- Modify: `src/BroLedger.Tools/Program.cs`（`replay` 路由替换 Task 1 的占位）
 - Test: `tests/BroLedger.Core.Tests/Tools/ReplayAnalyzerTests.cs`（迁移 `JAVATEST/tools/ReplayAnalyzerTest.java` 全部用例）
 
 **Interfaces:**
 - Consumes: Task 1 项目结构；`SaveParser`、`SaveReplayService`（`Instance/ReplayDir/AnnotationsFor/ListAll`、`ReplayEntry`）、`AnnotationService.Instance.PreviewReconcile` + 静态 `ReadAnnotationMaps`、`LevelUpEvent`（`Name/Adjusted/LevelsAssigned/StatDeltas/AddedPerkIds/ConsumedIncreases/Post11`）、`DictionaryService`
 - Produces: `ReplayAnalyzer` 静态类：`public static int Run(string[] args)`（交互式 Scanner→`Console.ReadLine` 循环；`--dir` 参数、1-based transition 或 "all"、可选输出文件）+ internal 静态缝（Java 包级私有）：`ReportRosterChanges(prev, next, TextWriter, List<string>)`、`ReportLevelUpEvent(LevelUpEvent, TextWriter, DictionaryService)`、`DetectAnomalies(prev, next, List<string>)`、`CrossCheck(brothers, computedPlanned, computedPost11, actualPlanned, actualPost11)`、`IsValid(Brother)`、`DisplayTs(string?)`、`StemOf(string)`；`record Transition(int Idx, string Prev, string Next)` internal
 
-- [ ] **Step 1: 写失败测试**（Java 20 个 @Test 逐断言转录；`ByteArrayOutputStream+PrintStream` → `StringWriter`；`fakeEvent` helper 构造 LevelUpEvent——C# 侧 StatDeltas/ConsumedIncreases 传空 `List<KeyValuePair<Stat,int>>`；isValid 五例、detectAnomalies 三例、roster 四例、crossCheck 三例、displayTs/stemOf 五例）
+- [ ] **Step 1: 写失败测试**（Java 20 个 @Test 逐断言转录；`ByteArrayOutputStream+PrintStream` → `StringWriter`；`fakeEvent` helper 构造 LevelUpEvent——C# 侧 StatDeltas/AdjustedStats/ConsumedIncreases/AddedPerkIds 传空集合、Post11=false；isValid 五例、detectAnomalies 三例、roster 四例、crossCheck 三例、displayTs/stemOf 五例）
 - [ ] **Step 2: 运行确认编译失败**
-- [ ] **Step 3: 实现**（真源 541 行逐方法。要点：① `DISPLAY_FMT "yyyy-MM-dd HH:mm:ss.SSS 'UTC'"` + `PARSE_FMT` 同 SaveReplayService；`displayTs` 用 `DateTimeOffset.TryParseExact(stem, "yyyyMMdd'T'HHmmss'_'fff'Z'", Invariant, ...)` 失败返回原串、null 安全；② `analyzeTransitions` 的 carried 状态三 map 深拷贝推进（`deepCopy` 值 clone）；③ crossCheck 的 `isNullOrZero/nullToZero` null≡全零等价；④ isValid 的 60 字长/name 空白/背景类型校验（`DictionaryService.Instance.Get`）；⑤ `"/".repeat(70)`→`new string('=', 70)`；⑥ 输出 `TextWriter`（Console.Out 或 StreamWriter））
+- [ ] **Step 3: 实现**（真源 541 行逐方法。要点：① `DISPLAY_FMT "yyyy-MM-dd HH:mm:ss.SSS 'UTC'"` + `PARSE_FMT` 同 SaveReplayService；`displayTs` 用 `DateTimeOffset.TryParseExact(stem, "yyyyMMdd'T'HHmmss'_'fff'Z'", Invariant, ...)` 失败返回原串、null 安全；② `analyzeTransitions` 的 carried 状态三 map 深拷贝推进（`deepCopy` 值 clone）；③ crossCheck 的 `isNullOrZero/nullToZero` null≡全零等价；④ isValid 的 60 字长/name 空白/背景类型校验（`DictionaryService.Instance.Get`）；⑤ `"=".repeat(70)`→`new string('=', 70)`；⑥ 输出 `TextWriter`（Console.Out 或 StreamWriter））
 - [ ] **Step 4: 运行确认通过；Step 5: Commit** `feat(tools): ReplayAnalyzer (transition replay + cross-check)`
 
 ---
@@ -110,9 +111,10 @@ abbrev+" pot" + Perk N + Traits）；`"*".repeat(stars)`；sanitize（`;`→空�
   - 单例：`Instance`（环境变量 `BROLEDGER_ROLESHARE_BASEURL` 覆盖，缺省 `https://bro-ledger-roles.niclas-cf8.workers.dev`）、`internal static CreateForTest(string)`、`internal static ResetInstance()`
   - `static string? NormalizeCode(string?)`；`PublishResult Publish(RolePack)`；`void Update(string rawCode, string ownerToken, RolePack pack)`；`RolePack Fetch(string rawCode)`
   - `internal static RolePack Sanitize(RolePack)`（Java 包级私有，测试直打）+ private NormalizedTargets/NormalizedPerkPlan/NormalizedPriorities
-  - 常量逐字：DEFAULT_BASE_URL、REQUEST_TIMEOUT=20s、MAX_PACK_ROLES=100、MAX_ROLE_NAME_LENGTH=60、MAX_PERK_PLAN_ENTRIES=100、MAX_TARGET_STAT=999
+  - schema 校验用 `RolePack.SchemaVersion` 常量（对 Java `RolePack.SCHEMA_VERSION`）
+  - 其余常量逐字：DEFAULT_BASE_URL、REQUEST_TIMEOUT=20s、MAX_PACK_ROLES=100、MAX_ROLE_NAME_LENGTH=60、MAX_PERK_PLAN_ENTRIES=100、MAX_TARGET_STAT=999
   - `HttpTestServer`（定稿 API，实现照此）：`class HttpTestServer : IDisposable`——构造时 `TcpListener(IPAddress.Loopback, 0)` 启动 accept 循环（后台线程）；`public string Url { get; }`（`http://127.0.0.1:{port}`）；`public void Route(string method, string path, Func<(string Method, string Path, string OwnerToken), (int Status, string Body)> handler)`（逐路由注册，未匹配路由返回 500）；`Dispose()` 停 listener。请求头解析只需读 request line 与 `X-Owner-Token`；响应写 status+body（Content-Type: application/json）。单线程 accept 循环即可（测试串行）
-- [ ] **Step 1: 写失败测试**（Java 17 个 @Test 逐断言转录——stub 路由逐例对应 Java HttpServer context；`assertThrows(KeyNotFoundException)`/`ArgumentException`/`IOException` 对应 Java 异常类型映射；`sanitizeNormalizesStatArrays` 等六例直打 internal Sanitize）
+- [ ] **Step 1: 写失败测试**（Java 19 个 @Test 逐断言转录——stub 路由逐例对应 Java HttpServer context；`assertThrows(KeyNotFoundException)`/`ArgumentException`/`IOException` 对应 Java 异常类型映射；`sanitizeNormalizesStatArrays` 起共七例直打 internal Sanitize）
 - [ ] **Step 2: 运行确认编译失败**
 - [ ] **Step 3: 实现**（真源 261 行逐方法。要点：① HttpClient via SocketsHttpHandler{ConnectTimeout=10s}、client.Timeout=20s；② publish POST `/packs` JSON body（`Serialize(pack, DataJsonContext.Default.RolePack)` 泛型重载）、200→解析 `{code, ownerToken}`（ownerToken 缺失→null）；③ update PUT `/packs/{code}` + `X-Owner-Token` 头；404→`KeyNotFoundException("Code {code} has expired — publish as a new code instead.")`、403→`IOException("Code {code} can't be updated from this computer.")`、其余非 200→IOException；④ fetch GET；404→KeyNotFoundException("No role pack found for code: {code}")；坏码 ArgumentException 不联网（normalizeCode 先行）；⑤ sanitize 逐句：null pack→IOException("Fetch failed: empty pack")、schemaVersion>SCHEMA_VERSION→IOException("...newer version...")、roles null→空、removeIf null、>100 截断+MarkTruncated、name null→""/60 截断、三组 normalize；⑥ NormalizedPerkPlan：仅收 OPTIONAL/PLANNED 值、null 键跳过、100 上限 break、空→null）
 - [ ] **Step 4: 运行确认通过；Step 5: Commit** `feat(core): RoleShareService (worker API, hostile-pack sanitize, test HttpServer)`
