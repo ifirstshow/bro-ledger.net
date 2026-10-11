@@ -13,11 +13,10 @@ public static class Program
         return args[0] switch
         {
             "savefile" => Parser.BrotherSavefileExporter.Run(args[1..]),
-            // Task 2: ReplayAnalyzer
-            "replay" => NotYetAvailable("replay"),
+            "replay"   => ReplayAnalyzer.Run(args[1..]),
             // Task 3: BrotherCsvExporter
-            "csv"    => NotYetAvailable("csv"),
-            _        => UnknownVerb(args[0]),
+            "csv"      => NotYetAvailable("csv"),
+            _          => UnknownVerb(args[0]),
         };
     }
 

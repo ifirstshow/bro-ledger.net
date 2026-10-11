@@ -22,6 +22,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\BroLedger.Core\BroLedger.Core.csproj" />
+    <ProjectReference Include="..\..\src\BroLedger.Tools\BroLedger.Tools.csproj" />
   </ItemGroup>
 
 </Project>
