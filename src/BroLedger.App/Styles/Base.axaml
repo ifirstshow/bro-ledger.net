@@ -739,4 +739,83 @@
     <Style Selector="CheckBox.pref-check">
         <Setter Property="Foreground" Value="#d69f23"/>
     </Style>
+
+    <!-- ===== Task 6 segments (keeper.css role-manager / share-import rules) ===== -->
+
+    <!-- keeper.css: .sidebar (role-manager left pane; gold text, transparent list cells) -->
+    <Style Selector="Border.sidebar">
+        <Setter Property="Background" Value="#120d05"/>
+        <Setter Property="BorderBrush" Value="#3a2510"/>
+        <Setter Property="BorderThickness" Value="0,0,1,0"/>
+    </Style>
+    <Style Selector="TextBlock.sidebar-header">
+        <Setter Property="Foreground" Value="#ba9238"/>
+        <Setter Property="FontSize" Value="13"/>
+        <Setter Property="FontWeight" Value="Bold"/>
+        <Setter Property="Padding" Value="12,8"/>
+        <Setter Property="Background" Value="#0f0a04"/>
+    </Style>
+
+    <!-- keeper.css: .role-editor -->
+    <Style Selector="StackPanel.role-editor">
+        <Setter Property="Background" Value="#1a1209"/>
+    </Style>
+
+    <!-- keeper.css: .role-list-buttons -->
+    <Style Selector="Border.role-list-buttons">
+        <Setter Property="Background" Value="#0f0a04"/>
+        <Setter Property="BorderBrush" Value="#3a2510"/>
+        <Setter Property="BorderThickness" Value="0,1,0,0"/>
+    </Style>
+
+    <!-- keeper.css: .prio-toggle (P1/P2/P3 weight previews; selected = darker amber) -->
+    <Style Selector="ToggleButton.prio-toggle">
+        <Setter Property="Background" Value="#1e1508"/>
+        <Setter Property="Foreground" Value="#8a7040"/>
+        <Setter Property="BorderBrush" Value="#3a2510"/>
+        <Setter Property="CornerRadius" Value="2"/>
+        <Setter Property="FontSize" Value="11"/>
+        <Setter Property="Padding" Value="4,2"/>
+    </Style>
+    <Style Selector="ToggleButton.prio-toggle /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Foreground" Value="{Binding $parent[ToggleButton].Foreground}"/>
+    </Style>
+    <Style Selector="ToggleButton.prio-toggle:checked /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Background" Value="#3a2510"/>
+        <Setter Property="Foreground" Value="#d69f23"/>
+    </Style>
+    <Style Selector="ToggleButton.prio-toggle:disabled">
+        <Setter Property="Opacity" Value="0.4"/>
+    </Style>
+
+    <!-- keeper.css: .pack-title (import dialog's fetched-pack title) -->
+    <Style Selector="TextBlock.pack-title">
+        <Setter Property="Foreground" Value="#d4b060"/>
+        <Setter Property="FontSize" Value="15"/>
+        <Setter Property="FontWeight" Value="Bold"/>
+    </Style>
+
+    <!-- keeper.css: .check-box (gold check text; FluentTheme supplies the box) -->
+    <Style Selector="CheckBox.check-box">
+        <Setter Property="Foreground" Value="#d69f23"/>
+    </Style>
+
+    <!-- keeper.css: .list-view / .list-cell (transparent list, gold rows, amber selection) -->
+    <Style Selector="ListBox.role-list">
+        <Setter Property="Background" Value="Transparent"/>
+    </Style>
+    <Style Selector="ListBox.role-list ListBoxItem">
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="Foreground" Value="#d69f23"/>
+        <Setter Property="Padding" Value="6,3"/>
+    </Style>
+    <Style Selector="ListBox.role-list ListBoxItem /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="TextBlock.Foreground" Value="{Binding $parent[ListBoxItem].Foreground}"/>
+    </Style>
+    <Style Selector="ListBox.role-list ListBoxItem:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Background" Value="#2a1a08"/>
+    </Style>
+    <Style Selector="ListBox.role-list ListBoxItem:selected /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Background" Value="#3a2510"/>
+    </Style>
 </Styles>

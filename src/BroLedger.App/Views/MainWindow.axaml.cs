@@ -278,8 +278,25 @@ public partial class MainWindow : Window
 
     private void OnExportExcerpt(object? sender, RoutedEventArgs e) => _vm.ExportExcerpt();
 
-    // T6 mount: Java openRoleManager — RoleManager dialog lands with T6.
-    private void OnOpenRoleManager(object? sender, RoutedEventArgs e) { }
+    // Java openRoleManager: themed modal with usage counter + roles-changed repaint.
+    private void OnOpenRoleManager(object? sender, RoutedEventArgs e)
+    {
+        var manager = new RoleManagerWindow();
+        manager.Init(CountBrothersAssignedTo);
+        manager.RolesChanged += OnRolesChanged;
+        _ = manager.ShowDialog(this);
+    }
+
+    /// <summary>Java countBrothersAssignedTo — loaded-save brothers per role id.</summary>
+    private long? CountBrothersAssignedTo(string roleId) => _vm.Brothers.Count(b =>
+        b.Fingerprint != null && roleId == AnnotationService.Instance.Get(b.Fingerprint).RoleId);
+
+    /// <summary>Java onRolesChanged: refresh the card's role widgets, re-show the overview.</summary>
+    private void OnRolesChanged()
+    {
+        if (!_vm.ShowingOverview && _vm.SelectedBrother != null) _vm.ShowCard(_vm.SelectedBrother);
+        if (_vm.ShowingOverview && _vm.Brothers.Count > 0) _vm.ShowOverview();
+    }
 
     // Java openPreferences: themed modal; onPreferencesChanged repaints card + overview
     // when the expected-stats mode changed.

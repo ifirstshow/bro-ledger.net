@@ -1,0 +1,73 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:BroLedger.App.ViewModels"
+        x:Class="BroLedger.App.RoleImportWindow"
+        x:DataType="vm:RoleImportViewModel"
+        Title="Import Roles"
+        Width="480" Height="500" MinWidth="440" MinHeight="420"
+        WindowDecorations="None"
+        ExtendClientAreaToDecorationsHint="True"
+        Background="{StaticResource BgAppBrush}">
+
+    <!-- role-import-dialog.fxml 1:1: code + Fetch, status, pack title, checked import
+         checklist with Select All/None, Import/Close. -->
+    <Border Classes="app-frame modal-frame"
+            Background="{StaticResource BgAppBrush}"
+            TextElement.Foreground="{StaticResource GoldBrush}"
+            TextElement.FontSize="13">
+        <DockPanel>
+
+            <Border x:Name="TitleBar" Classes="title-bar" DockPanel.Dock="Top">
+                <DockPanel LastChildFill="True">
+                    <TextBlock Classes="title-bar-label" Text="Import Roles"
+                               VerticalAlignment="Center"/>
+                    <Button Classes="window-btn window-btn-close" Content="✕"
+                            Focusable="False" DockPanel.Dock="Right" Click="OnClose"/>
+                </DockPanel>
+            </Border>
+
+            <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" Spacing="8"
+                        HorizontalAlignment="Right" Margin="20,0,20,16">
+                <Button x:Name="ImportButton" Classes="fancy-btn" Content="Import" Focusable="False"
+                        IsEnabled="{Binding ImportEnabled}" Click="OnImport"/>
+                <Button Classes="fancy-btn" Content="Close" Focusable="False" Click="OnClose"/>
+            </StackPanel>
+
+            <StackPanel Spacing="12" Margin="20,16,20,12">
+
+                <StackPanel Orientation="Horizontal" Spacing="10">
+                    <TextBlock Classes="field-label" Text="Code:" MinWidth="90" VerticalAlignment="Center"/>
+                    <TextBox x:Name="CodeField" PlaceholderText="e.g. AB3D9F2K" Text="{Binding Code}"
+                             HorizontalAlignment="Stretch"/>
+                    <Button x:Name="FetchButton" Classes="fancy-btn" Content="Fetch" Focusable="False"
+                            IsEnabled="{Binding FetchEnabled}" Click="OnFetch"/>
+                </StackPanel>
+
+                <TextBlock x:Name="StatusLabel" Classes="dim-label" TextWrapping="Wrap"
+                           Text="{Binding StatusText}"/>
+
+                <TextBlock x:Name="PackTitleLabel" Classes="pack-title" TextWrapping="Wrap"
+                           Text="{Binding PackTitle}"
+                           IsVisible="{Binding PackTitle, Converter={x:Static ObjectConverters.IsNotNull}}"/>
+
+                <Grid ColumnDefinitions="*,8,Auto,6,Auto">
+                    <TextBlock Classes="section-header" Text="Roles to import:" VerticalAlignment="Center"/>
+                    <Button Classes="fancy-btn" Content="Select All" Focusable="False" Click="OnSelectAll"/>
+                    <Button Grid.Column="4" Classes="fancy-btn" Content="Select None" Focusable="False" Click="OnSelectNone"/>
+                </Grid>
+                <ScrollViewer Classes="modal-scroll" HorizontalScrollBarVisibility="Disabled">
+                    <ItemsControl ItemsSource="{Binding Items}" Margin="4">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="vm:ImportCheckRole">
+                                <CheckBox Classes="check-box" Margin="0,2"
+                                          Content="{Binding Label}"
+                                          IsChecked="{Binding IsChecked, Mode=TwoWay}"/>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </ScrollViewer>
+
+            </StackPanel>
+        </DockPanel>
+    </Border>
+</Window>

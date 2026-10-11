@@ -1,0 +1,96 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:BroLedger.App.ViewModels"
+        x:Class="BroLedger.App.RoleShareWindow"
+        x:DataType="vm:RoleShareViewModel"
+        Title="Share Roles"
+        Width="480" Height="560" MinWidth="440" MinHeight="520"
+        WindowDecorations="None"
+        ExtendClientAreaToDecorationsHint="True"
+        Background="{StaticResource BgAppBrush}">
+
+    <!-- role-share-dialog.fxml 1:1: hint, title field, checked role list with
+         Select All/None, recent-uploads history (update-in-place), code + Copy, status. -->
+    <Border Classes="app-frame modal-frame"
+            Background="{StaticResource BgAppBrush}"
+            TextElement.Foreground="{StaticResource GoldBrush}"
+            TextElement.FontSize="13">
+        <DockPanel>
+
+            <Border x:Name="TitleBar" Classes="title-bar" DockPanel.Dock="Top">
+                <DockPanel LastChildFill="True">
+                    <TextBlock Classes="title-bar-label" Text="Share Roles"
+                               VerticalAlignment="Center"/>
+                    <Button Classes="window-btn window-btn-close" Content="✕"
+                            Focusable="False" DockPanel.Dock="Right" Click="OnClose"/>
+                </DockPanel>
+            </Border>
+
+            <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" Spacing="8"
+                        HorizontalAlignment="Right" Margin="20,0,20,16">
+                <Button x:Name="ShareButton" Classes="fancy-btn" Focusable="False"
+                        Content="{Binding ShareButtonLabel}" IsEnabled="{Binding ShareEnabled}"
+                        Click="OnShare"/>
+                <Button Classes="fancy-btn" Content="Close" Focusable="False" Click="OnClose"/>
+            </StackPanel>
+
+            <StackPanel Spacing="12" Margin="20,16,20,12">
+
+                <TextBlock Classes="dim-label" TextWrapping="Wrap"
+                           Text="Uploads the selected roles' names, targets, and perk plans to an unlisted public store. Anyone with the code can view them."/>
+
+                <StackPanel Orientation="Horizontal" Spacing="10">
+                    <TextBlock Classes="field-label" Text="Title:" MinWidth="90" VerticalAlignment="Center"/>
+                    <TextBox PlaceholderText="Optional title" Text="{Binding PackName}"
+                             HorizontalAlignment="Stretch"/>
+                </StackPanel>
+
+                <Grid ColumnDefinitions="*,8,Auto,6,Auto">
+                    <TextBlock Classes="section-header" Text="Roles to include:" VerticalAlignment="Center"/>
+                    <Button Grid.Column="2" Classes="fancy-btn" Content="Select All" Focusable="False" Click="OnSelectAll"/>
+                    <Button Grid.Column="4" Classes="fancy-btn" Content="Select None" Focusable="False" Click="OnSelectNone"/>
+                </Grid>
+                <ScrollViewer Classes="modal-scroll" MaxHeight="150" HorizontalScrollBarVisibility="Disabled">
+                    <ItemsControl ItemsSource="{Binding CheckRoles}" Margin="4">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="vm:ShareCheckRole">
+                                <CheckBox Classes="check-box" Margin="0,2"
+                                          Content="{Binding Role.Name}"
+                                          IsChecked="{Binding IsChecked, Mode=TwoWay}"/>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </ScrollViewer>
+
+                <StackPanel IsVisible="{Binding RecentVisible}" Spacing="4">
+                    <Grid ColumnDefinitions="*,8,Auto">
+                        <TextBlock Classes="section-header" Text="Recent uploads (this computer):" VerticalAlignment="Center"/>
+                        <Button x:Name="NewCodeButton" Grid.Column="2" Classes="fancy-btn" Content="New code"
+                                Focusable="False" IsVisible="{Binding NewCodeVisible}" Click="OnNewCode"/>
+                    </Grid>
+                    <TextBlock Classes="dim-label" TextWrapping="Wrap"
+                               Text="Select one to publish the checked roles to the same code."/>
+                    <ListBox x:Name="RecentList" Classes="role-list" Height="110" MinHeight="110"
+                             ItemsSource="{Binding Recent}"
+                             SelectedItem="{Binding SelectedRecent, Mode=TwoWay}">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate x:DataType="vm:RecentShareItem">
+                                <TextBlock Text="{Binding Text}" TextWrapping="Wrap"/>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                </StackPanel>
+
+                <StackPanel Orientation="Horizontal" Spacing="10">
+                    <TextBlock Classes="field-label" Text="Code:" MinWidth="90" VerticalAlignment="Center"/>
+                    <TextBox IsReadOnly="True" Text="{Binding Code}" HorizontalAlignment="Stretch"/>
+                    <Button Classes="fancy-btn" Content="Copy" Focusable="False" Click="OnCopy"/>
+                </StackPanel>
+
+                <TextBlock x:Name="StatusLabel" Classes="dim-label" TextWrapping="Wrap"
+                           Text="{Binding StatusText}"/>
+
+            </StackPanel>
+        </DockPanel>
+    </Border>
+</Window>
