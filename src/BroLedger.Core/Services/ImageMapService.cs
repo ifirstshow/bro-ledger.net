@@ -115,6 +115,6 @@ public sealed class ImageMapService
     private static Dictionary<string, string> ToMap(JsonNode? node)
     {
         if (node == null || node.GetValueKind() == JsonValueKind.Null) return [];
-        return node.Deserialize<Dictionary<string, string>>() ?? [];
+        return node.Deserialize(DataJsonContext.Default.DictionaryStringString) ?? [];
     }
 }
