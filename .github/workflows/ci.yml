@@ -4,8 +4,9 @@
 # linux 本地冒烟（Task 6 交付清单用，CI 无需等 push 即可本地复现同款命令）：
 #   WSL:     wsl bash -lc "cd /mnt/c/Users/afly/Documents/Projects/BattleBrothers/bro-ledger.net && dotnet test -p:TreatWarningsAsErrors=true"
 #   docker:  docker run --rm -v "$PWD:/src" -w /src mcr.microsoft.com/dotnet/sdk:10.0 dotnet test -p:TreatWarningsAsErrors=true
-#   linux publish 冒烟:
-#            docker run --rm -v "$PWD:/src" -w /src mcr.microsoft.com/dotnet/sdk:10.0 dotnet publish src/BroLedger.App -c Release -r linux-x64 -p:TreatWarningsAsErrors=true
+#   linux publish 冒烟（bare sdk:10.0 无 clang/zlib1g-dev，AOT 需前置安装）:
+#            docker run --rm -v "$PWD:/src" -w /src mcr.microsoft.com/dotnet/sdk:10.0 bash -c "apt-get update && apt-get install -y clang zlib1g-dev && dotnet publish src/BroLedger.App -c Release -r linux-x64 -p:TreatWarningsAsErrors=true"
+#   macOS 产物运行: 未签名二进制需先 `xattr -d com.apple.quarantine BroLedger.App`；osx-x64 在 Apple Silicon 需 Rosetta
 
 name: CI
 

@@ -175,6 +175,7 @@ fingerprint = hex(hash[0..16])   // 32 个十六进制字符
 - TableView 行为：列重排（同类目内拖拽）、按角色排序、四个增强开关（Weapon Tier / Armor Stats / Perk Sorting / **Potential**——5 态：Off / Current+Pot. / Pot. Only / Current+Exp. / Exp. Only）交互一致；列顺序变化联动兄弟卡片属性排列
 - 拖放：Avalonia `DragDrop`；兄弟卡片排序拖放持久化到 keeper.json `sortIndex`
 - 快捷键语义一致：Ctrl+O 打开、Ctrl+W 停止监视、Enter 开卡片、ESC 逐层返回（卡片→总览；引导面板；各模态）
+  - 注：Java `SHORTCUT_DOWN` 语义——macOS 为 Cmd，其余为 Ctrl（平台加速器键）
 - 升级通知弹窗三态（Modal / Auto-close 15s / Off）由 Preferences 控制，持久化于 AppConfig
 - Level-up 指南粘性面板：总览中点击 level 单元格弹出，ESC/再点击/焦点外关闭逻辑一致
 - Setup 对话框：指向 `data/data_001.dat`、输出目录（默认 `~/game-art`）、Extract / Use existing folder 两按钮
