@@ -582,7 +582,9 @@ internal partial class BrotherCard : UserControl
         }
         else
         {
-            image.Source = _ctx.ImageCache.GetPlaceholder();
+            // Java 的 1×1 灰占位 PNG 损坏、实际渲染为空——空槽即透明（对齐 Java 视觉）；
+            // 占位图仅保留给真实缺图（game-art 缺文件）场景。
+            image.Source = null;
         }
 
         return new Border
