@@ -1,0 +1,72 @@
+# BroLedger CI — plan5 task 5（规格 §6 逐字）。
+# 本仓库无 remote：workflow 入库即交付；用户配置 remote 并 push 到 GitHub 后首跑（首跑盯满）。
+#
+# linux 本地冒烟（Task 6 交付清单用，CI 无需等 push 即可本地复现同款命令）：
+#   WSL:     wsl bash -lc "cd /mnt/c/Users/afly/Documents/Projects/BattleBrothers/bro-ledger.net && dotnet test -p:TreatWarningsAsErrors=true"
+#   docker:  docker run --rm -v "$PWD:/src" -w /src mcr.microsoft.com/dotnet/sdk:10.0 dotnet test -p:TreatWarningsAsErrors=true
+#   linux publish 冒烟:
+#            docker run --rm -v "$PWD:/src" -w /src mcr.microsoft.com/dotnet/sdk:10.0 dotnet publish src/BroLedger.App -c Release -r linux-x64 -p:TreatWarningsAsErrors=true
+
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  test:
+    name: test (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, ubuntu-latest, macos-latest]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+      - uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: nuget-${{ runner.os }}-${{ hashFiles('**/*.csproj') }}
+          restore-keys: nuget-${{ runner.os }}-
+      # 跨平台测试即门：xunit 双栈（Core.Tests v2 / App.Tests v3），solution 层一条命令跑两套 runner（T1 已验证）。
+      # macOS headless App.Tests 理论可跑；若首跑失败属"首跑盯满"范畴。
+      - run: dotnet test -p:TreatWarningsAsErrors=true
+
+  publish:
+    name: publish (${{ matrix.rid }})
+    needs: test
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { os: windows-latest, rid: win-x64 }
+          - { os: ubuntu-latest,  rid: linux-x64 }
+          - { os: macos-latest,   rid: osx-arm64 }
+          - { os: macos-latest,   rid: osx-x64 }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+      - uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: nuget-${{ runner.os }}-${{ hashFiles('**/*.csproj') }}
+          restore-keys: nuget-${{ runner.os }}-
+      # Native AOT 零警告硬门（TreatWarningsAsErrors 全步骤零容忍，规格 §6；win-x64 本机零警告已由 T4 验证）。
+      - run: dotnet publish src/BroLedger.App -c Release -r ${{ matrix.rid }} -p:TreatWarningsAsErrors=true
+      # Tools 项目 OutputType=Exe 但仅被当库引用（task-4 §6）：其 162KB apphost 会混入 publish 产物
+      # 成为死文件。unix apphost 无 .exe 后缀，两种名字都删——一步覆盖全平台。
+      - name: remove dead Tools apphost from publish output
+        shell: bash
+        run: rm -f src/BroLedger.App/bin/Release/net10.0/${{ matrix.rid }}/publish/BroLedger.Tools.exe src/BroLedger.App/bin/Release/net10.0/${{ matrix.rid }}/publish/BroLedger.Tools
+      - uses: actions/upload-artifact@v4
+        with:
+          name: BroLedger-${{ matrix.rid }}
+          path: src/BroLedger.App/bin/Release/net10.0/${{ matrix.rid }}/publish/
