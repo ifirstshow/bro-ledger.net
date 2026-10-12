@@ -17,6 +17,7 @@ namespace BroLedger.App.Tests.Controls;
 /// slots, plan edits surface the badge, back navigation raises BackRequested, and a valid
 /// overview column reorder rebuilds the grid in the new order.
 /// </summary>
+[Collection("EnvVar-BroLedgerDataDir")]
 public class BrotherCardTests : IDisposable
 {
     private readonly string _dataDir;
@@ -59,11 +60,9 @@ public class BrotherCardTests : IDisposable
         // the save file, and must not pollute the shared TestData output.
         vm.LoadSave(_saveCopy);
         // Parse runs Task.Run off-thread; pump until the roster landed.
-        for (var i = 0; i < 400 && vm.Brothers.Count == 0; i++)
-        {
-            Avalonia.Threading.Dispatcher.UIThread.RunJobs();
-            Thread.Sleep(25);
-        }
+        HeadlessPump.Until(() => vm.Brothers.Count > 0,
+            "vm.Brothers.Count > 0 (save parse applied)",
+            () => $"Brothers.Count={vm.Brothers.Count}");
         var card = new BrotherCard(UiContext.Defaults(), vm.Overview, vm.Brothers[0]);
         return (vm, card);
     }

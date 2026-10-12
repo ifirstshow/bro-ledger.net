@@ -13,6 +13,7 @@ namespace BroLedger.App.Tests.ViewModels;
 /// validation, the four-toggle cycle (LedDef tables), UiState persistence and the roster
 /// sort comparator. Cell rendering itself is exercised by the manual checklist.
 /// </summary>
+[Collection("EnvVar-BroLedgerDataDir")]
 public class OverviewViewModelTests : IDisposable
 {
     private readonly string _dataDir;

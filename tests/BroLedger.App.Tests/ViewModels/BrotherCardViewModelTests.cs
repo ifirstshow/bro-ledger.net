@@ -13,6 +13,7 @@ namespace BroLedger.App.Tests.ViewModels;
 /// click cycle and the extra-column presets. Plan ② T14 already covers OverviewCalc's pure
 /// math; these tests pin the wiring of that math into the card's annotations.
 /// </summary>
+[Collection("EnvVar-BroLedgerDataDir")]
 public class BrotherCardViewModelTests : IDisposable
 {
     private readonly string _dataDir;

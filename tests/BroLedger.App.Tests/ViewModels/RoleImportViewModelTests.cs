@@ -12,6 +12,7 @@ namespace BroLedger.App.Tests.ViewModels;
 /// Select All / Select None buttons (Java RoleImportController L100/L128/L150-156).
 /// The fetch network hop itself is exercised through RoleShareService in Core.Tests.
 /// </summary>
+[Collection("EnvVar-BroLedgerDataDir")]
 public class RoleImportViewModelTests : IDisposable
 {
     private readonly string _dataDir;

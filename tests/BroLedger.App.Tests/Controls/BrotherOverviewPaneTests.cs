@@ -15,6 +15,7 @@ namespace BroLedger.App.Tests.Controls;
 /// valid column-order commit rebuilding the header, and real header-drag pointer sequences
 /// (press/move/release through the headless window) committing or rejecting the reorder.
 /// </summary>
+[Collection("EnvVar-BroLedgerDataDir")]
 public class BrotherOverviewPaneTests : IDisposable
 {
     private readonly string _dataDir;
@@ -52,11 +53,9 @@ public class BrotherOverviewPaneTests : IDisposable
         vm.LoadSave(Path.Combine(AppContext.BaseDirectory, "TestData", "TestSavefile.sav"));
         // Parse runs Task.Run off-thread; pump the UI dispatcher until ApplyResult landed so
         // the pane is built from the real roster (otherwise rows would be vacuously 0 == 0).
-        for (var i = 0; i < 400 && vm.Brothers.Count == 0; i++)
-        {
-            Avalonia.Threading.Dispatcher.UIThread.RunJobs();
-            Thread.Sleep(25);
-        }
+        HeadlessPump.Until(() => vm.Brothers.Count > 0,
+            "vm.Brothers.Count > 0 (parse ApplyResult landed)",
+            () => $"Brothers.Count={vm.Brothers.Count}");
         var pane = new BrotherOverviewPane(UiContext.Defaults(), vm.Overview, vm.Brothers);
         return (vm, pane);
     }

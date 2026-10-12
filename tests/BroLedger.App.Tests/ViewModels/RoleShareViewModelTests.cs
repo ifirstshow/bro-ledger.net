@@ -11,6 +11,7 @@ namespace BroLedger.App.Tests.ViewModels;
 /// at VM level; Java's network thread itself was untested there and stays untested here
 /// (RoleShareService's HTTP seam is covered by Core.Tests against the local stub server).
 /// </summary>
+[Collection("EnvVar-BroLedgerDataDir")]
 public class RoleShareViewModelTests : IDisposable
 {
     private readonly string _dataDir;

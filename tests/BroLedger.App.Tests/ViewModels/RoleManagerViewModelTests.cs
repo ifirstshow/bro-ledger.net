@@ -11,6 +11,7 @@ namespace BroLedger.App.Tests.ViewModels;
 /// in Java those ran against live controls; here the form state is plain data on
 /// RoleManagerViewModel and the window pushes/pulls it.
 /// </summary>
+[Collection("EnvVar-BroLedgerDataDir")]
 public class RoleManagerViewModelTests : IDisposable
 {
     private readonly string _dataDir;

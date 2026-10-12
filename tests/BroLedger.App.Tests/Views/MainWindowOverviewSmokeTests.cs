@@ -9,6 +9,7 @@ namespace BroLedger.App.Tests.Views;
 /// Diagnostic smoke: MainWindow + real save → is the toolbar toggle host populated and is
 /// the overview pane mounted as CenterContent after LoadSave's async continuation?
 /// </summary>
+[Collection("EnvVar-BroLedgerDataDir")]
 public class MainWindowOverviewSmokeTests : IDisposable
 {
     private readonly string _dataDir;
@@ -40,13 +41,9 @@ public class MainWindowOverviewSmokeTests : IDisposable
         // Pump the dispatcher until LoadSave's continuation (parse → apply → ShowOverview)
         // ran: the parse is Task.Run off-thread (~1s for the 7MB fixture), its continuation
         // posts back to the UI-thread sync context.
-        for (var i = 0; i < 400 && !vm.ShowingOverview; i++)
-        {
-            window.Dispatcher.RunJobs();
-            Thread.Sleep(25);
-        }
-
-        Assert.True(vm.ShowingOverview, "ShowOverview never ran");
+        HeadlessPump.Until(() => vm.ShowingOverview,
+            "vm.ShowingOverview (LoadSave continuation ran ShowOverview)",
+            () => $"ShowingOverview={vm.ShowingOverview} OverviewTogglesVisible={vm.OverviewTogglesVisible}");
         Assert.True(vm.OverviewTogglesVisible);
 
         var host = window.GetControl<StackPanel>("OverviewTogglesHost");
