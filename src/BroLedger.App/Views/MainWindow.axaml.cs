@@ -39,7 +39,7 @@ public partial class MainWindow : Window
 
         // Java loadSave setOnFailed → showError: parse failure also opens an error modal.
         _vm.ParseFailed += (header, message) =>
-            _ = ModalService.ErrorAsync(this, "Error", header, message);
+            _ = ModalService.ErrorAsync(this, "错误", header, message);
 
         // Java loadSaveQuiet L483-489: open the level-up modal unless the mode is OFF;
         // startReloadCountdown closes it on the 15th tick when AUTO_CLOSE.
@@ -252,9 +252,9 @@ public partial class MainWindow : Window
     {
         var options = new FilePickerOpenOptions
         {
-            Title = "Open Battle Brothers Save File",
+            Title = "打开 Battle Brothers 存档文件",
             AllowMultiple = false,
-            FileTypeFilter = [new FilePickerFileType("Save files (*.sav)") { Patterns = ["*.sav"] }],
+            FileTypeFilter = [new FilePickerFileType("存档文件 (*.sav)") { Patterns = ["*.sav"] }],
         };
         // Java openSave L345-349: setInitialDirectory to the last save's folder.
         if (Path.GetDirectoryName(AppConfig.Instance.LastSaveFilePath) is { } dir && Directory.Exists(dir))

@@ -12,10 +12,10 @@ internal static class PerkSortModeLabels
 {
     public static string Label(this PerkSortMode mode) => mode switch
     {
-        PerkSortMode.Off => "Perk sort: Off",
-        PerkSortMode.Commonality => "Perk sort: Commonality",
-        PerkSortMode.Tier => "Perk sort: Tier",
-        PerkSortMode.TierThenCommon => "Perk sort: Tier+Common",
+        PerkSortMode.Off => "天赋排序：关",
+        PerkSortMode.Commonality => "天赋排序：共同性",
+        PerkSortMode.Tier => "天赋排序：品级",
+        PerkSortMode.TierThenCommon => "天赋排序：品级+共性",
         _ => throw new UnreachableException($"{mode}"),
     };
 

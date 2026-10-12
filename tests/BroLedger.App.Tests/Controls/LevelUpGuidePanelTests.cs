@@ -21,18 +21,19 @@ public class LevelUpGuidePanelTests
     // ---- verbatim texts (Java guideContent label literals) ------------------
 
     [Fact]
-    public void HeaderText_TwoSpacesBeforeCount()
+    public void HeaderText_ContainsRemainingCount()
     {
-        Assert.Equal("Roll Priority Guide  (7 levels remaining)",
+        // 中文版语义重排：原 Java 双空格格式 "Guide  (N levels remaining)" → 全角括号。
+        Assert.Equal("加点优先级指南（剩余 7 级）",
             LevelUpGuidePanel.HeaderText(7));
     }
 
     [Fact]
     public void SectionHeaders_Verbatim()
     {
-        Assert.Equal("Always pick:", LevelUpGuidePanel.AlwaysPickHeader);
-        Assert.Equal("Pick by roll outcome (higher = better):", LevelUpGuidePanel.RollOutcomeHeader);
-        Assert.Equal("Planned perks (next pick):", LevelUpGuidePanel.PlannedPerksHeader);
+        Assert.Equal("必选：", LevelUpGuidePanel.AlwaysPickHeader);
+        Assert.Equal("按投骰结果选择（越高越好）：", LevelUpGuidePanel.RollOutcomeHeader);
+        Assert.Equal("计划天赋（下一次选择）：", LevelUpGuidePanel.PlannedPerksHeader);
     }
 
     [Fact]

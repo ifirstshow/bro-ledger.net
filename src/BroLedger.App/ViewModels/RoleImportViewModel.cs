@@ -56,7 +56,7 @@ internal partial class RoleImportViewModel : ObservableObject
         var code = RoleShareService.NormalizeCode(Code);
         if (code == null)
         {
-            SetWarning("Enter a valid share code — 8 letters/digits, e.g. AB3D9F2K.");
+            SetWarning("请输入有效的分享码——8 位字母/数字，例如 AB3D9F2K。");
             return null;
         }
 
@@ -66,7 +66,7 @@ internal partial class RoleImportViewModel : ObservableObject
         PackTitle = null;
         FetchEnabled = false;
         ImportEnabled = false;
-        SetStatus("Fetching…");
+        SetStatus("正在获取…");
         return code;
     }
 
@@ -120,7 +120,7 @@ internal partial class RoleImportViewModel : ObservableObject
     /// <summary>Java task.setOnFailed.</summary>
     public void FetchFailed(Exception ex)
     {
-        SetWarning("Fetch failed: " + RoleShareViewModel.FailureMessage(ex));
+        SetWarning("获取失败：" + RoleShareViewModel.FailureMessage(ex));
         FetchEnabled = true;
     }
 
@@ -147,16 +147,17 @@ internal partial class RoleImportViewModel : ObservableObject
     private void SetStatus(string text) { StatusText = text; StatusWarning = false; }
     private void SetWarning(string text) { StatusText = text; StatusWarning = true; }
 
-    /// <summary>Checkbox text for one fetched role; flags roles that will update a previous import.</summary>
+    /// <summary>Checkbox text for one fetched role; flags roles that will update a previous import.
+    /// 双空格前缀保留（Java importCheckboxLabel 的格式）。</summary>
     public static string ImportCheckboxLabel(string name, bool updatesExisting) =>
-        updatesExisting ? name + "  (updates existing)" : name;
+        updatesExisting ? name + "  （更新已有角色）" : name;
 
     /// <summary>The fetched pack's display title; untitled packs fall back to showing the code.</summary>
     public static string PackTitleText(RolePack pack, string code) =>
-        !string.IsNullOrEmpty(pack.Label) ? pack.Label! : "Untitled pack (" + code + ")";
+        !string.IsNullOrEmpty(pack.Label) ? pack.Label! : "无标题包（" + code + "）";
 
     /// <summary>Java fetch onSucceeded's status line, truncation notice included.</summary>
     public static string FetchSuccessStatus(RolePack pack) =>
-        "Found " + pack.Roles.Count + " role(s)"
-        + (pack.Truncated() ? " (oversized pack — extra roles were dropped)" : "") + ".";
+        "找到 " + pack.Roles.Count + " 个角色"
+        + (pack.Truncated() ? "（分包过大——多余的角色已丢弃）" : "") + "。";
 }

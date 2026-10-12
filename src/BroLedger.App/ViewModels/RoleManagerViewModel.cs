@@ -59,7 +59,7 @@ internal sealed class RoleManagerViewModel : IPerkPlanState
 
     public void AddRole()
     {
-        var r = _ctx.Roles.Add("New Role", true);
+        var r = _ctx.Roles.Add("新角色", true);
         RefreshList(r);
         RolesChanged?.Invoke();
     }
@@ -230,12 +230,11 @@ internal sealed class RoleManagerViewModel : IPerkPlanState
     {
         var usage = assigned switch
         {
-            null => "Any brothers assigned to it will lose the assignment.",
-            0 => "No brothers in the current save are assigned to it.",
-            _ => "It is assigned to " + assigned + " brother(s) in the current save — "
-                + "their assignment will be cleared.",
+            null => "已分配该角色的兄弟将失去此分配。",
+            0 => "当前存档中没有兄弟分配到此角色。",
+            _ => "当前存档中有 " + assigned + " 名兄弟分配到此角色——"
+                + "他们的分配将被清除。",
         };
-        return usage + "\n\nAssignments in other saves are cleared when those saves are"
-            + " next loaded. This cannot be undone.";
+        return usage + "\n\n其他存档中的分配将在其下次载入时清除。此操作无法撤销。";
     }
 }

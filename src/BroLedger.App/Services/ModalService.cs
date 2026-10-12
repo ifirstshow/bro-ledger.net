@@ -37,11 +37,11 @@ internal static class ModalService
 
     /// <summary>Java Modals.confirm: true only if okText was clicked.</summary>
     public static async Task<bool> ConfirmAsync(Window owner, string title, string? header, string? body, string okText) =>
-        await ChoiceAsync(owner, title, header, body, "Cancel", okText) == 1;
+        await ChoiceAsync(owner, title, header, body, "取消", okText) == 1;
 
     /// <summary>Java Modals.error: header/body + a single Close button.</summary>
     public static Task ErrorAsync(Window owner, string title, string? header, string? body) =>
-        ChoiceAsync(owner, title, header, body, "Close");
+        ChoiceAsync(owner, title, header, body, "关闭");
 
     /// <summary>
     /// Port of Java Modals.choice: themed dialog with an arbitrary set of buttons

@@ -50,9 +50,9 @@ public class RoleImportViewModelTests : IDisposable
     [Fact]
     public void PackTitleText_FallsBackToCodeWhenUntitled()
     {
-        Assert.Equal("Untitled pack (AB3D9F2K)",
+        Assert.Equal("无标题包（AB3D9F2K）",
             RoleImportViewModel.PackTitleText(Pack(null), "AB3D9F2K"));
-        Assert.Equal("Untitled pack (AB3D9F2K)",
+        Assert.Equal("无标题包（AB3D9F2K）",
             RoleImportViewModel.PackTitleText(Pack(""), "AB3D9F2K"));
     }
 
@@ -62,7 +62,7 @@ public class RoleImportViewModelTests : IDisposable
     public void ImportCheckboxLabel_FlagsUpdateInPlaceRoles()
     {
         Assert.Equal("Tank", RoleImportViewModel.ImportCheckboxLabel("Tank", false));
-        Assert.Equal("Tank  (updates existing)", RoleImportViewModel.ImportCheckboxLabel("Tank", true));
+        Assert.Equal("Tank  （更新已有角色）", RoleImportViewModel.ImportCheckboxLabel("Tank", true));
     }
 
     // ---- VM equivalents: fetch success population (Java task.setOnSucceeded) ----
@@ -77,12 +77,12 @@ public class RoleImportViewModelTests : IDisposable
         var vm = Vm();
         vm.CompleteFetch(Pack("My Pack", Role("srv-1", "Tank"), Role("srv-2", "Healer")), "AB3D9F2K");
 
-        Assert.Equal("Tank  (updates existing)", vm.Items[0].Label);
+        Assert.Equal("Tank  （更新已有角色）", vm.Items[0].Label);
         Assert.Equal("Healer", vm.Items[1].Label);
         Assert.True(vm.Items[0].IsChecked); // Java populateRoleList: default checked
         Assert.True(vm.Items[1].IsChecked);
         Assert.Equal("My Pack", vm.PackTitle);
-        Assert.Equal("Found 2 role(s).", vm.StatusText);
+        Assert.Equal("找到 2 个角色。", vm.StatusText);
         Assert.False(vm.StatusWarning);
         Assert.True(vm.FetchEnabled);
     }
@@ -96,7 +96,7 @@ public class RoleImportViewModelTests : IDisposable
 
         vm.CompleteFetch(pack, "AB3D9F2K");
 
-        Assert.Equal("Found 1 role(s) (oversized pack — extra roles were dropped).",
+        Assert.Equal("找到 1 个角色（分包过大——多余的角色已丢弃）。",
             vm.StatusText);
     }
 
@@ -105,7 +105,7 @@ public class RoleImportViewModelTests : IDisposable
     {
         var vm = Vm();
         vm.CompleteFetch(Pack(null, Role("srv-1", "Tank")), "AB3D9F2K");
-        Assert.Equal("Untitled pack (AB3D9F2K)", vm.PackTitle);
+        Assert.Equal("无标题包（AB3D9F2K）", vm.PackTitle);
     }
 
     // ---- VM equivalents: fetch validation (Java fetch's early return) -----------
@@ -118,7 +118,7 @@ public class RoleImportViewModelTests : IDisposable
             var vm = Vm();
             vm.Code = raw!;
             Assert.Null(vm.TryBeginFetch());
-            Assert.Equal("Enter a valid share code — 8 letters/digits, e.g. AB3D9F2K.",
+            Assert.Equal("请输入有效的分享码——8 位字母/数字，例如 AB3D9F2K。",
                 vm.StatusText);
             Assert.True(vm.StatusWarning);
             Assert.True(vm.FetchEnabled);
@@ -137,7 +137,7 @@ public class RoleImportViewModelTests : IDisposable
         Assert.Equal("AB3D9F2K", code);
         Assert.Empty(vm.Items);
         Assert.Null(vm.PackTitle);
-        Assert.Equal("Fetching…", vm.StatusText);
+        Assert.Equal("正在获取…", vm.StatusText);
         Assert.False(vm.FetchEnabled);
         Assert.False(vm.ImportEnabled);
     }
@@ -187,7 +187,7 @@ public class RoleImportViewModelTests : IDisposable
 
         var vm = Vm();
         vm.CompleteFetch(Pack(null, Role("srv-1", "Tank v2")), "AB3D9F2K");
-        Assert.EndsWith("(updates existing)", vm.Items[0].Label);
+        Assert.EndsWith("（更新已有角色）", vm.Items[0].Label);
 
         vm.DoImport();
 
@@ -203,7 +203,7 @@ public class RoleImportViewModelTests : IDisposable
         var vm = Vm();
         vm.FetchFailed(new IOException("HTTP 500"));
 
-        Assert.Equal("Fetch failed: HTTP 500", vm.StatusText);
+        Assert.Equal("获取失败：HTTP 500", vm.StatusText);
         Assert.True(vm.StatusWarning);
         Assert.True(vm.FetchEnabled);
     }

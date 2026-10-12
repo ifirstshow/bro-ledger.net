@@ -29,9 +29,10 @@ public class TooltipFactoryTests
     public void ForSlot_GenericWeapon_BuildsWeaponText()
     {
         // Real dictionary entry B13235B0 "Ancient Bladed Pike" (weaponClass Polearms, tier 2).
+        // Tooltip 行文案已中文化；Polearms 是游戏数据名称，保留原文。
         var text = TooltipFactory.ForSlot(Slot("B13235B0", "genericWeapon",
             new ItemStats { DamageMin = 55, DamageMax = 80 }));
-        Assert.Equal("Ancient Bladed Pike\nDamage: 55 – 80\nClass: Polearms\nTier: 2", text);
+        Assert.Equal("Ancient Bladed Pike\n伤害：55 – 80\n类别：Polearms\n品级：2", text);
     }
 
     [Fact]
@@ -41,7 +42,7 @@ public class TooltipFactoryTests
         // is the whole point: case-sensitive Contains() missed it and returned the bare name.
         var text = TooltipFactory.ForSlot(Slot("50CC8BAE", "namedArmor",
             new ItemStats { Durability = 280, Fatigue = -35 }));
-        Assert.Equal("Alloy Plate Armor\nDurability: 280\nFatigue: -35", text);
+        Assert.Equal("Alloy Plate Armor\n耐久：280\n疲劳消耗：-35", text);
     }
 
     [AvaloniaFact]

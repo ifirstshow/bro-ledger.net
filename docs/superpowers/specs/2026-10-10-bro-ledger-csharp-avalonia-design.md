@@ -170,6 +170,8 @@ fingerprint = hex(hash[0..16])   // 32 个十六进制字符
 
 ## 7. UI 迁移规范
 
+> **errata（2026-10-12，用户决议）**：UI 语言为**中文硬编码**（有意偏离英文原版）——全部用户可见文案（窗口/按钮/表头/tooltip/弹窗/状态栏/错误提示）中文化；内部枚举值、JSON 字段名、AppConfig 键、列 ID、`Stat.DisplayName`（自动分配破平局键）保持英文不动，显示层用 `StatLabels` 等映射；控制台工具输出维持英文。原文「窗口标题、图标沿用原版文案」按此修正。
+
 - 布局结构 1:1：FXML 层级 → AXAML 层级；keeper.css 选择器 → Avalonia 样式（类名/伪类按 Avalonia 习惯命名，视觉值不变）
 - JavaFX `Property` → `[ObservableProperty]`；`ObservableList` → `ObservableCollection<T>`
 - TableView 行为：列重排（同类目内拖拽）、按角色排序、四个增强开关（Weapon Tier / Armor Stats / Perk Sorting / **Potential**——5 态：Off / Current+Pot. / Pot. Only / Current+Exp. / Exp. Only）交互一致；列顺序变化联动兄弟卡片属性排列

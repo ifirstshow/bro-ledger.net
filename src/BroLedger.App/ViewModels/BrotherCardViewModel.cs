@@ -162,13 +162,13 @@ internal sealed class BrotherCardViewModel : IPerkPlanState
         string text;
         if (b.LevelTotal == 11)
         {
-            text = "Lv 11";
+            text = "11 级";
         }
         else
         {
             text = OverviewCalc.FormatBudgetLabel(lb.Post11, lb.Used, lb.TotalBudget);
             if (!lb.Post11 && b.LevelPoints > 0 && b.PerkPoints == 0)
-                text += "  (" + b.LevelPoints + " levels available)";
+                text += "  （剩余 " + b.LevelPoints + " 级）";
             stateClass = OverviewCalc.GetBudgetState(lb.Used, lb.TotalBudget) switch
             {
                 OverviewCalc.BudgetState.Over => "increases-remaining-red",
@@ -300,7 +300,7 @@ internal sealed class BrotherCardViewModel : IPerkPlanState
             _plan.Count == 0 ? null : new Dictionary<string, string>(_plan));
     }
 
-    /// <summary>Java updatePerkBadges: "P: n · O: n" badge text, null = hide.</summary>
+    /// <summary>Java updatePerkBadges: "计划 n · 可选 n" badge text, null = hide.</summary>
     public static string? PlanBadgeText(IReadOnlyDictionary<string, string>? plan)
     {
         if (plan == null) return null;
@@ -311,12 +311,12 @@ internal sealed class BrotherCardViewModel : IPerkPlanState
             if (v == "PLANNED") planned++;
             else if (v == "OPTIONAL") optional++;
         }
-        return planned == 0 && optional == 0 ? null : "P: " + planned + "  ·  O: " + optional;
+        return planned == 0 && optional == 0 ? null : "计划 " + planned + " · 可选 " + optional;
     }
 
     /// <summary>Java updatePerkPointsBadge: "(+n unspent)" text, null = hide.</summary>
     public string? PerkPointsText() =>
-        Brother is { PerkPoints: > 0 } ? "(+" + Brother.PerkPoints + " unspent)" : null;
+        Brother is { PerkPoints: > 0 } ? "（+" + Brother.PerkPoints + " 未消耗）" : null;
 
     /// <summary>Java updateInitPlanBtn: null = hide; otherwise the current button label.</summary>
     public string? InitPlanButtonText()
@@ -324,7 +324,7 @@ internal sealed class BrotherCardViewModel : IPerkPlanState
         if (Brother?.Fingerprint == null) return null;
         var role = ResolveRole();
         if (role?.PerkPlanTemplate is not { Count: > 0 }) return null;
-        return _plan.Count > 0 ? "Reset to role template" : "Init plan from role";
+        return _plan.Count > 0 ? "重置为角色模板" : "从角色初始化计划";
     }
 
     // ---- extra role columns (Java rebuildExtraColumns / setExtras) --------------

@@ -41,9 +41,9 @@ public partial class SetupWindow : Window
     {
         var files = await StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
         {
-            Title = "Select data_001.dat",
+            Title = "选择 data_001.dat",
             AllowMultiple = false,
-            FileTypeFilter = [new FilePickerFileType("Game Data (*.dat)") { Patterns = ["*.dat"] }],
+            FileTypeFilter = [new FilePickerFileType("游戏数据 (*.dat)") { Patterns = ["*.dat"] }],
         });
         if (files.Count > 0) _vm.DatPath = files[0].Path.LocalPath;
     }
@@ -53,7 +53,7 @@ public partial class SetupWindow : Window
     {
         var folders = await StorageProvider.OpenFolderPickerAsync(new FolderPickerOpenOptions
         {
-            Title = "Select output folder",
+            Title = "选择输出文件夹",
             AllowMultiple = false,
         });
         if (folders.Count == 0) return;
@@ -67,10 +67,10 @@ public partial class SetupWindow : Window
         }
 
         // choice == -1 (dismissed via ✕): leave OutDir untouched, matching the old Alert.
-        var choice = await ModalService.ChoiceAsync(this, "Confirm output folder", null,
-            "The selected folder is '" + name + "'.\n\n" +
-            "Create a 'game-art' subfolder inside it to keep extracted files organized?",
-            "Create 'game-art' subfolder", "Use selected folder");
+        var choice = await ModalService.ChoiceAsync(this, "确认输出文件夹", null,
+            "所选文件夹为“" + name + "”。\n\n" +
+            "是否在其中创建“game-art”子文件夹，以便整理提取出的文件？",
+            "创建 game-art 子文件夹", "使用所选文件夹");
         if (choice == 0) _vm.OutDir = Path.Combine(dir, "game-art");
         else if (choice == 1) _vm.OutDir = dir;
     }
@@ -80,7 +80,7 @@ public partial class SetupWindow : Window
     {
         var folders = await StorageProvider.OpenFolderPickerAsync(new FolderPickerOpenOptions
         {
-            Title = "Select game-art directory",
+            Title = "选择游戏素材目录",
             AllowMultiple = false,
         });
         if (folders.Count == 0) return;

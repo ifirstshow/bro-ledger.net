@@ -3,7 +3,7 @@
         xmlns:vm="using:BroLedger.App.ViewModels"
         x:Class="BroLedger.App.SetupWindow"
         x:DataType="vm:SetupViewModel"
-        Title="Game Art Setup"
+        Title="游戏素材设置"
         Width="540" MinWidth="540" MinHeight="340" SizeToContent="Height"
         WindowDecorations="None"
         ExtendClientAreaToDecorationsHint="True"
@@ -19,7 +19,7 @@
 
             <Border x:Name="TitleBar" Classes="title-bar" DockPanel.Dock="Top">
                 <DockPanel LastChildFill="True">
-                    <TextBlock Classes="title-bar-label" Text="Game Art Setup"
+                    <TextBlock Classes="title-bar-label" Text="游戏素材设置"
                                VerticalAlignment="Center"/>
                     <Button x:Name="SkipTitleBtn" Classes="window-btn window-btn-close" Content="✕"
                             Focusable="False" DockPanel.Dock="Right" Click="OnSkip"/>
@@ -31,27 +31,27 @@
                 <TextBlock Classes="stat-label" Text="{Binding HeaderText}" TextWrapping="Wrap"/>
 
                 <StackPanel Classes="card-section" Spacing="10">
-                    <TextBlock Classes="section-header" Text="Extract from game data"/>
+                    <TextBlock Classes="section-header" Text="从游戏数据提取"/>
                     <TextBlock Classes="stat-label" TextWrapping="Wrap"
-                               Text="Point to data_001.dat in your Battle Brothers installation and choose an output folder."/>
+                               Text="定位到 Battle Brothers 安装目录中的 data_001.dat，并选择一个输出文件夹。"/>
 
                     <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="8">
                         <TextBlock Grid.Column="0" Classes="field-label" Text="data_001.dat:"
                                    MinWidth="110" VerticalAlignment="Center"/>
                         <TextBox x:Name="DatPathField" Grid.Column="1"
-                                 PlaceholderText="Select data_001.dat…" IsReadOnly="True"
+                                 PlaceholderText="选择 data_001.dat…" IsReadOnly="True"
                                  Text="{Binding DatPath}"/>
-                        <Button Grid.Column="2" Classes="fancy-btn" Content="Browse" MinWidth="70"
+                        <Button Grid.Column="2" Classes="fancy-btn" Content="浏览" MinWidth="70"
                                 Focusable="False" Click="OnBrowseDat"/>
                     </Grid>
 
                     <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="8">
-                        <TextBlock Grid.Column="0" Classes="field-label" Text="Output folder:"
+                        <TextBlock Grid.Column="0" Classes="field-label" Text="输出文件夹："
                                    MinWidth="110" VerticalAlignment="Center"/>
                         <TextBox x:Name="OutDirField" Grid.Column="1"
-                                 PlaceholderText="Output directory…" IsReadOnly="True"
+                                 PlaceholderText="输出目录…" IsReadOnly="True"
                                  Text="{Binding OutDir}"/>
-                        <Button Grid.Column="2" Classes="fancy-btn" Content="Browse" MinWidth="70"
+                        <Button Grid.Column="2" Classes="fancy-btn" Content="浏览" MinWidth="70"
                                 Focusable="False" Click="OnBrowseOutDir"/>
                     </Grid>
 
@@ -60,18 +60,18 @@
                     <TextBlock Classes="stat-label" Text="{Binding ProgressText}"
                                TextWrapping="Wrap" IsVisible="{Binding ProgressVisible}"/>
 
-                    <Button x:Name="ExtractBtn" Classes="fancy-btn" Content="Extract"
+                    <Button x:Name="ExtractBtn" Classes="fancy-btn" Content="提取"
                             Focusable="False" HorizontalAlignment="Stretch"
                             IsEnabled="{Binding CanExtract}" Command="{Binding ExtractCommand}"/>
                 </StackPanel>
 
-                <TextBlock Classes="stat-label" Text="— or —" HorizontalAlignment="Center"/>
+                <TextBlock Classes="stat-label" Text="—— 或 ——" HorizontalAlignment="Center"/>
 
-                <Button x:Name="SelectExistingBtn" Classes="fancy-btn" Content="Select existing game-art folder"
+                <Button x:Name="SelectExistingBtn" Classes="fancy-btn" Content="使用现有素材文件夹"
                         Focusable="False" HorizontalAlignment="Stretch" Click="OnSelectExisting"/>
 
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,16,0,0">
-                    <Button Classes="fancy-btn" Content="Skip for now" Focusable="False" Click="OnSkip"/>
+                    <Button Classes="fancy-btn" Content="暂时跳过" Focusable="False" Click="OnSkip"/>
                 </StackPanel>
 
             </StackPanel>

@@ -3,7 +3,7 @@
         xmlns:vm="using:BroLedger.App.ViewModels"
         x:Class="BroLedger.App.PreferencesWindow"
         x:DataType="vm:PreferencesViewModel"
-        Title="Preferences"
+        Title="偏好设置"
         Width="420" MinWidth="420" MinHeight="200"
         SizeToContent="Height"
         WindowDecorations="None"
@@ -20,7 +20,7 @@
 
             <Border x:Name="TitleBar" Classes="title-bar" DockPanel.Dock="Top">
                 <DockPanel LastChildFill="True">
-                    <TextBlock Classes="title-bar-label" Text="Preferences"
+                    <TextBlock Classes="title-bar-label" Text="偏好设置"
                                VerticalAlignment="Center"/>
                     <Button x:Name="CloseTitleBtn" Classes="window-btn window-btn-close" Content="✕"
                             Focusable="False" DockPanel.Dock="Right" Click="OnClose"/>
@@ -29,48 +29,48 @@
 
             <StackPanel DockPanel.Dock="Bottom" Margin="0,8,24,20"
                         HorizontalAlignment="Right">
-                <Button Classes="fancy-btn" Content="Close" Focusable="False" Click="OnClose"/>
+                <Button Classes="fancy-btn" Content="关闭" Focusable="False" Click="OnClose"/>
             </StackPanel>
 
             <StackPanel Margin="24,20,24,20" Spacing="16">
 
                 <!-- Expected stats mode -->
                 <StackPanel Classes="card-section" Spacing="8">
-                    <TextBlock Classes="section-header" Text="Expected Stats Mode"/>
+                    <TextBlock Classes="section-header" Text="期望属性模式"/>
                     <TextBlock Classes="stat-label" TextWrapping="Wrap"
-                               Text="Controls how expected stat values are calculated in the detail view and overview."/>
+                               Text="控制详情视图与总览中期望属性值的计算方式。"/>
                     <StackPanel Orientation="Horizontal" Spacing="16">
                         <RadioButton Classes="role-radio" GroupName="expectedMode"
-                                     Content="Naive — current + mean × count  (default, always live)"
+                                     Content="朴素——当前值 + 均值 × 次数（默认，始终实时计算）"
                                      IsChecked="{Binding NaiveMode}"/>
                         <RadioButton Classes="role-radio" GroupName="expectedMode"
-                                     Content="Greedy — optimal selection benefit  (requires full allocation)"
+                                     Content="贪心——最优选择收益（需完成全部分配）"
                                      IsChecked="{Binding GreedyMode}"/>
                     </StackPanel>
                 </StackPanel>
 
                 <!-- Level-up modal -->
                 <StackPanel Classes="card-section" Spacing="8">
-                    <TextBlock Classes="section-header" Text="Level-Up Modal"/>
+                    <TextBlock Classes="section-header" Text="升级弹窗"/>
                     <TextBlock Classes="stat-label" TextWrapping="Wrap"
-                               Text="Controls whether a summary is shown when a level-up is detected on save reload."/>
+                               Text="控制重新载入存档检测到升级时是否显示摘要弹窗。"/>
                     <StackPanel Orientation="Horizontal" Spacing="16">
                         <RadioButton Classes="role-radio" GroupName="lvlModal"
-                                     Content="Modal" IsChecked="{Binding ModalOnLevelUp}"/>
+                                     Content="常驻" IsChecked="{Binding ModalOnLevelUp}"/>
                         <RadioButton Classes="role-radio" GroupName="lvlModal"
-                                     Content="Modal — auto-close after 15s" IsChecked="{Binding ModalAutoClose}"/>
+                                     Content="15 秒后自动关闭" IsChecked="{Binding ModalAutoClose}"/>
                         <RadioButton Classes="role-radio" GroupName="lvlModal"
-                                     Content="Off" IsChecked="{Binding ModalOff}"/>
+                                     Content="关闭" IsChecked="{Binding ModalOff}"/>
                     </StackPanel>
                 </StackPanel>
 
                 <!-- Update Replay (debug builds only) -->
                 <StackPanel Classes="card-section" Spacing="8" IsVisible="{Binding ReplayVisible}">
-                    <TextBlock Classes="section-header" Text="Update Replay"/>
+                    <TextBlock Classes="section-header" Text="更新重放"/>
                     <TextBlock Classes="stat-label" TextWrapping="Wrap"
-                               Text="Saves a copy of the save file and planned stat increases before each overwrite. Run ReplayAnalyzer to inspect the captured sequence and detect reconciliation errors."/>
+                               Text="每次覆盖存档前，先保存一份存档副本与计划属性增量。可运行 ReplayAnalyzer 检查捕获的序列并发现调和错误。"/>
                     <CheckBox Classes="pref-check"
-                              Content="Enable capture on overwrite (stored in ~/.bro-ledger/replay/)"
+                              Content="覆盖存档时启用捕获（存储于 ~/.bro-ledger/replay/）"
                               IsChecked="{Binding ReplayCapture}"/>
                 </StackPanel>
 

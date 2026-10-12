@@ -66,11 +66,11 @@ public class MainWindowShellTests
         {
             AppConfig.Instance.LastSaveFilePath = null;
             window.GetControl<Button>("ExportBtn").RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
-            Assert.Equal("No save file loaded — open a save first", vm.StatusText);
+            Assert.Equal("尚未载入存档——请先打开存档", vm.StatusText);
             Assert.True(vm.StatusIsWarning);
 
             window.GetControl<Button>("ExcerptBtn").RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
-            Assert.Equal("No save file loaded — open a save first", vm.StatusText);
+            Assert.Equal("尚未载入存档——请先打开存档", vm.StatusText);
         }
         finally
         {
@@ -97,7 +97,7 @@ public class MainWindowShellTests
             window.GetControl<Button>("ExportBtn").RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
 
             Assert.True(File.Exists(csv), "CSV should be written next to the save");
-            Assert.Equal("Exported to TestSavefile.csv", vm.StatusText);
+            Assert.Equal("已导出到 TestSavefile.csv", vm.StatusText);
             Assert.False(vm.StatusIsWarning);
         }
         finally

@@ -186,27 +186,27 @@ public class OverviewViewModelTests : IDisposable
         var toggles = OverviewViewModel.Toggles;
 
         Assert.Equal(4, toggles.Count);
-        Assert.Equal("Weapon Tier", toggles[0].Title);
-        Assert.Equal("Armor Stats", toggles[1].Title);
-        Assert.Equal("Perk Sorting", toggles[2].Title);
-        Assert.Equal("Potential", toggles[3].Title);
+        Assert.Equal("武器品级", toggles[0].Title);
+        Assert.Equal("护甲属性", toggles[1].Title);
+        Assert.Equal("天赋排序", toggles[2].Title);
+        Assert.Equal("潜力", toggles[3].Title);
 
         // Weapon Tier: Off(red) / On(green)
         Assert.Equal(
-            [("Off", "led-red"), ("On", "led-green")],
+            [("关", "led-red"), ("开", "led-green")],
             toggles[0].Options.Select(o => (o.Desc, o.LedClass)).ToArray());
         // Armor Stats: Off(red) / Durability(yellow) / Fatigue(yellow)
         Assert.Equal(
-            [("Off", "led-red"), ("Durability", "led-yellow"), ("Fatigue", "led-yellow")],
+            [("关", "led-red"), ("耐久", "led-yellow"), ("疲劳", "led-yellow")],
             toggles[1].Options.Select(o => (o.Desc, o.LedClass)).ToArray());
         // Perk Sorting: Off / Commonality / Tier / "Tier + Cmn" (all red then yellow)
         Assert.Equal(
-            [("Off", "led-red"), ("Commonality", "led-yellow"), ("Tier", "led-yellow"), ("Tier + Cmn", "led-yellow")],
+            [("关", "led-red"), ("共同性", "led-yellow"), ("品级", "led-yellow"), ("品级+共性", "led-yellow")],
             toggles[2].Options.Select(o => (o.Desc, o.LedClass)).ToArray());
         // Potential: 5 states, red / yellow×3 / green×2
         Assert.Equal(
-            [("Off", "led-red"), ("Current + Pot.", "led-yellow"), ("Pot. Only", "led-yellow"),
-             ("Current + Exp.", "led-green"), ("Exp. Only", "led-green")],
+            [("关", "led-red"), ("当前+潜力", "led-yellow"), ("仅潜力", "led-yellow"),
+             ("当前+期望", "led-green"), ("仅期望", "led-green")],
             toggles[3].Options.Select(o => (o.Desc, o.LedClass)).ToArray());
     }
 

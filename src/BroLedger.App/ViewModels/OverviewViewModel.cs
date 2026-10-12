@@ -26,34 +26,35 @@ internal partial class OverviewViewModel : ObservableObject
 
     public sealed record ToggleSpec(string Title, IReadOnlyList<ToggleOption> Options);
 
-    // Java MainController.buildToolbar L139-161 — verbatim LedDef tables.
+    // Java MainController.buildToolbar L139-161 — LedDef tables. Title/Desc 是纯显示文案
+    // （持久化走 UiState 的枚举名字符串，与此处无关）。列 ID / 枚举名保持英文。
     public static readonly IReadOnlyList<ToggleSpec> Toggles =
     [
-        new("Weapon Tier",
+        new("武器品级",
         [
-            new ToggleOption("Off", "led-red", WeaponTierMode.OFF),
-            new ToggleOption("On", "led-green", WeaponTierMode.ON),
+            new ToggleOption("关", "led-red", WeaponTierMode.OFF),
+            new ToggleOption("开", "led-green", WeaponTierMode.ON),
         ]),
-        new("Armor Stats",
+        new("护甲属性",
         [
-            new ToggleOption("Off", "led-red", ArmorMode.OFF),
-            new ToggleOption("Durability", "led-yellow", ArmorMode.DURABILITY),
-            new ToggleOption("Fatigue", "led-yellow", ArmorMode.FATIGUE),
+            new ToggleOption("关", "led-red", ArmorMode.OFF),
+            new ToggleOption("耐久", "led-yellow", ArmorMode.DURABILITY),
+            new ToggleOption("疲劳", "led-yellow", ArmorMode.FATIGUE),
         ]),
-        new("Perk Sorting",
+        new("天赋排序",
         [
-            new ToggleOption("Off", "led-red", PerkSortMode.Off),
-            new ToggleOption("Commonality", "led-yellow", PerkSortMode.Commonality),
-            new ToggleOption("Tier", "led-yellow", PerkSortMode.Tier),
-            new ToggleOption("Tier + Cmn", "led-yellow", PerkSortMode.TierThenCommon),
+            new ToggleOption("关", "led-red", PerkSortMode.Off),
+            new ToggleOption("共同性", "led-yellow", PerkSortMode.Commonality),
+            new ToggleOption("品级", "led-yellow", PerkSortMode.Tier),
+            new ToggleOption("品级+共性", "led-yellow", PerkSortMode.TierThenCommon),
         ]),
-        new("Potential",
+        new("潜力",
         [
-            new ToggleOption("Off", "led-red", PotentialMode.CURRENT),
-            new ToggleOption("Current + Pot.", "led-yellow", PotentialMode.BOTH),
-            new ToggleOption("Pot. Only", "led-yellow", PotentialMode.POTENTIAL),
-            new ToggleOption("Current + Exp.", "led-green", PotentialMode.CURRENT_EXPECTED),
-            new ToggleOption("Exp. Only", "led-green", PotentialMode.EXPECTED),
+            new ToggleOption("关", "led-red", PotentialMode.CURRENT),
+            new ToggleOption("当前+潜力", "led-yellow", PotentialMode.BOTH),
+            new ToggleOption("仅潜力", "led-yellow", PotentialMode.POTENTIAL),
+            new ToggleOption("当前+期望", "led-green", PotentialMode.CURRENT_EXPECTED),
+            new ToggleOption("仅期望", "led-green", PotentialMode.EXPECTED),
         ]),
     ];
 

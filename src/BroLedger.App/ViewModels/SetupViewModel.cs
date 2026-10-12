@@ -34,8 +34,8 @@ internal partial class SetupViewModel : ObservableObject
 
     /// <summary>Java setOutdated: header switches when the existing game-art is stale.</summary>
     public string HeaderText => Outdated
-        ? "Game-art is outdated and needs to be re-extracted. Choose an option:"
-        : "No game-art directory is configured. Choose an option:";
+        ? "游戏素材已过期，需要重新提取。请选择一项："
+        : "尚未配置游戏素材目录。请选择一项：";
 
     /// <summary>Java initialize's extractBtn disable binding (both fields must be filled).</summary>
     public bool CanExtract =>
@@ -83,14 +83,14 @@ internal partial class SetupViewModel : ObservableObject
         {
             if (t.IsFaulted)
             {
-                ProgressText = "Extraction failed: " + t.Exception?.GetBaseException();
+                ProgressText = "提取失败：" + t.Exception?.GetBaseException();
                 ExtractRunning = false;
                 ExtractionFailed?.Invoke();
                 return;
             }
             var r = t.Result;
             Progress = 1.0;
-            ProgressText = $"Done — extracted {r.Extracted}/{r.Total} files ({r.Fallback} fallback)";
+            ProgressText = $"完成——已提取 {r.Extracted}/{r.Total} 个文件（{r.Fallback} 个来自回退源）";
             _config.GameArtDirectory = outDir;
             _config.Save();
             Configured?.Invoke();

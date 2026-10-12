@@ -64,7 +64,7 @@ public class RoleShareViewModelTests : IDisposable
     public void RecentCellText_ShowsTitleCodeCountAndDate()
     {
         var r = new ShareRecord("AB3D9F2K", "tok", "My Pack", "2026-07-05T12:00:00Z", 3);
-        Assert.Equal("My Pack — AB3D9F2K · 3 role(s) · 2026-07-05",
+        Assert.Equal("My Pack — AB3D9F2K · 3 个角色 · 2026-07-05",
             RoleShareViewModel.RecentCellText(r));
     }
 
@@ -72,14 +72,14 @@ public class RoleShareViewModelTests : IDisposable
     public void RecentCellText_UntitledAndMissingDate()
     {
         var r = new ShareRecord("AB3D9F2K", "tok", null, null, 1);
-        Assert.Equal("Untitled — AB3D9F2K · 1 role(s)", RoleShareViewModel.RecentCellText(r));
+        Assert.Equal("无标题 — AB3D9F2K · 1 个角色", RoleShareViewModel.RecentCellText(r));
     }
 
     [Fact]
     public void RecentCellText_FlagsTokenlessEntries()
     {
         var r = new ShareRecord("AB3D9F2K", null, "Old", "2026-07-05T12:00:00Z", 2);
-        Assert.EndsWith("(not updatable)", RoleShareViewModel.RecentCellText(r));
+        Assert.EndsWith("（不可更新）", RoleShareViewModel.RecentCellText(r));
     }
 
     // ---- VM equivalents: checklist (Java setRoles/selectAll/selectNone/share) --
@@ -113,7 +113,7 @@ public class RoleShareViewModelTests : IDisposable
         vm.SelectNoneRoles();
 
         Assert.False(vm.Share());
-        Assert.Equal("Select at least one role to share.", vm.StatusText);
+        Assert.Equal("请至少选择一个要分享的角色。", vm.StatusText);
         Assert.True(vm.StatusWarning);
     }
 
@@ -128,13 +128,13 @@ public class RoleShareViewModelTests : IDisposable
         var vm = Vm();
 
         Assert.True(vm.RecentVisible);
-        Assert.DoesNotContain("(not updatable)", vm.Recent[0].Text);
+        Assert.DoesNotContain("（不可更新）", vm.Recent[0].Text);
         vm.SelectedRecent = vm.Recent[0];
 
-        Assert.Equal("Update AB3D9F2K", vm.ShareButtonLabel);
+        Assert.Equal("更新 AB3D9F2K", vm.ShareButtonLabel);
         Assert.True(vm.NewCodeVisible);
         Assert.Equal("My Pack", vm.PackName);
-        Assert.Equal("Publishing will overwrite AB3D9F2K for everyone who has the code.",
+        Assert.Equal("发布将覆盖 AB3D9F2K，所有持有此码的人都会收到新版本。",
             vm.StatusText);
     }
 
@@ -145,9 +145,9 @@ public class RoleShareViewModelTests : IDisposable
         var vm = Vm();
         vm.SelectedRecent = vm.Recent[0];
 
-        Assert.Equal("Share", vm.ShareButtonLabel);
+        Assert.Equal("分享", vm.ShareButtonLabel);
         Assert.False(vm.NewCodeVisible);
-        Assert.Equal("This upload can't be updated — Share publishes a new code.", vm.StatusText);
+        Assert.Equal("此上传不可更新——分享将发布一个新码。", vm.StatusText);
     }
 
     [Fact]
@@ -160,7 +160,7 @@ public class RoleShareViewModelTests : IDisposable
         vm.NewCode();
 
         Assert.Null(vm.SelectedRecent);
-        Assert.Equal("Share", vm.ShareButtonLabel);
+        Assert.Equal("分享", vm.ShareButtonLabel);
         Assert.False(vm.NewCodeVisible);
     }
 
@@ -175,7 +175,7 @@ public class RoleShareViewModelTests : IDisposable
         vm.ShareSucceeded(new RoleShareService.PublishResult("AB3D9F2K", "tok"), "My Pack", 1, updateMode: false);
 
         Assert.Equal("AB3D9F2K", vm.Code);
-        Assert.Equal("Published — code copied to clipboard.", vm.StatusText);
+        Assert.Equal("已发布——码已复制到剪贴板。", vm.StatusText);
         Assert.True(vm.ShareEnabled);
         var record = Assert.Single(AppConfig.Instance.RecentShares!);
         Assert.Equal("AB3D9F2K", record.Code);
@@ -189,7 +189,7 @@ public class RoleShareViewModelTests : IDisposable
     {
         var vm = Vm();
         vm.ShareSucceeded(new RoleShareService.PublishResult("AB3D9F2K", "tok"), "My Pack", 1, updateMode: true);
-        Assert.Equal("Updated — everyone with this code gets the new version. Code copied.",
+        Assert.Equal("已更新——持有此码的所有人都会获得新版本。码已复制。",
             vm.StatusText);
     }
 }

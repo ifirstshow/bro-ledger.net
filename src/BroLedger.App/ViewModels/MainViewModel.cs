@@ -25,7 +25,7 @@ internal partial class MainViewModel : ObservableObject
     private string? _reloadNote;
 
     // Java buildToolbar: currentFileName = "No file open" — the Open Save button's desc line.
-    [ObservableProperty] private string _currentFileName = "No file open";
+    [ObservableProperty] private string _currentFileName = "未打开存档";
     [ObservableProperty] private string _watchStatusText = "";
     [ObservableProperty] private string _statusText = "";
     [ObservableProperty] private bool _statusIsWarning;
@@ -83,8 +83,8 @@ internal partial class MainViewModel : ObservableObject
     public static string DanglingRoleMessage(IReadOnlyList<string> names)
     {
         var shown = string.Join(", ", names.Take(5));
-        var more = names.Count > 5 ? " +" + (names.Count - 5) + " more" : "";
-        return names.Count + " brother(s) referenced a deleted role — assignment cleared: " + shown + more;
+        var more = names.Count > 5 ? " 等共 " + names.Count + " 名" : "";
+        return names.Count + " 名兄弟引用了已删除的角色——分配已清除：" + shown + more;
     }
 
     /// <summary>
@@ -93,9 +93,9 @@ internal partial class MainViewModel : ObservableObject
     /// </summary>
     public static string ReloadCountdownText(int secondsElapsed, string? note)
     {
-        if (secondsElapsed >= 15) return "Watching";
+        if (secondsElapsed >= 15) return "监视中";
         var suffix = note != null ? " • " + note : "";
-        return $"Reloaded {secondsElapsed} seconds ago{suffix}";
+        return $"{secondsElapsed} 秒前已重新载入{suffix}";
     }
 
     // ---- file flow ---------------------------------------------------------
@@ -120,9 +120,9 @@ internal partial class MainViewModel : ObservableObject
         {
             if (t.IsFaulted)
             {
-                var message = t.Exception?.GetBaseException().Message ?? "unknown error";
-                SetStatus("Failed to parse save file: " + message, true);
-                ParseFailed?.Invoke("Failed to parse save file", message);
+                var message = t.Exception?.GetBaseException().Message ?? "未知错误";
+                SetStatus("存档解析失败：" + message, true);
+                ParseFailed?.Invoke("存档解析失败", message);
                 return;
             }
             ApplyResult(parser, t.Result);
@@ -176,11 +176,11 @@ internal partial class MainViewModel : ObservableObject
         {
             new BrotherCsvExporter(_ctx.Dict, _ctx.StatModifier, _ctx.Annotation, _ctx.Roles)
                 .Export(AppConfig.Instance, target.Value.Save, target.Value.Out);
-            SetStatus("Exported to " + Path.GetFileName(target.Value.Out), false);
+            SetStatus("已导出到 " + Path.GetFileName(target.Value.Out), false);
         }
         catch (IOException e)
         {
-            SetStatus("Export failed: " + e.Message, true);
+            SetStatus("导出失败：" + e.Message, true);
         }
     }
 
@@ -192,11 +192,11 @@ internal partial class MainViewModel : ObservableObject
         try
         {
             new BrotherSavefileExporter(_ctx.Dict).Write(target.Value.Save, target.Value.Out);
-            SetStatus("Excerpt written to " + Path.GetFileName(target.Value.Out), false);
+            SetStatus("节选已写入 " + Path.GetFileName(target.Value.Out), false);
         }
         catch (IOException e)
         {
-            SetStatus("Excerpt failed: " + e.Message, true);
+            SetStatus("节选导出失败：" + e.Message, true);
         }
     }
 
@@ -207,7 +207,7 @@ internal partial class MainViewModel : ObservableObject
         var savePath = AppConfig.Instance.LastSaveFilePath;
         if (string.IsNullOrWhiteSpace(savePath))
         {
-            SetStatus("No save file loaded — open a save first", true);
+            SetStatus("尚未载入存档——请先打开存档", true);
             return null;
         }
         var baseName = Regex.Replace(Path.GetFileName(savePath), @"\.[^.]+$", "");
@@ -232,7 +232,7 @@ internal partial class MainViewModel : ObservableObject
         if (warnings.Count == 0)
             SetStatus("", false);
         else
-            SetStatus(warnings.Distinct().Count() + " unknown item type(s) — stats unavailable for those slots", true);
+            SetStatus(warnings.Distinct().Count() + " 个未知物品类型——相应槽位无法显示属性", true);
     }
 
     private void SetStatus(string message, bool warning)
@@ -261,7 +261,7 @@ internal partial class MainViewModel : ObservableObject
     /// (计划②裁决 — marshal = Dispatcher.UIThread.InvokeAsync).</summary>
     private void StartWatching(string savePath)
     {
-        WatchStatusText = "Watching";
+        WatchStatusText = "监视中";
         _watcher.Watch(savePath, () =>
         {
             _ctx.Annotation.LoadFor(savePath);
@@ -281,7 +281,7 @@ internal partial class MainViewModel : ObservableObject
         {
             if (t.IsFaulted)
             {
-                SetStatus("Reload failed: " + t.Exception?.GetBaseException().Message, true);
+                SetStatus("重新载入失败：" + t.Exception?.GetBaseException().Message, true);
                 return;
             }
             var oldBrothers = Brothers;
@@ -301,7 +301,7 @@ internal partial class MainViewModel : ObservableObject
                 var mode = AppConfig.Instance.LevelUpModalMode;
                 if (LevelUpViewModel.ShouldShow(mode))
                     LevelUpsDetected?.Invoke(events, LevelUpViewModel.IsAutoClose(mode));
-                StartReloadCountdown(events.Count + " level-up(s) detected");
+                StartReloadCountdown("检测到 " + events.Count + " 次升级");
             }
             else
             {
@@ -327,7 +327,7 @@ internal partial class MainViewModel : ObservableObject
             }
             else
             {
-                WatchStatusText = "Watching";
+                WatchStatusText = "监视中";
                 timer.Stop();
                 ReloadCountdownFinished?.Invoke(); // Java closes the AUTO_CLOSE stage here
             }

@@ -27,20 +27,23 @@ namespace BroLedger.App.Controls;
 /// </summary>
 internal partial class BrotherCard : UserControl
 {
-    // Java display order: stats[stat.statIndex()] and stars[stat.starIndex()].
-    private static readonly (string Label, Stat Stat, string Icon)[] StatRows =
+    // Java display order: stats[stat.statIndex()] and stars[stat.starIndex()]. 行标签
+    // 用 StatLabels（Stat.DisplayName 保持英文，是数据逻辑的破平局键）。
+    private static readonly (Stat Stat, string Icon)[] StatRows =
     [
-        ("Health", Stat.Health, "icon-health.png"),
-        ("Resolve", Stat.Resolve, "icon-resolve.png"),
-        ("Fatigue", Stat.Fatigue, "icon-fatigue.png"),
-        ("Initiative", Stat.Initiative, "icon-initiative.png"),
-        ("Melee Skill", Stat.MeleeSkill, "icon-mSkill.png"),
-        ("Ranged Skill", Stat.RangedSkill, "icon-rSkill.png"),
-        ("Melee Def", Stat.MeleeDefense, "icon-mDefense.png"),
-        ("Ranged Def", Stat.RangedDefense, "icon-rDefense.png"),
+        (Stat.Health, "icon-health.png"),
+        (Stat.Resolve, "icon-resolve.png"),
+        (Stat.Fatigue, "icon-fatigue.png"),
+        (Stat.Initiative, "icon-initiative.png"),
+        (Stat.MeleeSkill, "icon-mSkill.png"),
+        (Stat.RangedSkill, "icon-rSkill.png"),
+        (Stat.MeleeDefense, "icon-mDefense.png"),
+        (Stat.RangedDefense, "icon-rDefense.png"),
     ];
 
+    // 槽位键（SlotNames）是 ImageMap 查找键，保持英文；显示标签用 SlotLabels。
     private static readonly string[] SlotNames = ["weapon", "shield", "body", "helmet", "trinket", "quiver", "pouch"];
+    private static readonly string[] SlotLabels = ["武器", "盾", "身甲", "头盔", "饰品", "箭袋", "囊"];
 
     // Java grid layout constants.
     private const int StatHeaderRow = 0;
@@ -123,7 +126,7 @@ internal partial class BrotherCard : UserControl
         NameLabel.Text = b.Name ?? "";
         TitleLabel.Text = b.Title ?? "";
         var bg = b.BackgroundHexId != null ? _ctx.Dict.Get(b.BackgroundHexId) : null;
-        BackgroundLabel.Text = (bg?.Name ?? "") + ", level " + b.LevelTotal;
+        BackgroundLabel.Text = (bg?.Name ?? "") + "，等级 " + b.LevelTotal;
 
         // 2. Traits
         BuildTraitsPane(b);
@@ -151,9 +154,9 @@ internal partial class BrotherCard : UserControl
         BuildEquipmentPane(b);
 
         // 7. Footer
-        ArmorLabel.Text = "Armor: " + ArmorCalculator.EffectiveArmor(b);
-        FatigueLabel.Text = "Fatigue: " + ArmorCalculator.TotalFatiguePenalty(b);
-        DamageLabel.Text = "Damage: " + ArmorCalculator.WeaponDamageRange(b);
+        ArmorLabel.Text = "护甲：" + ArmorCalculator.EffectiveArmor(b);
+        FatigueLabel.Text = "疲劳：" + ArmorCalculator.TotalFatiguePenalty(b);
+        DamageLabel.Text = "伤害：" + ArmorCalculator.WeaponDamageRange(b);
     }
 
     // ---- stats grid construction (Java buildStatRows + rebuildExtraColumns) ----
@@ -211,7 +214,7 @@ internal partial class BrotherCard : UserControl
             var icon = new Image { Width = 20, Height = 20, Source = LoadStatIcon(sr.Icon) };
             AddCell(icon, gridRow, 1);
 
-            var lbl = new TextBlock { Classes = { "stat-label" }, Text = sr.Label, MinWidth = 90, VerticalAlignment = VerticalAlignment.Center };
+            var lbl = new TextBlock { Classes = { "stat-label" }, Text = sr.Stat.Label(), MinWidth = 90, VerticalAlignment = VerticalAlignment.Center };
             AddCell(lbl, gridRow, 2);
 
             var val = new TextBlock { Classes = { "stat-value" }, MinWidth = 28, TextAlignment = TextAlignment.Right, VerticalAlignment = VerticalAlignment.Center };
@@ -249,7 +252,7 @@ internal partial class BrotherCard : UserControl
         }
 
         // Header row: column labels for val / pot / exp.
-        foreach (var (col, text) in new[] { (3, "Val"), (4, "Pot"), (ExpectedCol, "Exp") })
+        foreach (var (col, text) in new[] { (3, "值"), (4, "潜力"), (ExpectedCol, "期望") })
         {
             AddCell(new TextBlock
             {
@@ -318,7 +321,7 @@ internal partial class BrotherCard : UserControl
                 ItemTemplate = new FuncDataTemplate<Role>((r, _) =>
                     new TextBlock { Text = r?.Name ?? "" }),
                 SelectionBoxItemTemplate = new FuncDataTemplate<object>((_, _) =>
-                    new TextBlock { Text = "Choose" }),
+                    new TextBlock { Text = "选择" }),
             };
             var updating = false;
             combo.SelectionChanged += (_, _) =>
@@ -452,7 +455,7 @@ internal partial class BrotherCard : UserControl
 
     private void SetupRoleCombo()
     {
-        RoleCombo.PlaceholderText = "assign a role…";
+        RoleCombo.PlaceholderText = "指定角色…";
         RoleCombo.ItemsSource = RoleItems();
         RoleCombo.SelectionChanged += (_, _) =>
         {
@@ -515,7 +518,7 @@ internal partial class BrotherCard : UserControl
         PerkPointsLabel.Text = text ?? "";
         if (text != null)
             TooltipFactory.Install(PerkPointsLabel,
-                b.PerkPoints + " perk point(s) available\nbut not yet spent in-game.");
+                $"有 {b.PerkPoints} 个天赋点可用，\n尚未在游戏中消耗。");
         else
             ToolTip.SetTip(PerkPointsLabel, null);
     }
@@ -565,10 +568,10 @@ internal partial class BrotherCard : UserControl
     {
         EquipmentHost.Children.Clear();
         for (var i = 0; i < Math.Min(b.EquippedSlots.Length, SlotNames.Length); i++)
-            EquipmentHost.Children.Add(BuildEquipmentCell(b.EquippedSlots[i], SlotNames[i]));
+            EquipmentHost.Children.Add(BuildEquipmentCell(b.EquippedSlots[i], SlotNames[i], SlotLabels[i]));
     }
 
-    private Control BuildEquipmentCell(InventorySlot? slot, string slotName)
+    private Control BuildEquipmentCell(InventorySlot? slot, string slotName, string slotLabel)
     {
         var image = new Image { Width = 64, Height = 64, Stretch = Stretch.Uniform };
         if (slot is { Empty: false, ItemId: not null })
@@ -597,7 +600,7 @@ internal partial class BrotherCard : UserControl
                     new TextBlock
                     {
                         Classes = { "equip-slot-label" },
-                        Text = slotName,
+                        Text = slotLabel,
                         TextAlignment = TextAlignment.Center,
                     },
                 },

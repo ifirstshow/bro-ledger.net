@@ -41,23 +41,23 @@ public class RoleManagerViewModelTests : IDisposable
     public void DeleteConfirmationText_UnknownUsage()
     {
         var text = RoleManagerViewModel.DeleteConfirmationText(null);
-        Assert.Contains("Any brothers assigned to it", text);
-        Assert.Contains("cannot be undone", text);
+        Assert.Contains("已分配该角色的兄弟将失去此分配", text);
+        Assert.Contains("无法撤销", text);
     }
 
     [Fact]
     public void DeleteConfirmationText_ZeroAssigned()
     {
         var text = RoleManagerViewModel.DeleteConfirmationText(0);
-        Assert.Contains("No brothers in the current save", text);
+        Assert.Contains("当前存档中没有兄弟分配到此角色", text);
     }
 
     [Fact]
     public void DeleteConfirmationText_SomeAssigned()
     {
         var text = RoleManagerViewModel.DeleteConfirmationText(4);
-        Assert.Contains("assigned to 4 brother(s) in the current save", text);
-        Assert.Contains("cleared", text);
+        Assert.Contains("当前存档中有 4 名兄弟分配到此角色", text);
+        Assert.Contains("分配将被清除", text);
     }
 
     // ---- VM equivalents: add / save / populate (Java addRole/saveRole/populateForm)
@@ -72,7 +72,7 @@ public class RoleManagerViewModelTests : IDisposable
         vm.AddRole();
 
         var role = Assert.Single(vm.Roles);
-        Assert.Equal("New Role", role.Name);
+        Assert.Equal("新角色", role.Name);
         Assert.True(role.Frontline);
         Assert.Same(role, vm.Selected);
         Assert.True(vm.FormEnabled);
@@ -86,7 +86,7 @@ public class RoleManagerViewModelTests : IDisposable
         vm.AddRole();
         vm.Name = "   ";
         Assert.False(vm.SaveRole());
-        Assert.Equal("New Role", vm.Selected!.Name); // untouched (Java: requestFocus + return)
+        Assert.Equal("新角色", vm.Selected!.Name); // untouched (Java: requestFocus + return)
     }
 
     [Fact]
@@ -191,7 +191,7 @@ public class RoleManagerViewModelTests : IDisposable
         var body = vm.DeleteConfirmation();
 
         Assert.NotNull(body);
-        Assert.Contains("assigned to 4 brother(s)", body);
+        Assert.Contains("当前存档中有 4 名兄弟分配到此角色", body);
         Assert.Equal(vm.Selected!.Id, calls.Single());
     }
 

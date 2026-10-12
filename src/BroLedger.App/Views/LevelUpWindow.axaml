@@ -1,7 +1,7 @@
 <Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         x:Class="BroLedger.App.LevelUpWindow"
-        Title="Level Up Detected"
+        Title="检测到升级"
         Width="400" MinWidth="400" MinHeight="200"
         SizeToContent="Height"
         WindowDecorations="None"
@@ -21,7 +21,7 @@
             <Border x:Name="TitleBar" Classes="title-bar level-up-title-bar" DockPanel.Dock="Top">
                 <DockPanel LastChildFill="True">
                     <TextBlock Classes="title-bar-label level-up-title-label"
-                               Text="Level Up Detected" VerticalAlignment="Center"/>
+                               Text="检测到升级" VerticalAlignment="Center"/>
                     <Button x:Name="CloseTitleBtn" Classes="window-btn window-btn-close" Content="✕"
                             Focusable="False" DockPanel.Dock="Right" Click="OnClose"/>
                 </DockPanel>
@@ -29,7 +29,7 @@
 
             <StackPanel DockPanel.Dock="Bottom" Margin="0,8,20,16"
                         HorizontalAlignment="Right">
-                <Button Classes="fancy-btn" Content="Close" Focusable="False" Click="OnClose"/>
+                <Button Classes="fancy-btn" Content="关闭" Focusable="False" Click="OnClose"/>
             </StackPanel>
 
             <ScrollViewer Classes="modal-scroll" HorizontalScrollBarVisibility="Disabled"

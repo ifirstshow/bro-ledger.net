@@ -81,7 +81,7 @@ internal static class TooltipFactory
 
     private static void AppendBreakdown(System.Text.StringBuilder sb, StatModifierService.Breakdown bd)
     {
-        sb.Append("Base: ").Append(bd.Base);
+        sb.Append("基础：").Append(bd.Base);
         AppendContributions(sb, bd.Contributions);
         sb.Append("\n= ").Append(bd.FinalValue);
     }
@@ -91,7 +91,7 @@ internal static class TooltipFactory
     {
         foreach (var c in contributions)
         {
-            sb.Append('\n').Append(c.Name).Append(": ");
+            sb.Append('\n').Append(c.Name).Append("：");
             if (c.Points is { } pts) sb.Append(pts > 0 ? "+" : "").Append(pts);
             if (c.Percentage is { } pct) sb.Append(pct > 0 ? "+" : "").Append(pct).Append('%');
         }
@@ -102,7 +102,7 @@ internal static class TooltipFactory
     public static string ForStatPotential(StatPotentialCalculator.Potential pot,
         StatModifierService.Breakdown bd)
     {
-        var sb = new System.Text.StringBuilder("Potential at lv 11");
+        var sb = new System.Text.StringBuilder("11 级潜力");
         AppendPotentialBlock(sb, pot, bd);
         return sb.ToString();
     }
@@ -112,15 +112,15 @@ internal static class TooltipFactory
     {
         if (pot.RemainingLevels == 0)
         {
-            sb.Append("\n(already at max level)");
+            sb.Append("\n（已达最高等级）");
             return;
         }
-        sb.Append("\nBase: ").Append(pot.BasePotential);
+        sb.Append("\n基础：").Append(pot.BasePotential);
         AppendContributions(sb, bd.Contributions);
         sb.Append("\n= ").Append(pot.FinalPotential);
-        sb.Append("\nRange: ").Append(pot.MinBasePotential)
+        sb.Append("\n范围：").Append(pot.MinBasePotential)
             .Append('–').Append(pot.MaxBasePotential);
-        sb.Append("\n(").Append(pot.RemainingLevels).Append(" rolls remaining)");
+        sb.Append("\n（剩余 ").Append(pot.RemainingLevels).Append(" 次投骰）");
     }
 
     // ---- expected (Java forStatExpected + appendExpectedBlock) -----------------
@@ -130,7 +130,7 @@ internal static class TooltipFactory
         ExpectedStatsCalculator.Expected greedy,
         int usedBudget)
     {
-        var sb = new System.Text.StringBuilder("Expected at lv 11");
+        var sb = new System.Text.StringBuilder("11 级期望");
         AppendExpectedBlock(sb, naive, greedy, usedBudget);
         return sb.ToString();
     }
@@ -147,47 +147,45 @@ internal static class TooltipFactory
         {
             if (count == 0)
             {
-                sb.Append("\n(lv11 baseline — no post-lv11 gains on this stat)");
+                sb.Append("\n（11 级基线——该属性无 11 级后增量）");
             }
             else
             {
-                sb.Append("\n−").Append(count).Append(" post-lv11 increase")
-                    .Append(count == 1 ? "" : "s");
+                sb.Append("\n−").Append(count).Append(" 次 11 级后增量");
                 sb.Append("\n= ").Append(naive.FinalExpected);
             }
             return;
         }
         if (count == 0)
         {
-            sb.Append("\nNo increases allotted");
-            sb.Append("\nAvailable: ").Append(totalBudget - usedBudget)
+            sb.Append("\n未分配增量");
+            sb.Append("\n可用：").Append(totalBudget - usedBudget)
                 .Append(" / ").Append(totalBudget);
         }
         else
         {
-            sb.Append("\nAllotted: ").Append(count).Append(" / ").Append(remaining).Append(" max");
-            AppendExpectedRow(sb, "Naive ", naive);
+            sb.Append("\n已分配：").Append(count).Append(" / 上限 ").Append(remaining);
+            AppendExpectedRow(sb, "朴素", naive);
             if (usedBudget == totalBudget)
             {
-                if (greedy.FinalExpected == naive.FinalExpected) sb.Append("\nGreedy: same");
-                else AppendExpectedRow(sb, "Greedy", greedy);
+                if (greedy.FinalExpected == naive.FinalExpected) sb.Append("\n贪心：相同");
+                else AppendExpectedRow(sb, "贪心", greedy);
             }
             else
             {
-                sb.Append("\nGreedy: n/a (allocation incomplete)");
+                sb.Append("\n贪心：不适用（分配未完成）");
             }
-            sb.Append("\nBudget: ").Append(usedBudget).Append(" / ").Append(totalBudget)
-                .Append(" used");
+            sb.Append("\n预算：已用 ").Append(usedBudget).Append(" / ").Append(totalBudget);
         }
-        sb.Append("\n(").Append(remaining).Append(" levels remaining)");
+        sb.Append("\n（剩余 ").Append(remaining).Append(" 级）");
     }
 
     private static void AppendExpectedRow(System.Text.StringBuilder sb, string label,
         ExpectedStatsCalculator.Expected exp)
     {
-        sb.Append('\n').Append(label).Append(": ");
+        sb.Append('\n').Append(label).Append("：");
         if (exp.BaseExpected != exp.FinalExpected)
-            sb.Append("base ").Append(exp.BaseExpected).Append(" → ").Append(exp.FinalExpected);
+            sb.Append("基础 ").Append(exp.BaseExpected).Append(" → ").Append(exp.FinalExpected);
         else
             sb.Append(exp.FinalExpected);
     }
@@ -200,29 +198,29 @@ internal static class TooltipFactory
         if (s != null)
         {
             if (s.DamageMin > 0 || s.DamageMax > 0)
-                sb.Append("\nDamage: ").Append(s.DamageMin).Append(" – ").Append(s.DamageMax);
+                sb.Append("\n伤害：").Append(s.DamageMin).Append(" – ").Append(s.DamageMax);
             if (s.DamageArmor > 0)
-                sb.Append("\nArmor%: ").Append(Pct(s.DamageArmor));
+                sb.Append("\n护甲伤害：").Append(Pct(s.DamageArmor));
             if (s.Penetration > 0)
-                sb.Append("\nPenetration: ").Append(Pct(s.Penetration));
+                sb.Append("\n破甲：").Append(Pct(s.Penetration));
             if (s.FatigueUse > 0)
-                sb.Append("\nFatigue: ").Append(s.FatigueUse);
+                sb.Append("\n疲劳消耗：").Append(s.FatigueUse);
             if (s.HitBonus != 0)
-                sb.Append("\nHit: ").Append(s.HitBonus > 0 ? "+" : "").Append(s.HitBonus);
+                sb.Append("\n命中：").Append(s.HitBonus > 0 ? "+" : "").Append(s.HitBonus);
             if (s.HeadChance > 0)
-                sb.Append("\nHead%: ").Append(s.HeadChance);
+                sb.Append("\n爆头率：").Append(s.HeadChance);
         }
         if (itemType == "namedWeapon")
         {
-            sb.Append("\nNamed weapon");
+            sb.Append("\n名品武器");
         }
         else
         {
             var ws = WeaponStatsService.Instance.Get(hexId);
             if (ws?.WeaponClass != null)
             {
-                sb.Append("\nClass: ").Append(ws.WeaponClass);
-                if (ws.Tier != null) sb.Append("\nTier: ").Append(ws.Tier);
+                sb.Append("\n类别：").Append(ws.WeaponClass);
+                if (ws.Tier != null) sb.Append("\n品级：").Append(ws.Tier);
             }
         }
         return sb.ToString();
@@ -233,9 +231,9 @@ internal static class TooltipFactory
         if (s == null) return name;
         var sb = new System.Text.StringBuilder(name);
         if (s.Durability > 0)
-            sb.Append("\nDurability: ").Append((int)s.Durability);
+            sb.Append("\n耐久：").Append((int)s.Durability);
         if (s.Fatigue != 0)
-            sb.Append("\nFatigue: ").Append((int)s.Fatigue);
+            sb.Append("\n疲劳消耗：").Append((int)s.Fatigue);
         if (s.HasAttachment())
         {
             var att = dict.Get(s.Attachment!);
@@ -249,13 +247,13 @@ internal static class TooltipFactory
         if (s == null) return name;
         var sb = new System.Text.StringBuilder(name);
         if (s.Durability > 0)
-            sb.Append("\nDurability: ").Append((int)s.Durability);
+            sb.Append("\n耐久：").Append((int)s.Durability);
         if (s.MDef != 0)
-            sb.Append("\nMelee Def: +").Append(s.MDef);
+            sb.Append("\n近防：+").Append(s.MDef);
         if (s.RDef != 0)
-            sb.Append("\nRanged Def: +").Append(s.RDef);
+            sb.Append("\n远防：+").Append(s.RDef);
         if (s.FatigueUse > 0)
-            sb.Append("\nFatigue: ").Append(s.FatigueUse);
+            sb.Append("\n疲劳消耗：").Append(s.FatigueUse);
         return sb.ToString();
     }
 

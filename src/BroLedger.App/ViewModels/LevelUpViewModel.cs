@@ -1,3 +1,4 @@
+using BroLedger.App.Services;
 using BroLedger.Core.Models;
 using BroLedger.Core.Services;
 
@@ -34,17 +35,26 @@ internal static class LevelUpViewModel
             var delta = ev.StatDeltas.FirstOrDefault(kv => kv.Key == s).Value;
             if (delta <= 0) continue; // Java: null or <= 0 skipped
             var consumed = ev.ConsumedIncreases.FirstOrDefault(kv => kv.Key == s).Value;
-            var text = s.DisplayName + "  +" + delta
-                + (consumed != 0 ? "  (" + consumed + " planned consumed)" : "");
+            var text = s.Label() + "  +" + delta
+                + (consumed != 0 ? "  （已消耗计划增量 " + consumed + "）" : "");
             stats.Add(new StatLine(text, underConsumed));
         }
 
         var dict = DictionaryService.Instance;
-        var perks = ev.AddedPerkIds.Select(id => "Perk: " + dict.GetName(id)).ToList();
+        var perks = ev.AddedPerkIds.Select(id => "天赋：" + dict.GetName(id)).ToList();
 
         return new LevelUpCard(ev.Name, stats, perks,
-            OverviewCalc.LevelUpStatusText(ev.Post11, ev.Adjusted), ev.Adjusted);
+            StatusText(ev.Post11, ev.Adjusted), ev.Adjusted);
     }
+
+    /// <summary>OverviewCalc.LevelUpStatusText 的中文显示映射（Core 输出属数据层，不动）。</summary>
+    private static string StatusText(bool post11, bool adjusted) => (post11, adjusted) switch
+    {
+        (true, true) => "已记录 11 级后的增量 ✓",
+        (true, false) => "检测到 11 级后的升级",
+        (false, true) => "已按计划调整增量 ✓",
+        _ => "没有可调整的计划增量",
+    };
 
     public static IReadOnlyList<LevelUpCard> BuildCards(
         IReadOnlyList<AnnotationService.LevelUpEvent> events) =>

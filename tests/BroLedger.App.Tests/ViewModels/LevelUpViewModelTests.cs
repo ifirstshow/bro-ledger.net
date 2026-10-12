@@ -8,8 +8,8 @@ namespace BroLedger.App.Tests.ViewModels;
 /// Content pins for the level-up modal card assembly (Java LevelUpModalController.buildCard)
 /// and the modal three-state branch decision (Java MainController.loadSaveQuiet L484-488 +
 /// PreferencesController's mode normalization). Java has no tests for either — UI test
-/// gap; these pin the port instead. Exact strings mirror the Java label texts
-/// ("Name  +delta  (n planned consumed)" double spaces included).
+/// gap; these pin the port instead. Exact strings mirror the (中文化后) card label texts —
+/// Java format "Name  +delta  (n planned consumed)", 中文 "名称  +增量  （已消耗计划增量 n）".
 /// </summary>
 public class LevelUpViewModelTests
 {
@@ -37,7 +37,7 @@ public class LevelUpViewModelTests
             levelsAssigned: 2);
         var card = LevelUpViewModel.BuildCard(ev);
         var line = Assert.Single(card.Stats);
-        Assert.Equal("Health  +2  (1 planned consumed)", line.Text);
+        Assert.Equal("生命  +2  （已消耗计划增量 1）", line.Text);
     }
 
     [Fact]
@@ -45,7 +45,7 @@ public class LevelUpViewModelTests
     {
         var ev = Event(deltas: [new(Stat.MeleeSkill, 3)]);
         var card = LevelUpViewModel.BuildCard(ev);
-        Assert.Equal("Melee Skill  +3", Assert.Single(card.Stats).Text);
+        Assert.Equal("近攻  +3", Assert.Single(card.Stats).Text);
     }
 
     [Fact]
@@ -59,7 +59,7 @@ public class LevelUpViewModelTests
         ]);
         var card = LevelUpViewModel.BuildCard(ev);
         var line = Assert.Single(card.Stats);
-        Assert.Equal("Fatigue  +4", line.Text);
+        Assert.Equal("疲劳  +4", line.Text);
     }
 
     // ---- under-consumed flag (OverviewCalc.isUnderConsumed wiring) ---------
@@ -100,7 +100,7 @@ public class LevelUpViewModelTests
     {
         var perkId = DictionaryService.Instance.GetAllByType("perk").First().Key;
         var card = LevelUpViewModel.BuildCard(Event(perks: [perkId]));
-        Assert.Equal(["Perk: " + DictionaryService.Instance.GetName(perkId)], card.Perks);
+        Assert.Equal(["天赋：" + DictionaryService.Instance.GetName(perkId)], card.Perks);
     }
 
     [Fact]
@@ -116,23 +116,23 @@ public class LevelUpViewModelTests
     public void StatusText_Pre11NotAdjusted_SaysNoPlannedIncreases()
     {
         var card = LevelUpViewModel.BuildCard(Event());
-        Assert.Equal("No planned increases to adjust", card.StatusText);
+        Assert.Equal("没有可调整的计划增量", card.StatusText);
     }
 
     [Fact]
     public void StatusText_Pre11Adjusted_SaysAdjusted()
     {
         var card = LevelUpViewModel.BuildCard(Event(adjusted: true));
-        Assert.Equal("Planned increases adjusted ✓", card.StatusText);
+        Assert.Equal("已按计划调整增量 ✓", card.StatusText);
         Assert.True(card.Adjusted); // the green-colour flag rides Adjusted
     }
 
     [Fact]
     public void StatusText_Post11_BothVariants()
     {
-        Assert.Equal("Post-lv11 level-up detected",
+        Assert.Equal("检测到 11 级后的升级",
             LevelUpViewModel.BuildCard(Event(post11: true)).StatusText);
-        Assert.Equal("Post-lv11 increases recorded ✓",
+        Assert.Equal("已记录 11 级后的增量 ✓",
             LevelUpViewModel.BuildCard(Event(post11: true, adjusted: true)).StatusText);
     }
 

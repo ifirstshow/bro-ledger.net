@@ -8,7 +8,7 @@
 
             <!-- 0. Navigation toolbar -->
             <StackPanel Orientation="Horizontal">
-                <Button x:Name="BackBtn" Content="← Back" Classes="overview-potential-toggle"/>
+                <Button x:Name="BackBtn" Content="← 返回" Classes="overview-potential-toggle"/>
             </StackPanel>
 
             <!-- 1. Header: portrait + name / title / background -->
@@ -25,29 +25,29 @@
 
             <!-- 2. Traits -->
             <StackPanel Classes="card-section" Spacing="6">
-                <TextBlock Text="Traits" Classes="section-header"/>
+                <TextBlock Text="特性" Classes="section-header"/>
                 <WrapPanel x:Name="TraitsHost"/>
             </StackPanel>
 
             <!-- 3. Role -->
             <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
-                <TextBlock Text="Role:" Classes="field-label" VerticalAlignment="Center"/>
+                <TextBlock Text="角色：" Classes="field-label" VerticalAlignment="Center"/>
                 <ComboBox x:Name="RoleCombo" Classes="role-combo" MaxWidth="300"
                           HorizontalAlignment="Left" VerticalAlignment="Center"/>
-                <Button x:Name="ClearRoleBtn" Content="Clear" Classes="overview-potential-toggle"/>
+                <Button x:Name="ClearRoleBtn" Content="清除" Classes="overview-potential-toggle"/>
                 <Control HorizontalAlignment="Stretch"/>
-                <Button x:Name="ResetRolesBtn" Content="Reset" Classes="overview-potential-toggle"/>
-                <Button x:Name="ShowAllRolesBtn" Content="Show All" Classes="overview-potential-toggle"/>
-                <Button x:Name="FrontlineRolesBtn" Content="Frontline" Classes="overview-potential-toggle"/>
-                <Button x:Name="BacklineRolesBtn" Content="Backline" Classes="overview-potential-toggle"/>
+                <Button x:Name="ResetRolesBtn" Content="重置" Classes="overview-potential-toggle"/>
+                <Button x:Name="ShowAllRolesBtn" Content="显示全部" Classes="overview-potential-toggle"/>
+                <Button x:Name="FrontlineRolesBtn" Content="前排" Classes="overview-potential-toggle"/>
+                <Button x:Name="BacklineRolesBtn" Content="后排" Classes="overview-potential-toggle"/>
             </StackPanel>
 
             <!-- 4. Stats grid (populated programmatically) -->
             <StackPanel Classes="card-section" Spacing="6">
                 <StackPanel Orientation="Horizontal" Spacing="12">
-                    <TextBlock Text="Attributes" Classes="section-header"/>
+                    <TextBlock Text="属性" Classes="section-header"/>
                     <Control HorizontalAlignment="Stretch"/>
-                    <Button x:Name="AutoAssignBtn" Content="Auto-assign by role"
+                    <Button x:Name="AutoAssignBtn" Content="按角色自动分配"
                             Classes="overview-potential-toggle"/>
                 </StackPanel>
                 <Grid x:Name="StatsGrid"/>
@@ -56,11 +56,11 @@
             <!-- 5. Perks (populated programmatically) -->
             <StackPanel Classes="card-section" Spacing="6">
                 <StackPanel Orientation="Horizontal" Spacing="8">
-                    <TextBlock Text="Perks" Classes="section-header"/>
+                    <TextBlock Text="天赋" Classes="section-header"/>
                     <TextBlock x:Name="PerkPointsLabel" Classes="level-pending-badge" IsVisible="False"/>
                     <TextBlock x:Name="PerkPlanBadgeLabel" Classes="perk-plan-badge" IsVisible="False"/>
                     <Control HorizontalAlignment="Stretch"/>
-                    <Button x:Name="ClearPlanBtn" Content="Clear" Classes="overview-potential-toggle"
+                    <Button x:Name="ClearPlanBtn" Content="清除" Classes="overview-potential-toggle"
                             IsVisible="False"/>
                     <Button x:Name="InitPlanBtn" Classes="overview-potential-toggle" IsVisible="False"/>
                 </StackPanel>
@@ -69,7 +69,7 @@
 
             <!-- 6. Equipment (populated programmatically) -->
             <StackPanel Classes="card-section" Spacing="6">
-                <TextBlock Text="Equipment" Classes="section-header"/>
+                <TextBlock Text="装备" Classes="section-header"/>
                 <StackPanel x:Name="EquipmentHost" Orientation="Horizontal" Spacing="10"/>
             </StackPanel>
 

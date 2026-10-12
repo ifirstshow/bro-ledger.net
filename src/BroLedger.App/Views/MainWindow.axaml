@@ -45,17 +45,17 @@
                         <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="8">
                             <Button Classes="fancy-btn" Focusable="False" Click="OnOpenSave">
                                 <StackPanel Spacing="2">
-                                    <TextBlock Classes="btn-header" Text="Open Save"/>
+                                    <TextBlock Classes="btn-header" Text="打开存档"/>
                                     <TextBlock Classes="btn-desc" Text="{Binding CurrentFileName}"/>
                                 </StackPanel>
                             </Button>
                             <!-- Java buildToolbar L126-131: Export always; Excerpt only in
                                  debug builds (visibility set in code-behind ctor). -->
                             <Button x:Name="ExportBtn" Classes="fancy-btn" Focusable="False" Click="OnExportSave">
-                                <TextBlock Classes="btn-header" Text="Export"/>
+                                <TextBlock Classes="btn-header" Text="导出 CSV"/>
                             </Button>
                             <Button x:Name="ExcerptBtn" Classes="fancy-btn" Focusable="False" Click="OnExportExcerpt">
-                                <TextBlock Classes="btn-header" Text="Excerpt"/>
+                                <TextBlock Classes="btn-header" Text="导出节选"/>
                             </Button>
                             <TextBlock Classes="watch-status-label" Text="{Binding WatchStatusText}"/>
                         </StackPanel>
@@ -69,9 +69,9 @@
                         </StackPanel>
 
                         <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8">
-                            <Button Classes="fancy-btn" Content="Roles" Focusable="False" Click="OnOpenRoleManager"/>
-                            <Button Classes="fancy-btn" Content="Preferences" Focusable="False" Click="OnOpenPreferences"/>
-                            <Button Classes="fancy-btn" Content="Reset Layout" Focusable="False" Click="OnResetLayout"/>
+                            <Button Classes="fancy-btn" Content="角色管理" Focusable="False" Click="OnOpenRoleManager"/>
+                            <Button Classes="fancy-btn" Content="偏好设置" Focusable="False" Click="OnOpenPreferences"/>
+                            <Button Classes="fancy-btn" Content="重置布局" Focusable="False" Click="OnResetLayout"/>
                         </StackPanel>
                     </Grid>
                 </Border>

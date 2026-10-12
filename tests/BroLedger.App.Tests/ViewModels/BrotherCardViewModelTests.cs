@@ -152,7 +152,7 @@ public class BrotherCardViewModelTests : IDisposable
         Assert.False(ui.Post11);
         Assert.Equal(4, ui.Cap);
         Assert.Equal(12, ui.TotalBudget);
-        Assert.Equal("0/12  (2 levels available)", ui.BudgetText);
+        Assert.Equal("0/12  （剩余 2 级）", ui.BudgetText);
         Assert.Equal("increases-remaining-green", ui.BudgetStateClass); // under → green
     }
 
@@ -192,7 +192,7 @@ public class BrotherCardViewModelTests : IDisposable
 
         var ui = vm.ComputeIncreaseUi();
         Assert.True(ui.Lv11);
-        Assert.Equal("Lv 11", ui.BudgetText);
+        Assert.Equal("11 级", ui.BudgetText);
     }
 
     [Fact]
@@ -380,7 +380,7 @@ public class BrotherCardViewModelTests : IDisposable
         Assert.Null(BrotherCardViewModel.PlanBadgeText(null));
         Assert.Null(BrotherCardViewModel.PlanBadgeText(new Dictionary<string, string>())); // empty → null
 
-        Assert.Equal("P: 2  ·  O: 1", BrotherCardViewModel.PlanBadgeText(new Dictionary<string, string>
+        Assert.Equal("计划 2 · 可选 1", BrotherCardViewModel.PlanBadgeText(new Dictionary<string, string>
         {
             ["a"] = "PLANNED", ["b"] = "OPTIONAL", ["c"] = "PLANNED",
         }));
@@ -396,10 +396,10 @@ public class BrotherCardViewModelTests : IDisposable
 
         var role = EnsureRole(priority: null, template: new Dictionary<string, string> { [GiftedHexId] = "PLANNED" });
         AnnotationService.Instance.SetRole("fp18", role.Id);
-        Assert.Equal("Init plan from role", vm.InitPlanButtonText());
+        Assert.Equal("从角色初始化计划", vm.InitPlanButtonText());
 
         vm.InitPlanFromRole();
-        Assert.Equal("Reset to role template", vm.InitPlanButtonText());
+        Assert.Equal("重置为角色模板", vm.InitPlanButtonText());
     }
 
     // ---- extra columns: Java setExtras presets + ensurePlaceholder ------------

@@ -148,18 +148,18 @@ public class MainViewModelTests
     public void DanglingRoleMessage_ListsAllNamesWhenFiveOrFewer()
     {
         var msg = MainViewModel.DanglingRoleMessage(["Horik", "Sten"]);
-        Assert.StartsWith("2 brother(s)", msg, StringComparison.Ordinal);
+        Assert.StartsWith("2 名兄弟引用了已删除的角色——分配已清除：", msg, StringComparison.Ordinal);
         Assert.Contains("Horik, Sten", msg, StringComparison.Ordinal);
-        Assert.DoesNotContain("more", msg, StringComparison.Ordinal);
+        Assert.DoesNotContain("等共", msg, StringComparison.Ordinal);
     }
 
     [Fact]
     public void DanglingRoleMessage_CapsAtFiveNames()
     {
         var msg = MainViewModel.DanglingRoleMessage(["A", "B", "C", "D", "E", "F", "G"]);
-        Assert.StartsWith("7 brother(s)", msg, StringComparison.Ordinal);
+        Assert.StartsWith("7 名兄弟引用了已删除的角色——分配已清除：", msg, StringComparison.Ordinal);
         Assert.Contains("A, B, C, D, E", msg, StringComparison.Ordinal);
-        Assert.Contains("+2 more", msg, StringComparison.Ordinal);
+        Assert.Contains(" 等共 7 名", msg, StringComparison.Ordinal);
         Assert.DoesNotContain("F", msg, StringComparison.Ordinal);
     }
 
@@ -168,25 +168,25 @@ public class MainViewModelTests
     [Fact]
     public void Countdown_AtZeroShowsReloadedZero()
     {
-        Assert.Equal("Reloaded 0 seconds ago", MainViewModel.ReloadCountdownText(0, null));
+        Assert.Equal("0 秒前已重新载入", MainViewModel.ReloadCountdownText(0, null));
     }
 
     [Fact]
     public void Countdown_NoteAppendedWithBullet()
     {
-        Assert.Equal("Reloaded 0 seconds ago • 3 level-up(s) detected",
-            MainViewModel.ReloadCountdownText(0, "3 level-up(s) detected"));
+        Assert.Equal("0 秒前已重新载入 • 检测到 3 次升级",
+            MainViewModel.ReloadCountdownText(0, "检测到 3 次升级"));
     }
 
     [Fact]
     public void Countdown_Before15CountsSeconds()
     {
-        Assert.Equal("Reloaded 14 seconds ago", MainViewModel.ReloadCountdownText(14, null));
+        Assert.Equal("14 秒前已重新载入", MainViewModel.ReloadCountdownText(14, null));
     }
 
     [Fact]
     public void Countdown_At15ShowsWatching()
     {
-        Assert.Equal("Watching", MainViewModel.ReloadCountdownText(15, null));
+        Assert.Equal("监视中", MainViewModel.ReloadCountdownText(15, null));
     }
 }

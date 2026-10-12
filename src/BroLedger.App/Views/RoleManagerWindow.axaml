@@ -3,7 +3,7 @@
         xmlns:vm="using:BroLedger.App.ViewModels"
         x:Class="BroLedger.App.RoleManagerWindow"
         x:DataType="vm:RoleManagerViewModel"
-        Title="Manage Roles"
+        Title="角色管理"
         Width="960" Height="620" MinWidth="960" MinHeight="620"
         WindowDecorations="None"
         ExtendClientAreaToDecorationsHint="True"
@@ -20,7 +20,7 @@
 
             <Border x:Name="TitleBar" Classes="title-bar" DockPanel.Dock="Top">
                 <DockPanel LastChildFill="True">
-                    <TextBlock Classes="title-bar-label" Text="Manage Roles"
+                    <TextBlock Classes="title-bar-label" Text="角色管理"
                                VerticalAlignment="Center"/>
                     <Button Classes="window-btn window-btn-close" Content="✕"
                             Focusable="False" DockPanel.Dock="Right" Click="OnClose"/>
@@ -32,20 +32,20 @@
                 <!-- Left: role list -->
                 <Border Classes="sidebar" Grid.Column="0">
                     <DockPanel>
-                        <TextBlock Classes="sidebar-header" Text="Roles" DockPanel.Dock="Top"/>
+                        <TextBlock Classes="sidebar-header" Text="角色" DockPanel.Dock="Top"/>
                         <Border Classes="role-list-buttons" DockPanel.Dock="Bottom">
                             <StackPanel Spacing="6" Margin="8">
                                 <Grid ColumnDefinitions="*,6,*">
-                                    <Button Classes="fancy-btn" Content="+ Add" Focusable="False" Click="OnAdd"/>
-                                    <Button Grid.Column="2" Classes="fancy-btn" Content="− Delete" Focusable="False" Click="OnDelete"/>
+                                    <Button Classes="fancy-btn" Content="+ 添加" Focusable="False" Click="OnAdd"/>
+                                    <Button Grid.Column="2" Classes="fancy-btn" Content="− 删除" Focusable="False" Click="OnDelete"/>
                                 </Grid>
                                 <Grid ColumnDefinitions="*,6,*">
                                     <Button Classes="fancy-btn" Content="▲" MinWidth="36" Focusable="False" Click="OnMoveUp"/>
                                     <Button Grid.Column="2" Classes="fancy-btn" Content="▼" MinWidth="36" Focusable="False" Click="OnMoveDown"/>
                                 </Grid>
                                 <Grid ColumnDefinitions="*,6,*">
-                                    <Button Classes="fancy-btn" Content="Share…" Focusable="False" Click="OnShare"/>
-                                    <Button Grid.Column="2" Classes="fancy-btn" Content="Import…" Focusable="False" Click="OnImport"/>
+                                    <Button Classes="fancy-btn" Content="分享…" Focusable="False" Click="OnShare"/>
+                                    <Button Grid.Column="2" Classes="fancy-btn" Content="导入…" Focusable="False" Click="OnImport"/>
                                 </Grid>
                             </StackPanel>
                         </Border>
@@ -59,33 +59,33 @@
                            Margin="20,16">
                     <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" Spacing="8"
                                 HorizontalAlignment="Right" Margin="0,14,0,0">
-                        <Button Classes="fancy-btn" Content="Save Role" Focusable="False" Click="OnSave"/>
-                        <Button Classes="fancy-btn" Content="Close" Focusable="False" Click="OnClose"/>
+                        <Button Classes="fancy-btn" Content="保存角色" Focusable="False" Click="OnSave"/>
+                        <Button Classes="fancy-btn" Content="关闭" Focusable="False" Click="OnClose"/>
                     </StackPanel>
 
                     <Grid RowDefinitions="Auto,Auto,Auto,*">
                         <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="10">
-                            <TextBlock Classes="field-label" Text="Name:" MinWidth="80" VerticalAlignment="Center"/>
-                            <TextBox x:Name="NameField" PlaceholderText="Role name" HorizontalAlignment="Stretch"/>
+                            <TextBlock Classes="field-label" Text="名称：" MinWidth="80" VerticalAlignment="Center"/>
+                            <TextBox x:Name="NameField" PlaceholderText="角色名称" HorizontalAlignment="Stretch"/>
                         </StackPanel>
 
                         <StackPanel Grid.Row="1" Orientation="Horizontal" Spacing="16" Margin="0,14,0,0">
-                            <TextBlock Classes="field-label" Text="Position:" MinWidth="80" VerticalAlignment="Center"/>
+                            <TextBlock Classes="field-label" Text="位置：" MinWidth="80" VerticalAlignment="Center"/>
                             <RadioButton x:Name="FrontlineRadio" Classes="role-radio" GroupName="position"
-                                         Content="Frontline"/>
+                                         Content="前排"/>
                             <RadioButton x:Name="BacklineRadio" Classes="role-radio" GroupName="position"
-                                         Content="Backline"/>
+                                         Content="后排"/>
                         </StackPanel>
 
                         <StackPanel Grid.Row="2" Classes="card-section" Spacing="6" Margin="0,14">
-                            <TextBlock Classes="section-header" Text="Attributes"/>
+                            <TextBlock Classes="section-header" Text="属性"/>
                             <Grid x:Name="StatEditorGrid" ColumnDefinitions="120,60,Auto" RowDefinitions="Auto"/>
                         </StackPanel>
 
                         <!-- Perk Plan (populated programmatically) -->
                         <Grid Grid.Row="3" Classes="card-section" RowDefinitions="Auto,*" Margin="0,14,0,0">
                             <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="8">
-                                <TextBlock Classes="section-header" Text="Perk Plan"/>
+                                <TextBlock Classes="section-header" Text="天赋计划"/>
                                 <TextBlock x:Name="PerkPlanBadge" Classes="perk-plan-badge" IsVisible="False"/>
                             </StackPanel>
                             <ScrollViewer x:Name="PerkPlanScroll" Grid.Row="1" Classes="modal-scroll"

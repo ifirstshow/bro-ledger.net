@@ -67,9 +67,9 @@ public partial class RoleManagerWindow : Window
 
     private void BuildStatEditorGrid()
     {
-        AddGridCell(0, 0, new TextBlock { Classes = { "field-label" }, Text = "Stat" });
-        AddGridCell(0, 1, new TextBlock { Classes = { "field-label" }, Text = "Target" });
-        AddGridCell(0, 2, new TextBlock { Classes = { "field-label" }, Text = "Priority" });
+        AddGridCell(0, 0, new TextBlock { Classes = { "field-label" }, Text = "属性" });
+        AddGridCell(0, 1, new TextBlock { Classes = { "field-label" }, Text = "目标" });
+        AddGridCell(0, 2, new TextBlock { Classes = { "field-label" }, Text = "优先级" });
 
         for (var visual = 0; visual < _vm.StatRows.Count; visual++)
         {
@@ -80,7 +80,7 @@ public partial class RoleManagerWindow : Window
             var name = new TextBlock
             {
                 Classes = { "stat-label" },
-                Text = row.Stat.DisplayName,
+                Text = row.Stat.Label(),
                 MinWidth = 100,
                 VerticalAlignment = VerticalAlignment.Center,
             };
@@ -184,8 +184,8 @@ public partial class RoleManagerWindow : Window
         var body = _vm.DeleteConfirmation();
         if (selected == null || body == null) return;
 
-        var confirmed = await ModalService.ConfirmAsync(this, "Delete Role",
-            "Delete role \"" + selected.Name + "\"?", body, "Delete");
+        var confirmed = await ModalService.ConfirmAsync(this, "删除角色",
+            "删除角色“" + selected.Name + "”？", body, "删除");
         if (confirmed) _vm.DeleteRole();
     }
 

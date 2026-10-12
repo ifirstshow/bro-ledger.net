@@ -5,6 +5,7 @@ using Avalonia.Interactivity;
 using Avalonia.Layout;
 using Avalonia.Media;
 using Avalonia.VisualTree;
+using BroLedger.App.Services;
 using BroLedger.App.ViewModels;
 using System.ComponentModel;
 using BroLedger.Core;
@@ -42,10 +43,12 @@ internal partial class BrotherOverviewPane : UserControl
     private const double WPerkMin = 112;
     private const double WPerkPref = 280;
 
-    // Java EQUIP_SLOT_IDX / EQUIP_SLOT_NAME / EQUIP_HDR.
+    // Java EQUIP_SLOT_IDX / EQUIP_SLOT_NAME / EQUIP_HDR. EquipHdr 同时是列 ID 的后缀（
+    // AppConfig.OverviewColumnOrder 持久化 + Java 互认），必须保持英文；显示文本用 EquipHdrDisplay。
     private static readonly int[] EquipSlotIdx = [2, 3, 0, 1, 4, 5];
     private static readonly string[] EquipSlotName = ["body", "helmet", "weapon", "shield", "trinket", "quiver"];
     private static readonly string[] EquipHdr = ["Arm", "Hlm", "Wpn", "Shd", "Trk", "Quv", "P1", "P2", "P3", "P4"];
+    private static readonly string[] EquipHdrDisplay = ["身甲", "头盔", "武器", "盾", "饰品", "箭袋", "囊1", "囊2", "囊3", "囊4"];
 
     // Java TRAIT_NAME_BLOCKLIST. Internal: the brother card's traits pane shares it
     // (Java BrotherCardController references BrotherOverviewPane.TRAIT_NAME_BLOCKLIST).
@@ -149,11 +152,11 @@ internal partial class BrotherOverviewPane : UserControl
             specs.Add(id switch
             {
                 "portrait" => new ColumnSpec(id, "", WPortrait, ColumnKind.Portrait, null),
-                "name" => new ColumnSpec(id, "Name", WName, ColumnKind.Name, null),
-                "role" => new ColumnSpec(id, "Role", WRole, ColumnKind.Role, null),
-                "level" => new ColumnSpec(id, "Lvl", WLevel, ColumnKind.Level, null),
-                "traits" => new ColumnSpec(id, "Traits", WTrait, ColumnKind.Traits, null),
-                "perks" => new ColumnSpec(id, "Perks", WPerkPref, ColumnKind.Perks, null),
+                "name" => new ColumnSpec(id, "姓名", WName, ColumnKind.Name, null),
+                "role" => new ColumnSpec(id, "角色", WRole, ColumnKind.Role, null),
+                "level" => new ColumnSpec(id, "等级", WLevel, ColumnKind.Level, null),
+                "traits" => new ColumnSpec(id, "特性", WTrait, ColumnKind.Traits, null),
+                "perks" => new ColumnSpec(id, "天赋", WPerkPref, ColumnKind.Perks, null),
                 _ when id.StartsWith("stat-") => StatSpec(id),
                 _ when id.StartsWith("equip-") => EquipSpec(id),
                 _ => new ColumnSpec(id, id, WStat, ColumnKind.Stat, null),
@@ -165,7 +168,7 @@ internal partial class BrotherOverviewPane : UserControl
         {
             var abbrev = id["stat-".Length..];
             var stat = Stat.Values.FirstOrDefault(s => s.Abbrev == abbrev) ?? Stat.Values[0];
-            return new ColumnSpec(id, abbrev, WStat, ColumnKind.Stat, stat);
+            return new ColumnSpec(id, stat.Label(), WStat, ColumnKind.Stat, stat);
         }
 
         static ColumnSpec EquipSpec(string id)
@@ -177,11 +180,11 @@ internal partial class BrotherOverviewPane : UserControl
                 // Java equipCol(i): durability overlay on Arm/Hlm, tier dot on the weapon.
                 var kind = p is 0 or 1 ? EquipKind.Durability
                     : EquipSlotName[p] == "weapon" ? EquipKind.Tier : EquipKind.Plain;
-                return new ColumnSpec(id, suffix, WEquip, ColumnKind.Equip,
+                return new ColumnSpec(id, EquipHdrDisplay[p], WEquip, ColumnKind.Equip,
                     new EquipTag(kind, b => SlotAt(b, EquipSlotIdx[p], EquipSlotName[p])));
             }
             // Java pouchCol(p): tier dot overlay.
-            return new ColumnSpec(id, suffix, WEquip, ColumnKind.Equip,
+            return new ColumnSpec(id, EquipHdrDisplay[p], WEquip, ColumnKind.Equip,
                 new EquipTag(EquipKind.Tier, b =>
                 {
                     var pouches = OverviewCalc.GatherPouches(b.EquippedSlots, b.ExtraPouches);
@@ -446,17 +449,17 @@ internal partial class BrotherOverviewPane : UserControl
     /// <summary>Java refreshCell's else-branch tooltip text (the non-popup cases).</summary>
     private static string LevelTooltipText(Brother b, OverviewCalc.LevelBudget budget)
     {
-        if (b.LevelTotal == 11 || budget.Cap == 0) return "Max level reached";
+        if (b.LevelTotal == 11 || budget.Cap == 0) return "已达最高等级";
         if (budget.Post11)
         {
             return budget.Free > 0
-                ? $"Assign post-lv11 increases\n({budget.Used} / {budget.TotalBudget} used)"
-                : "Post-lv11 increases fully assigned";
+                ? $"分配11级后的增长点数\n（已用 {budget.Used} / {budget.TotalBudget}）"
+                : "11级后的增长点数已分配完毕";
         }
         var pendingNote = b.LevelPoints > 0
-            ? b.LevelPoints + " unassigned level-up(s) folded into budget.\n" : "";
-        return pendingNote + "Assign all increases to see\nthe roll priority guide.\n("
-            + budget.Used + " / " + budget.TotalBudget + " used)";
+            ? $"有 {b.LevelPoints} 次未分配的升级计入预算。\n" : "";
+        return pendingNote + "分配全部增长点数后\n可查看判定优先级指南。\n（已用 "
+            + budget.Used + " / " + budget.TotalBudget + "）";
     }
 
     private Control BuildStatCell(Stat stat, Brother b)
@@ -622,7 +625,7 @@ internal partial class BrotherOverviewPane : UserControl
                 Classes = { "level-pending-badge" },
                 Text = "+" + b.PerkPoints,
             };
-            ToolTip.SetTip(badge, b.PerkPoints + " perk point(s) available but not yet spent.");
+            ToolTip.SetTip(badge, $"有 {b.PerkPoints} 个天赋点可用，尚未在游戏中消耗。");
             box.Children.Add(badge);
         }
         return new Border { Background = Brushes.Transparent, Padding = new Thickness(4, 0, 0, 0), Child = box };

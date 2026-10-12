@@ -48,7 +48,7 @@ internal partial class RoleShareViewModel : ObservableObject
     [ObservableProperty] private string _code = "";
     [ObservableProperty] private string _statusText = "";
     [ObservableProperty] private bool _statusWarning;
-    [ObservableProperty] private string _shareButtonLabel = "Share";
+    [ObservableProperty] private string _shareButtonLabel = "分享";
     [ObservableProperty] private bool _newCodeVisible;
     [ObservableProperty] private bool _shareEnabled = true;
     [ObservableProperty] private bool _recentVisible;
@@ -96,19 +96,19 @@ internal partial class RoleShareViewModel : ObservableObject
         var selected = item?.Record;
         if (selected != null && selected.Updatable())
         {
-            ShareButtonLabel = "Update " + selected.Code;
+            ShareButtonLabel = "更新 " + selected.Code;
             NewCodeVisible = true;
             PackName = selected.Title ?? "";
-            SetStatus("Publishing will overwrite " + selected.Code
-                + " for everyone who has the code.");
+            SetStatus("发布将覆盖 " + selected.Code
+                + "，所有持有此码的人都会收到新版本。");
         }
         else
         {
-            ShareButtonLabel = "Share";
+            ShareButtonLabel = "分享";
             NewCodeVisible = false;
             if (selected != null)
             {
-                SetStatus("This upload can't be updated — Share publishes a new code.");
+                SetStatus("此上传不可更新——分享将发布一个新码。");
             }
         }
     }
@@ -125,7 +125,7 @@ internal partial class RoleShareViewModel : ObservableObject
         var selected = CheckedRoles();
         if (selected.Count == 0)
         {
-            SetWarning("Select at least one role to share.");
+            SetWarning("请至少选择一个要分享的角色。");
             return false;
         }
 
@@ -137,8 +137,8 @@ internal partial class RoleShareViewModel : ObservableObject
         var updateTarget = target != null && target.Updatable() ? target : null;
 
         ShareEnabled = false;
-        if (updateTarget != null) SetStatus("Updating " + updateTarget.Code + "…");
-        else SetStatus("Publishing…");
+        if (updateTarget != null) SetStatus("正在更新 " + updateTarget.Code + "…");
+        else SetStatus("正在发布…");
 
         var service = RoleShareService.Instance;
         Task.Run(() =>
@@ -181,8 +181,8 @@ internal partial class RoleShareViewModel : ObservableObject
         RefreshRecentList();
         Code = result.Code;
         SetStatus(updateMode
-            ? "Updated — everyone with this code gets the new version. Code copied."
-            : "Published — code copied to clipboard.");
+            ? "已更新——持有此码的所有人都会获得新版本。码已复制。"
+            : "已发布——码已复制到剪贴板。");
         ShareEnabled = true;
         CodeReady?.Invoke(result.Code);
     }
@@ -190,7 +190,7 @@ internal partial class RoleShareViewModel : ObservableObject
     /// <summary>Java task.setOnFailed.</summary>
     public void ShareFailed(Exception ex, bool updateMode)
     {
-        SetWarning((updateMode ? "Update failed: " : "Publish failed: ") + FailureMessage(ex));
+        SetWarning((updateMode ? "更新失败：" : "发布失败：") + FailureMessage(ex));
         ShareEnabled = true;
     }
 
@@ -211,19 +211,19 @@ internal partial class RoleShareViewModel : ObservableObject
     /// <summary>One line in the recent-uploads list: title, code, size, date, updatability.</summary>
     public static string RecentCellText(ShareRecord r)
     {
-        var title = !string.IsNullOrEmpty(r.Title) ? r.Title! : "Untitled";
+        var title = !string.IsNullOrEmpty(r.Title) ? r.Title! : "无标题";
         var date = r.UploadedAt != null && r.UploadedAt.Length >= 10 ? r.UploadedAt[..10] : "";
         var sb = new StringBuilder(title).Append(" — ").Append(r.Code)
-            .Append(" · ").Append(r.RoleCount).Append(" role(s)");
+            .Append(" · ").Append(r.RoleCount).Append(" 个角色");
         if (date.Length > 0) sb.Append(" · ").Append(date);
-        if (!r.Updatable()) sb.Append(" (not updatable)");
+        if (!r.Updatable()) sb.Append("（不可更新）");
         return sb.ToString();
     }
 
     /// <summary>Null-safe status text for a failed share/fetch task; also used by the import VM.</summary>
     public static string FailureMessage(Exception? ex)
     {
-        if (ex == null) return "unknown error";
+        if (ex == null) return "未知错误";
         return ex.Message ?? ex.GetType().Name;
     }
 }

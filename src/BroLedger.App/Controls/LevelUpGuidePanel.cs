@@ -34,10 +34,10 @@ internal sealed class LevelUpGuidePanel
     // ---- verbatim texts (Java guideContent label literals) -------------------
 
     public static string HeaderText(int remaining) =>
-        "Roll Priority Guide  (" + remaining + " levels remaining)";
-    public const string AlwaysPickHeader = "Always pick:";
-    public const string RollOutcomeHeader = "Pick by roll outcome (higher = better):";
-    public const string PlannedPerksHeader = "Planned perks (next pick):";
+        "加点优先级指南（剩余 " + remaining + " 级）";
+    public const string AlwaysPickHeader = "必选：";
+    public const string RollOutcomeHeader = "按投骰结果选择（越高越好）：";
+    public const string PlannedPerksHeader = "计划天赋（下一次选择）：";
 
     /// <summary>Java String.format("%+.1f") — explicit sign, one decimal.</summary>
     public static string FormatDeviation(double deviation) =>
@@ -268,7 +268,7 @@ internal sealed class LevelUpGuidePanel
                 row.Children.Add(new TextBlock
                 {
                     Classes = { "priority-guide-name" },
-                    Text = e.Stat.DisplayName,
+                    Text = e.Stat.Label(),
                     VerticalAlignment = VerticalAlignment.Center,
                 });
                 if (!e.Fixed)

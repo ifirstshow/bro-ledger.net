@@ -91,9 +91,9 @@ public class BrotherCardTests : IDisposable
             Assert.True(perkRows.Children.Count > 0);
 
             // Footer derived stats are filled from the parsed save.
-            Assert.StartsWith("Armor: ", card.GetControl<TextBlock>("ArmorLabel").Text);
-            Assert.StartsWith("Fatigue: ", card.GetControl<TextBlock>("FatigueLabel").Text);
-            Assert.StartsWith("Damage: ", card.GetControl<TextBlock>("DamageLabel").Text);
+            Assert.StartsWith("护甲：", card.GetControl<TextBlock>("ArmorLabel").Text);
+            Assert.StartsWith("疲劳：", card.GetControl<TextBlock>("FatigueLabel").Text);
+            Assert.StartsWith("伤害：", card.GetControl<TextBlock>("DamageLabel").Text);
         }
         finally
         {
@@ -165,7 +165,7 @@ public class BrotherCardTests : IDisposable
 
             card.Populate(vm.Brothers[0]); // card re-reads the plan on populate
             Assert.True(badge.IsVisible);
-            Assert.Equal("P: 1  ·  O: 0", badge.Text);
+            Assert.Equal("计划 1 · 可选 0", badge.Text);
             Assert.True(clear.IsVisible);
             Assert.False(init.IsVisible); // no role template assigned → no init button
 
