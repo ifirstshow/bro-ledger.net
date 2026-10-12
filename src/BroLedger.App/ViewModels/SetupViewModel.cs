@@ -17,10 +17,12 @@ internal partial class SetupViewModel : ObservableObject
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(CanExtract))]
+    [NotifyCanExecuteChangedFor(nameof(ExtractCommand))]
     private string _datPath = "";
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(CanExtract))]
+    [NotifyCanExecuteChangedFor(nameof(ExtractCommand))]
     private string _outDir =
         Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "game-art");
 
@@ -44,6 +46,7 @@ internal partial class SetupViewModel : ObservableObject
     /// <summary>While the extractor task runs the button stays disabled (Java startExtract).</summary>
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(CanExtract))]
+    [NotifyCanExecuteChangedFor(nameof(ExtractCommand))]
     private bool _extractRunning;
 
     /// <summary>Java onConfigured — fired after game-art is configured (extract or existing).</summary>

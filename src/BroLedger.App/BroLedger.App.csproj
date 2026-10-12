@@ -5,6 +5,10 @@
     <RootNamespace>BroLedger.App</RootNamespace>
     <PublishAot>true</PublishAot>
     <ApplicationIcon>Assets\BroLedger.ico</ApplicationIcon>
+    <!-- AOT 发布必然 self-contained，而引用的 Tools 项目是框架依赖 Exe（仅当库用：
+         BrotherCsvExporter/BrotherSavefileExporter）。关掉 SDK 的 exe→exe 自包含一致性
+         检查（NETSDK1150，learn.microsoft.com/dotnet/core/compatibility/sdk/5.0/referencing-executable）。 -->
+    <ValidateExecutableReferencesMatchSelfContained>false</ValidateExecutableReferencesMatchSelfContained>
   </PropertyGroup>
 
   <ItemGroup>
