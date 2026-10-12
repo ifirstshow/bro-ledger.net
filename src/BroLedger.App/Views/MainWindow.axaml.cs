@@ -189,18 +189,17 @@ public partial class MainWindow : Window
 
     // ---- hotkeys (Java HotkeyManager "global" scope: Ctrl+O / Ctrl+W / ESC) ----
 
-    // ponytail: Java binds KeyCodeCombination.SHORTCUT_DOWN (Cmd on macOS); these cases match
-    // KeyModifiers.Control (Win/Linux) only — map to KeyModifiers.Meta on OS X in 计划⑤'s
-    // cross-platform acceptance pass.
+    // Java HotkeyManager binds KeyCodeCombination.SHORTCUT_DOWN (Cmd on macOS, Ctrl
+    // elsewhere) — PlatformAccelerator carries that mapping.
     protected override void OnKeyDown(KeyEventArgs e)
     {
         switch (e.Key)
         {
-            case Key.O when e.KeyModifiers.HasFlag(KeyModifiers.Control):
+            case Key.O when e.KeyModifiers.HasFlag(PlatformAccelerator.Accelerator):
                 _ = OpenSaveAsync();
                 e.Handled = true;
                 break;
-            case Key.W when e.KeyModifiers.HasFlag(KeyModifiers.Control):
+            case Key.W when e.KeyModifiers.HasFlag(PlatformAccelerator.Accelerator):
                 _vm.StopWatcher();
                 e.Handled = true;
                 break;
