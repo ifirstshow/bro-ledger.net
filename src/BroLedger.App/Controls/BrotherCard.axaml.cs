@@ -491,29 +491,6 @@ internal partial class BrotherCard : UserControl
         AutoAssignBtn.IsEnabled = false;
     }
 
-    /// <summary>
-    /// Java refreshRoles — MainController calls this after the role manager changes (T6):
-    /// re-read the role list, keep the current selection by id, re-resolve the extra columns.
-    /// </summary>
-    public void RefreshRoles()
-    {
-        var current = RoleCombo.SelectedItem as Role;
-        _updatingRoleCombo = true;
-        RoleCombo.ItemsSource = RoleItems();
-        RoleCombo.SelectedItem = current != null
-            ? _ctx.Roles.GetAll().FirstOrDefault(r => r.Id == current.Id)
-            : null;
-        _updatingRoleCombo = false;
-
-        for (var i = 0; i < _vm.Extras.Count; i++)
-        {
-            var extra = _vm.Extras[i];
-            if (extra == null) continue;
-            _vm.Extras[i] = _ctx.Roles.GetAll().FirstOrDefault(r => r.Id == extra.Id);
-        }
-        RebuildGrid(); // includes the value refresh
-    }
-
     // ---- perks (Java buildPerkPlanPane + badge/button updates) -------------------
 
     private PerkPlanPane PerkPlanPane = null!;
