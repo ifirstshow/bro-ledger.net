@@ -16,7 +16,19 @@
   <ItemGroup>
     <EmbeddedResource Include="Resources\data\game-data.json" LogicalName="BroLedger.Core.Resources.data.game-data.json" />
     <EmbeddedResource Include="Resources\data\game-data.schema.json" LogicalName="BroLedger.Core.Resources.data.game-data.schema.json" />
-    <EmbeddedResource Include="Resources\version.properties" LogicalName="BroLedger.Core.Resources.version.properties" />
+    <EmbeddedResource Include="$(BaseIntermediateOutputPath)version.properties" LogicalName="BroLedger.Core.Resources.version.properties" />
   </ItemGroup>
+
+  <!-- Java pom filtered ${maven.build.timestamp} into version.properties at build time.
+       No Inputs/Outputs on purpose: the target runs every build (incl. incremental) so the
+       stamp is refreshed and re-embedded; minute precision = equal values within a minute are legal. -->
+  <Target Name="StampVersionProperties" BeforeTargets="BeforeBuild">
+    <PropertyGroup>
+      <BuildTimestamp>$([System.DateTime]::UtcNow.ToString('yyyyMMddHHmm'))</BuildTimestamp>
+    </PropertyGroup>
+    <WriteLinesToFile File="$(BaseIntermediateOutputPath)version.properties"
+                      Lines="version=$(BuildTimestamp);debug.enabled=true"
+                      Overwrite="true" />
+  </Target>
 
 </Project>
