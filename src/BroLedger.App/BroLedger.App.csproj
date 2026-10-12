@@ -9,6 +9,9 @@
          BrotherCsvExporter/BrotherSavefileExporter）。关掉 SDK 的 exe→exe 自包含一致性
          检查（NETSDK1150，learn.microsoft.com/dotnet/core/compatibility/sdk/5.0/referencing-executable）。 -->
     <ValidateExecutableReferencesMatchSelfContained>false</ValidateExecutableReferencesMatchSelfContained>
+    <!-- ponytail: 产物形态是自包含目录（exe + Avalonia 原生库同目录）——Native AOT 不支持把
+         Avalonia 原生库嵌入单 exe（IncludeNativeLibrariesForSelfExtract 在 AOT 下被忽略，已实测）。
+         分发须整目录（CI 已按目录打包）；只复制 exe 会从 DLL 搜索路径加载到不兼容旧库而闪退。 -->
   </PropertyGroup>
 
   <ItemGroup>

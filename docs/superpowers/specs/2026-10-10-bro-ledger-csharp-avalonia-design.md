@@ -164,7 +164,7 @@ fingerprint = hex(hash[0..16])   // 32 个十六进制字符
 - Avalonia 12 无需 `BuiltInComInteropSupport=false`（12.0 之前才需要）
 - 所有 JSON 序列化/反序列化走 `JsonSerializerContext` source generator；禁止运行时反射序列化
 - 禁用：`Activator.CreateInstance`(字符串)、`Assembly.Load`、`Expression.Compile`、`dynamic`
-- 发布矩阵：`win-x64`、`linux-x64`、`osx-arm64`、`osx-x64`，`dotnet publish -c Release -r <rid>`，单文件自包含
+- 发布矩阵：`win-x64`、`linux-x64`、`osx-arm64`、`osx-x64`，`dotnet publish -c Release -r <rid>`，**AOT 自包含目录**（App exe + Avalonia 原生库同目录）——**errata（2026-10-12）**：原文「单文件自包含」不可实现：Native AOT 不支持将 Avalonia 原生库（libSkiaSharp/av_libglesv2/libHarfBuzzSharp）嵌入单 exe（`IncludeNativeLibrariesForSelfExtract` 在 AOT 下被忽略，已实测）。分发须整目录；只复制 exe 会从 DLL 搜索路径加载到不兼容的旧版原生库而闪退
 - CI：GitHub Actions 三平台 matrix。构建/publish 均带 `-p:TreatWarningsAsErrors=true`——AOT/trimmer 分析警告（IL2000–IL2099、IL3000–IL3007、IL3050–IL3056）零容忍，一旦出现即构建失败。**注意**：TreatWarningsAsErrors 为全集，nullable 与 xUnit 分析器警告同样升为错误（正是所需；首次 CI 若爆量，逐条修复而非放宽）
 - `dotnet test` 全绿 + `dotnet publish -c Release -r <rid>` 三平台成功为验收门
 
