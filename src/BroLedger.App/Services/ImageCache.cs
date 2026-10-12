@@ -91,13 +91,13 @@ public sealed class ImageCache
     // IDAT chunk is corrupt (its CRC should be 0x8405A4EF, and the zlib stream itself is
     // invalid — the Java author's hand-typed bytes; the IHDR CRC 0x3A7E9B55 is the correct
     // canonical value). JavaFX's lenient loader swallowed it, Skia throws "Unable to load
-    // bitmap" (crashed first launch). Draw the same 1×1 gray square natively instead of
-    // porting the corrupt bytes.
+    // bitmap" (crashed first launch).
+    // Java 的占位图实际从未渲染成功——所有占位场景（空装备槽、缺口图）在 Java 里都是空白。
+    // 1:1 视觉对齐：占位图改为全透明 1×1（灰块会在总览装备列/卡片/缺口图处显示 Java 没有
+    // 的灰色方块——用户已两次报告）。
     private static Bitmap BuildPlaceholder()
     {
         var rtb = new RenderTargetBitmap(new PixelSize(1, 1), new Vector(96, 96));
-        using (var ctx = rtb.CreateDrawingContext())
-            ctx.FillRectangle(Brushes.Gray, new Rect(0, 0, 1, 1));
-        return rtb;
+        return rtb; // 未绘制的 RenderTargetBitmap 即全透明
     }
 }
