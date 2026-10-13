@@ -1,0 +1,78 @@
+# 自动发布：推 v* 标签（或手动 dispatch）→ 4 RID AOT 构建 → 整目录压缩（含
+# av_libglesv2.dll / libHarfBuzzSharp.dll / libSkiaSharp.dll 等 Avalonia 原生库）→
+# 挂到 GitHub Releases。非 tag 的 dispatch 运行只产 artifacts 不建 Release。
+# linux publish 冒烟（bare sdk:10.0 无 clang/zlib1g-dev，AOT 需前置安装）:
+#          docker run --rm -v "$PWD:/src" -w /src mcr.microsoft.com/dotnet/sdk:10.0 bash -c "apt-get update && apt-get install -y clang zlib1g-dev && dotnet publish src/BroLedger.App -c Release -r linux-x64 -p:TreatWarningsAsErrors=true"
+# macOS 产物首启：xattr -d com.apple.quarantine BroLedger.App；osx-x64 在 Apple Silicon 需 Rosetta。
+name: release
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: release (${{ matrix.rid }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { rid: win-x64,   os: windows-latest, archive: zip }
+          - { rid: linux-x64, os: ubuntu-latest,  archive: targz }
+          - { rid: osx-arm64, os: macos-latest,   archive: targz }
+          - { rid: osx-x64,   os: macos-latest,   archive: targz }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+      - uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: nuget-${{ matrix.os }}
+
+      - name: publish (AOT)
+        run: dotnet publish src/BroLedger.App -c Release -r ${{ matrix.rid }} -p:TreatWarningsAsErrors=true
+
+      # Tools 项目 OutputType=Exe 但仅被当库引用：其 apphost 是死文件，两种名字覆盖全平台
+      - name: remove dead Tools apphost from publish output
+        shell: bash
+        run: rm -f src/BroLedger.App/bin/Release/net10.0/${{ matrix.rid }}/publish/BroLedger.Tools.exe src/BroLedger.App/bin/Release/net10.0/${{ matrix.rid }}/publish/BroLedger.Tools
+
+      # 分发契约：exe 必须与 Avalonia 原生库同目录——打包前硬校验，缺一个即红
+      - name: verify native libs in publish output
+        shell: bash
+        run: |
+          cd src/BroLedger.App/bin/Release/net10.0/${{ matrix.rid }}/publish
+          for f in av_libglesv2.dll libHarfBuzzSharp.dll libSkiaSharp.dll; do
+            test -f "$f" || { echo "MISSING required native lib: $f"; exit 1; }
+          done
+          ls -la
+
+      - name: pack (zip / tar.gz, whole folder)
+        shell: bash
+        run: |
+          cd src/BroLedger.App/bin/Release/net10.0/${{ matrix.rid }}/publish
+          name="BroLedger-${{ matrix.rid }}-${{ github.ref_name }}"
+          mkdir -p "$GITHUB_WORKSPACE/dist"
+          if [ "${{ matrix.archive }}" = "zip" ]; then
+            zip -r "$GITHUB_WORKSPACE/dist/$name.zip" .
+          else
+            tar -czf "$GITHUB_WORKSPACE/dist/$name.tar.gz" .
+          fi
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: BroLedger-${{ matrix.rid }}
+          path: dist/
+
+      - name: attach to GitHub Release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/BroLedger-*
