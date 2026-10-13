@@ -165,7 +165,7 @@ dotnet publish src/BroLedger.App -c Release -r osx-x64 -p:TreatWarningsAsErrors=
 
 产物在 `src/BroLedger.App/bin/Release/net10.0/<rid>/publish/`——**整个目录一起分发**（exe 依赖同目录的 Avalonia 原生库，只复制 exe 会闪退）。
 
-推送到 GitHub 后 CI 自动产出全部 4 个 RID 的发布产物（Actions 页下载）。
+推送到 GitHub 后 CI 自动产出全部 4 个 RID 的发布产物（Actions 页下载）；**推 `v*` 标签**（如 `git tag v1.0.0 && git push origin v1.0.0`）会自动构建并发布整目录压缩包（含 Avalonia 原生库）到 **Releases** 页。
 
 ### 控制台工具
 
