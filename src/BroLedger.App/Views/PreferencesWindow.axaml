@@ -39,7 +39,7 @@
                     <TextBlock Classes="section-header" Text="期望属性模式"/>
                     <TextBlock Classes="stat-label" TextWrapping="Wrap"
                                Text="控制详情视图与总览中期望属性值的计算方式。"/>
-                    <StackPanel Orientation="Horizontal" Spacing="16">
+                    <StackPanel Orientation="Vertical" Spacing="8">
                         <RadioButton Classes="role-radio" GroupName="expectedMode"
                                      Content="朴素——当前值 + 均值 × 次数（默认，始终实时计算）"
                                      IsChecked="{Binding NaiveMode}"/>
