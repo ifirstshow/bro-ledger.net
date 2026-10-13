@@ -44,27 +44,44 @@ jobs:
         shell: bash
         run: rm -f src/BroLedger.App/bin/Release/net10.0/${{ matrix.rid }}/publish/BroLedger.Tools.exe src/BroLedger.App/bin/Release/net10.0/${{ matrix.rid }}/publish/BroLedger.Tools
 
-      # 分发契约：exe 必须与 Avalonia 原生库同目录——打包前硬校验，缺一个即红
+      # 分发契约：exe 必须与 Avalonia 原生库同目录——打包前硬校验，缺一个即红。
+      # 库名按平台：Skia/HarfBuzz 全平台同主名（.dll/.so/.dylib）；Windows 第三件是
+      # av_libglesv2.dll，unix 是 libAvaloniaNative（macOS 无 GLES shim——首跑教训）。
       - name: verify native libs in publish output
         shell: bash
         run: |
           cd src/BroLedger.App/bin/Release/net10.0/${{ matrix.rid }}/publish
-          for f in av_libglesv2.dll libHarfBuzzSharp.dll libSkiaSharp.dll; do
-            test -f "$f" || { echo "MISSING required native lib: $f"; exit 1; }
-          done
           ls -la
+          fail=0
+          for pat in "libSkiaSharp.*" "libHarfBuzzSharp.*"; do
+            compgen -G "$pat" > /dev/null || { echo "MISSING required native lib: $pat"; fail=1; }
+          done
+          if [[ "${{ matrix.rid }}" == win-* ]]; then
+            compgen -G "av_libglesv2.dll" > /dev/null || { echo "MISSING required native lib: av_libglesv2.dll"; fail=1; }
+          else
+            compgen -G "libAvaloniaNative.*" > /dev/null || { echo "MISSING required native lib: libAvaloniaNative.*"; fail=1; }
+          fi
+          exit $fail
 
       - name: pack (zip / tar.gz, whole folder)
         shell: bash
+        if: matrix.archive == 'targz'
         run: |
           cd src/BroLedger.App/bin/Release/net10.0/${{ matrix.rid }}/publish
-          name="BroLedger-${{ matrix.rid }}-${{ github.ref_name }}"
           mkdir -p "$GITHUB_WORKSPACE/dist"
-          if [ "${{ matrix.archive }}" = "zip" ]; then
-            zip -r "$GITHUB_WORKSPACE/dist/$name.zip" .
-          else
-            tar -czf "$GITHUB_WORKSPACE/dist/$name.tar.gz" .
-          fi
+          tar -czf "$GITHUB_WORKSPACE/dist/BroLedger-${{ matrix.rid }}-${{ github.ref_name }}.tar.gz" .
+
+      # windows runner 的 bash 无 zip——用 pwsh 的 Compress-Archive
+      - name: pack (zip, whole folder)
+        shell: pwsh
+        if: matrix.archive == 'zip'
+        run: |
+          New-Item -ItemType Directory -Force -Path "$env:GITHUB_WORKSPACE/dist" | Out-Null
+          Compress-Archive -Path "$env:PUBDIR/*" `
+            -DestinationPath "$env:GITHUB_WORKSPACE/dist/BroLedger-${{ matrix.rid }}-${{ github.ref_name }}.zip" `
+            -Force
+        env:
+          PUBDIR: src/BroLedger.App/bin/Release/net10.0/${{ matrix.rid }}/publish
 
       - uses: actions/upload-artifact@v4
         with:
