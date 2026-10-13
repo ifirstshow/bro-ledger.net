@@ -91,6 +91,9 @@ internal partial class BrotherCard : UserControl
         _vm.SetBrother(brother);
 
         BackBtn.Click += (_, _) => BackRequested?.Invoke();
+        // Java clearPlanBtn/initPlanBtn setOnAction（L355/L366）：清除计划 / 从角色模板初始化。
+        ClearPlanBtn.Click += (_, _) => _vm.ClearPlan();
+        InitPlanBtn.Click += (_, _) => _vm.InitPlanFromRole();
 
         BuildPerkPlanPane();
         SetupRoleCombo();
@@ -506,6 +509,7 @@ internal partial class BrotherCard : UserControl
 
     private void OnPlanChanged()
     {
+        PerkPlanPane.RefreshPlan(); // ClearPlan/InitPlanFromRole 外部改整份计划，pane 需重绘
         UpdatePerkBadges();
         UpdatePlanButtons();
         RefreshIncreaseUi();

@@ -6,6 +6,7 @@ using Avalonia.Layout;
 using Avalonia.Media;
 using BroLedger.App.Controls;
 using BroLedger.App.ViewModels;
+using BroLedger.Core.Models;
 using BroLedger.Core.Services;
 
 namespace BroLedger.App.Tests.Controls;
@@ -226,6 +227,106 @@ public class BrotherCardTests : IDisposable
         finally
         {
             vm.StopWatcher();
+        }
+    }
+}
+
+// 计划按钮接线钉（留白手验兜底）：ClearPlanBtn/InitPlanBtn 曾漏接 Click——
+// VM 方法存在但 UI 无调用。用 RaiseEvent(Click) 钉真实接线，直调 VM 测不到。
+[Collection("EnvVar-BroLedgerDataDir")]
+public class BrotherCardPlanButtonTests : IDisposable
+{
+    private readonly string _dataDir;
+    private readonly string? _savedConfig;
+    private static string _saveCopy = null!;
+
+    public BrotherCardPlanButtonTests()
+    {
+        _dataDir = Path.Combine(Path.GetTempPath(), "broledger-planbtn-tests-" + Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(_dataDir);
+        Environment.SetEnvironmentVariable("BROLEDGER_DATADIR", _dataDir);
+        _savedConfig = AppConfig.ConfigFileForTest;
+        AppConfig.ConfigFileForTest = Path.Combine(_dataDir, "config.json");
+        _saveCopy = Path.Combine(_dataDir, "TestSavefile.sav");
+        File.Copy(Path.Combine(AppContext.BaseDirectory, "TestData", "TestSavefile.sav"), _saveCopy, true);
+        DictionaryService.Instance.LoadFromEmbeddedResource();
+        ImageMapService.Instance.LoadFromEmbeddedResource();
+        StatModifierService.Instance.LoadFromEmbeddedResource();
+        WeaponStatsService.Instance.LoadFromEmbeddedResource();
+    }
+
+    public void Dispose()
+    {
+        AppConfig.ConfigFileForTest = _savedConfig;
+        Environment.SetEnvironmentVariable("BROLEDGER_DATADIR", null);
+        try { Directory.Delete(_dataDir, recursive: true); } catch { /* best effort */ }
+    }
+
+    private static (MainViewModel Vm, BrotherCard Card, Brother Brother) BuildCardWithPlan()
+    {
+        var vm = new MainViewModel();
+        vm.LoadSave(_saveCopy);
+        HeadlessPump.Until(() => vm.Brothers.Count > 0, "roster loaded");
+        var brother = vm.Brothers[0];
+        AnnotationService.Instance.Get(brother.Fingerprint!).PerkPlanStatus =
+            new Dictionary<string, string> { ["AAAA1111"] = "PLANNED", ["BBBB2222"] = "OPTIONAL" };
+        var card = new BrotherCard(UiContext.Defaults(), vm.Overview, brother);
+        return (vm, card, brother);
+    }
+
+    [AvaloniaFact]
+    public void ClearPlanBtn_ClearsPlanAndPersists()
+    {
+        var (vm, card, brother) = BuildCardWithPlan();
+        var window = new Window { Content = card };
+        window.Show();
+        try
+        {
+            var clearBtn = card.GetControl<Button>("ClearPlanBtn");
+            Assert.True(clearBtn.IsVisible, "有计划时清除按钮可见");
+
+            clearBtn.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+
+            var status = AnnotationService.Instance.Get(brother.Fingerprint!).PerkPlanStatus;
+            Assert.Null(status); // 已持久化为 null（Java setPerkPlanStatus(fp, null) 同语义）
+            Assert.False(clearBtn.IsVisible);
+        }
+        finally
+        {
+            vm.StopWatcher();
+            window.Close();
+        }
+    }
+
+    [AvaloniaFact]
+    public void InitPlanBtn_SeedsFromRoleTemplate()
+    {
+        var (vm, card, brother) = BuildCardWithPlan();
+        var window = new Window { Content = card };
+        window.Show();
+        try
+        {
+            // 造一个带模板的角色并指派给该兄弟
+            var role = RoleService.Instance.Add("钉子角色", true);
+            role.PerkPlanTemplate = new Dictionary<string, string> { ["CCCC3333"] = "OPTIONAL" };
+            RoleService.Instance.Update(role);
+            AnnotationService.Instance.SetRole(brother.Fingerprint!, role.Id);
+            card.Populate(brother);
+
+            var initBtn = card.GetControl<Button>("InitPlanBtn");
+            Assert.True(initBtn.IsVisible);
+            Assert.Equal("重置为角色模板", initBtn.Content); // 已有计划 → 重置文案
+
+            initBtn.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+
+            var status = AnnotationService.Instance.Get(brother.Fingerprint!).PerkPlanStatus;
+            Assert.NotNull(status);
+            Assert.Equal("OPTIONAL", status!["CCCC3333"]); // 模板已落为计划
+        }
+        finally
+        {
+            vm.StopWatcher();
+            window.Close();
         }
     }
 }
