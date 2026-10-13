@@ -340,8 +340,28 @@ public class SaveReplayServiceTests : IDisposable
             Thread.Sleep(20); // ensure distinct timestamps
         }
 
+        AwaitPruneSettled(srs, SavePath, SaveReplayService.MaxSnapshots, 2000);
         Assert.True(srs.Snapshots(SavePath).Count <= SaveReplayService.MaxSnapshots,
             "snapshots must be capped at MAX_SNAPSHOTS=" + SaveReplayService.MaxSnapshots);
+    }
+
+    /// <summary>
+    /// Prune 在 DoCapture 末尾的 Task.Run 上异步执行——计数会先短暂超过 cap 再回落。
+    /// 等「≤ cap 且连续两次读数相同」即 prune 已结算（或本就未超），消除采样竞态
+    /// （Ubuntu CI 上曾采样到 6→5 的瞬态窗口而误报）。
+    /// </summary>
+    private static void AwaitPruneSettled(SaveReplayService srs, string savePath,
+        int cap, int timeoutMs)
+    {
+        var deadline = DateTime.UtcNow.AddMilliseconds(timeoutMs);
+        var prev = -1;
+        while (DateTime.UtcNow < deadline)
+        {
+            var count = srs.Snapshots(savePath).Count;
+            if (count <= cap && count == prev) return;
+            prev = count;
+            Thread.Sleep(25);
+        }
     }
 
     // ---- helpers -----------------------------------------------------------
