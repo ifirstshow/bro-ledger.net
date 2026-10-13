@@ -44,9 +44,16 @@ jobs:
         shell: bash
         run: rm -f src/BroLedger.App/bin/Release/net10.0/${{ matrix.rid }}/publish/BroLedger.Tools.exe src/BroLedger.App/bin/Release/net10.0/${{ matrix.rid }}/publish/BroLedger.Tools
 
+      # 调试符号（.pdb ~96MB / .dbg ~57MB）不入分发包
+      - name: strip debug symbols from publish output
+        shell: bash
+        run: rm -f src/BroLedger.App/bin/Release/net10.0/${{ matrix.rid }}/publish/*.pdb src/BroLedger.App/bin/Release/net10.0/${{ matrix.rid }}/publish/*.dbg
+
       # 分发契约：exe 必须与 Avalonia 原生库同目录——打包前硬校验，缺一个即红。
-      # 库名按平台：Skia/HarfBuzz 全平台同主名（.dll/.so/.dylib）；Windows 第三件是
-      # av_libglesv2.dll，unix 是 libAvaloniaNative（macOS 无 GLES shim——首跑教训）。
+      # 库名按平台（首跑+二跑教训）：
+      #   全平台：libSkiaSharp.* / libHarfBuzzSharp.*（.dll/.so/.dylib）
+      #   Windows 独有：av_libglesv2.dll
+      #   macOS 独有：libAvaloniaNative.dylib；Linux 无第三件（X11 后端用系统 libX11）
       - name: verify native libs in publish output
         shell: bash
         run: |
@@ -58,7 +65,8 @@ jobs:
           done
           if [[ "${{ matrix.rid }}" == win-* ]]; then
             compgen -G "av_libglesv2.dll" > /dev/null || { echo "MISSING required native lib: av_libglesv2.dll"; fail=1; }
-          else
+          fi
+          if [[ "${{ matrix.rid }}" == osx-* ]]; then
             compgen -G "libAvaloniaNative.*" > /dev/null || { echo "MISSING required native lib: libAvaloniaNative.*"; fail=1; }
           fi
           exit $fail
